@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>الإعلانات</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f8f9fa;
+            margin: 0; 
+            padding: 20px; 
+            min-height: 100vh;
+        }
+        .ads-container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 20px; 
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .ad-card { 
+            position: relative; 
+            background: white;
+            border-radius: 12px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow: hidden; 
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+        .ad-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            border-color: #007bff;
+        }
+        .ad-images { 
+            padding: 15px; 
+            display: flex; 
+            gap: 10px; 
+            align-items: center;
+            overflow-x: auto;
+        }
+        .ad-images img { 
+            width: 120px; 
+            height: 120px; 
+            object-fit: cover; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 2px solid #f8f9fa;
+            flex-shrink: 0;
+        }
+        .ad-images img:hover { 
+            transform: scale(1.05); 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            border-color: #007bff;
+        }
+        .ad-video { 
+            padding: 15px; 
+            display: flex; 
+            justify-content: center;
+        }
+        .ad-video video { 
+            width: 100%; 
+            max-width: 400px;
+            height: auto;
+            border-radius: 8px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 2px solid #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        .ad-video video:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            border-color: #007bff;
+        }
+        .ad-video iframe {
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 16/9;
+            border: 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 2px solid #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        .ad-video iframe:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            border-color: #007bff;
+        }
+        .ad-details { 
+            padding: 20px; 
+            background: white;
+        }
+        .status-badge { 
+            position: absolute; 
+            top: 15px; 
+            right: 15px; 
+            padding: 6px 12px; 
+            color: white; 
+            border-radius: 20px; 
+            font-size: 12px; 
+            font-weight: 600; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        .open { background-color: #28a745; }
+        .closed { background-color: #dc3545; }
+        .prayer { background-color: #fd7e14; }
+        .unknown { background-color: #6c757d; }
+        .coupon { 
+            background-color: #fff3cd; 
+            padding: 10px 15px; 
+            border-radius: 6px; 
+            display: inline-block; 
+            margin-top: 10px; 
+            font-weight: 600; 
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        h2 { 
+            text-align: center; 
+            color: #343a40; 
+            margin-bottom: 30px; 
+            font-size: 2.5em; 
+            font-weight: 600;
+        }
+        /* Loader */
+        .loader {
+            max-width: 1200px;
+            margin: 0 auto 10px;
+            padding: 0 20px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+        .spinner {
+            width: 22px;
+            height: 22px;
+            border: 3px solid #e9ecef;
+            border-top-color: #007bff;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        h3 { 
+            color: #212529; 
+            margin-bottom: 15px; 
+            font-size: 1.4em; 
+            font-weight: 600;
+        }
+        p { 
+            color: #6c757d; 
+            line-height: 1.6; 
+            margin-bottom: 12px; 
+            font-size: 1em;
+        }
+        strong { 
+            color: #495057; 
+            font-weight: 600;
+        }
+        /* Dev footer banner */
+        .dev-footer {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .dev-banner {
+            background: linear-gradient(135deg, #0d6efd, #845ef7);
+            color: #ffffff;
+            border-radius: 16px;
+            padding: 12px 16px;
+            box-shadow: 0 8px 24px rgba(13,110,253,0.18);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .dev-banner a {
+            background: rgba(255,255,255,0.15);
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: background-color 0.2s ease;
+        }
+        .dev-banner a:hover { background: rgba(255,255,255,0.25); }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .ads-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                padding: 15px;
+            }
+            .ad-card {
+                margin: 0 5px;
+            }
+            h2 {
+                font-size: 2em;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            .ad-images {
+                padding: 10px;
+                gap: 8px;
+            }
+            .ad-details {
+                padding: 15px;
+            }
+            h2 {
+                font-size: 1.8em;
+            }
+        }
+		.back-bar {
+			position: sticky;
+			top: 0;
+			z-index: 50;
+			background: #ffffff;
+			border-bottom: 1px solid #e9ecef;
+			max-width: 1200px;
+			margin: 0 auto 12px;
+			padding: 10px 20px;
+			display: flex;
+		}
+		.back-btn {
+			display: inline-flex;
+			align-items: center;
+			gap: 10px;
+			background: linear-gradient(135deg, #0d6efd, #4dabf7);
+			color: #ffffff;
+			border: none;
+			border-radius: 999px;
+			padding: 10px 16px;
+			cursor: pointer;
+			text-decoration: none;
+			font-weight: 700;
+			font-size: 15px;
+			box-shadow: 0 6px 18px rgba(13, 110, 253, 0.28);
+			transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+		}
+		.back-btn:hover {
+			transform: translateY(-1px) scale(1.02);
+			box-shadow: 0 10px 24px rgba(13, 110, 253, 0.34);
+		}
+		.back-btn:active {
+			transform: translateY(0);
+			opacity: 0.95;
+		}
+    </style>
+</head>
+<body>
+
+<div class="back-bar">
+	<button id="backBtn" class="back-btn" aria-label="الرجوع إلى الصفحة الرئيسية">← رجوع</button>
+</div>
+
+<div id="loader" class="loader" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <div>جارٍ التحميل...</div>
+    <span class="sr-only">جاري تحميل البيانات</span>
+ </div>
+
+<h2>الإعلانات</h2>
+<div class="ads-container" id="adsContainer"></div>
+
+<div class="dev-footer">
+	<div class="dev-banner">
+		<div>تطوير: <strong>Muslim Tech _ مسلم تيك</strong></div>
+		<a href="https://wa.me/01108857529" target="_blank" rel="noopener">تواصل واتساب: 01108857529</a>
+	</div>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbwB0VE5COC0e6NQNKrxQeNRu2Mtt_QuMbVoBrH7tE6Da3X3BP6UxK926bt9fDO0WPU5/exec";
+
+// تفعيل زر الرجوع
+const backBtn = document.getElementById('backBtn');
+if (backBtn) {
+	backBtn.addEventListener('click', () => {
+		if (history.length > 1) {
+			history.back();
+		} else {
+			window.location.href = 'index.html';
+		}
+	});
+}
+
+// Loader elements
+const loaderEl = document.getElementById('loader');
+function showLoader() { if (loaderEl) loaderEl.style.display = 'flex'; }
+function hideLoader() { if (loaderEl) loaderEl.style.display = 'none'; }
+let firstLoadDone = false;
+
+async function fetchAds() {
+    const startTs = Date.now();
+    const urlParams = new URLSearchParams(window.location.search);
+    const placeId = urlParams.get('placeId') || '';
+
+    try {
+        if (!firstLoadDone) showLoader();
+        const res = await fetch(`${API_URL}?action=getAdsByPlaceId&placeId=${placeId}`, { cache: "no-store" });
+        const data = await res.json();
+        displayAds(data);
+        const elapsed = Date.now() - startTs;
+        const remaining = Math.max(0, 5000 - elapsed);
+        setTimeout(() => { hideLoader(); firstLoadDone = true; }, remaining);
+    } catch (error) {
+        console.error("حدث خطأ في جلب البيانات:", error);
+        const elapsed = Date.now() - startTs;
+        const remaining = Math.max(0, 5000 - elapsed);
+        setTimeout(() => hideLoader(), remaining);
+    }
+}
+
+function displayAds(ads) {
+    const container = document.getElementById("adsContainer");
+    container.innerHTML = "";
+
+    ads.forEach(ad => {
+        let statusClass = '';
+        // تحديد دالة مساعدة لاختبار الروابط
+        const isUrlLike = (v) => typeof v === 'string' && /(https?:\/\/|\.mp4|\.mov|\.avi|youtube\.com|youtu\.be)/i.test(v);
+        
+        // نقرأ الحالة من الأعمدة المخصصة للحالة أولاً
+        let statusValue = ad['الحالة'] || ad.status || ad['حالة المكان'] || ad['state'] || '';
+        // نقرأ الفيديو المصرّح به صراحة
+        let candidateVideoField = ad['رابط الفيديو'] || ad['linkVideo'] || ad.video || '';
+        // إذا كان حقل الفيديو ليس رابطاً ويبدو أنه حالة، ونقص لدينا حالة، نستخدمه كحالة
+        if (!statusValue && candidateVideoField && !isUrlLike(candidateVideoField)) {
+            statusValue = candidateVideoField;
+        }
+        console.log('Status value found:', statusValue);
+        console.log('Available columns:', Object.keys(ad));
+        
+        if (statusValue === "مفتوح") statusClass = 'open';
+        else if (statusValue === "مغلق") statusClass = 'closed';
+        else if (statusValue === "مغلق للصلاة") statusClass = 'prayer';
+        else {
+            // إذا لم نجد حالة، نعرض "غير محدد"
+            statusClass = 'unknown';
+            console.log('No valid status found, using unknown');
+        }
+
+        // جمع الصور والفيديو
+        const allImages = [];
+        let videoUrl = '';
+        
+        // إعطاء أولوية لعمود "رابط الفيديو"/linkVideo/ad.video إذا كان رابطاً فعلاً
+        if (candidateVideoField && isUrlLike(candidateVideoField)) {
+            videoUrl = candidateVideoField.trim();
+        }
+        
+        // محاولة قراءة من عمود 'images' أولاً (من Google Apps Script)
+        if (ad.images && Array.isArray(ad.images)) {
+            ad.images.forEach((item) => {
+                if (item && item.trim() !== '') {
+                    if (!videoUrl && (item.includes('youtube') || item.includes('youtu.be') || item.includes('.mp4') || item.includes('.avi') || item.includes('.mov'))) {
+                        videoUrl = item;
+                        console.log('Found video URL from images:', videoUrl);
+                    } else {
+                        allImages.push(item);
+                    }
+                }
+            });
+            console.log('Found images in images array:', allImages);
+        } else if (ad.images && typeof ad.images === 'string') {
+            const imageUrls = ad.images.split(',').map(url => url.trim()).filter(url => url !== '');
+            imageUrls.forEach(item => {
+                if (!videoUrl && (item.includes('youtube') || item.includes('youtu.be') || item.includes('.mp4') || item.includes('.avi') || item.includes('.mov'))) {
+                    videoUrl = item;
+                    console.log('Found video URL in string:', videoUrl);
+                } else {
+                    allImages.push(item);
+                }
+            });
+            console.log('Found images in images string:', allImages);
+        } else {
+            const imageColumns = [
+                'رابط صورة1', 'رابط صورة2', 'رابط صورة3', 'رابط صورة4', 
+                'رابط صورة5', 'رابط صورة7', 'رابط صورة8'
+            ];
+            console.log('Checking image columns:', imageColumns);
+            imageColumns.forEach(colName => {
+                if (ad[colName] && ad[colName].trim() !== '') {
+                    allImages.push(ad[colName]);
+                    console.log(`Found image in ${colName}:`, ad[colName]);
+                }
+            });
+        }
+
+        console.log('Ad data:', ad);
+        console.log('All column names:', Object.keys(ad));
+        console.log('Found images:', allImages);
+        console.log('Found video URL:', videoUrl);
+        
+        console.log('=== ALL COLUMN VALUES ===');
+        Object.keys(ad).forEach((key, index) => {
+            console.log(`${index}: ${key} =`, ad[key]);
+        });
+        console.log('=== END COLUMN VALUES ===');
+
+        const placeDescriptionHtml = ad.placeDescription ? `<p>${ad.placeDescription}</p>` : '';
+        const imagesHtml = allImages.map(img => `<img src="${img}" alt="صورة" style="max-width: 100%; height: auto;">`).join('');
+        
+        // تحويل روابط YouTube إلى رابط embed
+        const toYouTubeEmbed = (url) => {
+            try {
+                let videoId = '';
+                if (url.includes('youtu.be/')) {
+                    videoId = url.split('youtu.be/')[1].split(/[?&]/)[0];
+                } else if (url.includes('youtube.com/watch')) {
+                    const u = new URL(url);
+                    videoId = u.searchParams.get('v') || '';
+                }
+                return videoId ? `https://www.youtube.com/embed/${videoId}` : '';
+            } catch (e) {
+                return '';
+            }
+        };
+        
+        let videoHtml = '';
+        if (videoUrl) {
+            if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+                const embedUrl = toYouTubeEmbed(videoUrl);
+                if (embedUrl) {
+                    videoHtml = `<iframe src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+                }
+            } else {
+                videoHtml = `<video controls><source src="${videoUrl}" type="video/mp4"></video>`;
+            }
+        }
+        
+        console.log('Final video URL:', videoUrl);
+        console.log('Final images count:', allImages.length);
+
+        const adCard = `
+            <div class="ad-card">
+                <div class="status-badge ${statusClass}">${statusValue}</div>
+                <div class="ad-details">${placeDescriptionHtml}</div>
+                ${imagesHtml ? `<div class="ad-images">${imagesHtml}</div>` : '<p>لا توجد صور</p>'}
+                ${videoHtml ? `<div class="ad-video">${videoHtml}</div>` : ''}
+                <div class="ad-details">
+                    <h3>${ad.title || ad['العنوان'] || ''}</h3>
+                    <p><strong>نوع الإعلان:</strong> ${ad.type || ad['نوع الاعلان'] || ''}</p>
+                    <p>${ad.description || ad['الوصف'] || ''}</p>
+                    <p><strong>تاريخ البداية:</strong> ${ad['تاريخ البداية'] || ad['بداية'] || ad['Start Date'] || ad['start_date'] || ad.startDate || ''}</p>
+                    <p><strong>تاريخ النهاية:</strong> ${ad['تاريخ النهاية'] || ad['نهاية'] || ad['End Date'] || ad['end_date'] || ad.endDate || ''}</p>
+                    ${ad.coupon || ad['كوبون خصم'] ? `<div class="coupon">كوبون الخصم: ${ad.coupon || ad['كوبون خصم']}</div>` : ''}
+                </div>
+            </div>
+        `;
+        container.innerHTML += adCard;
+    });
+}
+
+fetchAds();
+setInterval(fetchAds, 20000);
+</script>
+
+</body>
+</html> 
