@@ -304,6 +304,19 @@ async function fetchAds() {
     const urlParams = new URLSearchParams(window.location.search);
     const placeId = urlParams.get('placeId') || '';
 
+    // تسجيل الزيارة عند فتح الصفحة
+    if (placeId) {
+        try {
+            await fetch(`${API_URL}?type=place&id=${placeId}&source=ads_page`, { 
+                method: 'GET',
+                cache: 'no-store'
+            });
+            console.log('تم تسجيل الزيارة للمكان:', placeId);
+        } catch (e) {
+            console.warn('فشل في تسجيل الزيارة:', e);
+        }
+    }
+
     try {
         if (!firstLoadDone) showLoader();
         const res = await fetch(`${API_URL}?action=getAdsByPlaceId&placeId=${placeId}`, { cache: "no-store" });
