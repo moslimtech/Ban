@@ -96,17 +96,29 @@
             position: absolute; 
             top: 15px; 
             right: 15px; 
-            padding: 6px 12px; 
+            padding: 8px 16px; 
             color: white; 
-            border-radius: 20px; 
-            font-size: 12px; 
-            font-weight: 600; 
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            border-radius: 25px; 
+            font-size: 13px; 
+            font-weight: 700; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.2);
         }
-        .open { background-color: #28a745; }
-        .closed { background-color: #dc3545; }
-        .prayer { background-color: #fd7e14; }
-        .unknown { background-color: #6c757d; }
+        .open { background: linear-gradient(135deg, #28a745, #20c997); }
+        .closed { background: linear-gradient(135deg, #dc3545, #e74c3c); }
+        .prayer { background: linear-gradient(135deg, #fd7e14, #ffc107); }
+        .unknown { background: linear-gradient(135deg, #6c757d, #495057); }
+        
+        /* أيقونات الحالة */
+        .status-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
         .coupon { 
             background-color: #fff3cd; 
             padding: 10px 15px; 
@@ -281,6 +293,42 @@
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwB0VE5COC0e6NQNKrxQeNRu2Mtt_QuMbVoBrH7tE6Da3X3BP6UxK926bt9fDO0WPU5/exec";
 
+// دالة مساعدة لاختبار البيانات مباشرة
+function testAdData(placeId) {
+    console.log('=== TESTING AD DATA FOR PLACE ID:', placeId, '===');
+    
+    fetch(`${API_URL}?action=getAdsByPlaceId&placeId=${placeId}`, { cache: "no-store" })
+        .then(res => res.json())
+        .then(data => {
+            console.log('Raw API response:', data);
+            
+            if (Array.isArray(data) && data.length > 0) {
+                data.forEach((ad, index) => {
+                    console.log(`--- Ad ${index + 1} ---`);
+                    console.log('All ad properties:', Object.keys(ad));
+                    console.log('ad.status:', ad.status);
+                    console.log('ad["الحالة"]:', ad['الحالة']);
+                    console.log('ad["حالة الاعلان"]:', ad['حالة الاعلان']);
+                    console.log('ad["حالة المكان"]:', ad['حالة المكان']);
+                    console.log('ad.video:', ad.video);
+                    
+                    // البحث عن الحالة في جميع الخصائص
+                    Object.keys(ad).forEach(key => {
+                        const value = ad[key];
+                        if (typeof value === 'string' && (value === 'مفتوح' || value === 'مغلق' || value === 'مغلق للصلاة')) {
+                            console.log(`Found status in property "${key}":`, value);
+                        }
+                    });
+                });
+            } else {
+                console.log('No ads found for this place');
+            }
+        })
+        .catch(error => {
+            console.error('Error testing ad data:', error);
+        });
+}
+
 // تفعيل زر الرجوع
 const backBtn = document.getElementById('backBtn');
 if (backBtn) {
@@ -298,6 +346,28 @@ const loaderEl = document.getElementById('loader');
 function showLoader() { if (loaderEl) loaderEl.style.display = 'flex'; }
 function hideLoader() { if (loaderEl) loaderEl.style.display = 'none'; }
 let firstLoadDone = false;
+
+// دالة للحصول على أيقونة الحالة
+function getStatusIcon(status) {
+    switch (status.trim()) {
+        case 'مفتوح':
+            return `<svg class="status-icon" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>`;
+        case 'مغلق':
+            return `<svg class="status-icon" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+            </svg>`;
+        case 'مغلق للصلاة':
+            return `<svg class="status-icon" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+            </svg>`;
+        default:
+            return `<svg class="status-icon" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>`;
+    }
+}
 
 async function fetchAds() {
     const startTs = Date.now();
@@ -336,6 +406,10 @@ async function fetchAds() {
 function displayAds(ads) {
     const container = document.getElementById("adsContainer");
     container.innerHTML = "";
+    
+    // الحصول على placeId من URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const placeId = urlParams.get('placeId') || '';
 
     ads.forEach(ad => {
         let statusClass = '';
@@ -343,23 +417,178 @@ function displayAds(ads) {
         const isUrlLike = (v) => typeof v === 'string' && /(https?:\/\/|\.mp4|\.mov|\.avi|youtube\.com|youtu\.be)/i.test(v);
         
         // نقرأ الحالة من الأعمدة المخصصة للحالة أولاً
-        let statusValue = ad['الحالة'] || ad.status || ad['حالة المكان'] || ad['state'] || '';
+        let statusValue = ad['الحالة'] || ad['حالة الاعلان'] || ad.status || ad['حالة المكان'] || ad['state'] || '';
+        
+        console.log('=== STATUS SEARCH DEBUG ===');
+        console.log('ad["الحالة"]:', ad['الحالة']);
+        console.log('ad["حالة الاعلان"]:', ad['حالة الاعلان']);
+        console.log('ad.status:', ad.status);
+        console.log('ad["حالة المكان"]:', ad['حالة المكان']);
+        console.log('ad["state"]:', ad['state']);
+        console.log('Initial statusValue:', statusValue);
+        
+        // طباعة جميع خصائص الإعلان للبحث عن الحالة
+        console.log('=== ALL AD PROPERTIES ===');
+        Object.keys(ad).forEach(key => {
+            const value = ad[key];
+            if (typeof value === 'string' && (value === 'مفتوح' || value === 'مغلق' || value === 'مغلق للصلاة')) {
+                console.log(`Found status in property "${key}":`, value);
+            }
+        });
+        console.log('=== END ALL AD PROPERTIES ===');
+        console.log('=== END STATUS SEARCH DEBUG ===');
+        
+        // إذا لم نجد حالة في الأعمدة المخصصة، نبحث في جميع الأعمدة
+        if (!statusValue) {
+            // البحث في جميع الأعمدة عن قيم تشبه الحالة
+            const allColumns = Object.keys(ad);
+            for (let col of allColumns) {
+                const value = ad[col];
+                if (value && typeof value === 'string') {
+                    const trimmedValue = value.trim();
+                    // التحقق من أن القيمة تشبه حالة
+                    if (trimmedValue === 'مفتوح' || trimmedValue === 'مغلق' || trimmedValue === 'مغلق للصلاة') {
+                        statusValue = trimmedValue;
+                        console.log(`Found status in column "${col}":`, statusValue);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // إذا لم نجد حالة في الإعلان، نحاول جلبها من بيانات المكان
+        if (!statusValue && placeId) {
+            console.log('=== FETCHING PLACE STATUS ===');
+            try {
+                // محاولة جلب بيانات المكان للحصول على الحالة
+                fetch(`${API_URL}?action=getPlaceById&placeId=${placeId}`, { cache: "no-store" })
+                    .then(res => res.json())
+                    .then(placeData => {
+                        console.log('Place data received:', placeData);
+                        if (placeData && placeData.status) {
+                            console.log('Found status from place data:', placeData.status);
+                            // تحديث الحالة في البطاقة
+                            const statusBadge = document.querySelector(`[data-place-id="${placeId}"] .status-badge`);
+                            if (statusBadge) {
+                                let placeStatus = placeData.status;
+                                let placeStatusClass = '';
+                                
+                                if (placeStatus === "مفتوح") placeStatusClass = 'open';
+                                else if (placeStatus === "مغلق") placeStatusClass = 'closed';
+                                else if (placeStatus === "مغلق للصلاة") placeStatusClass = 'prayer';
+                                else placeStatusClass = 'unknown';
+                                
+                                statusBadge.className = `status-badge ${placeStatusClass}`;
+                                statusBadge.textContent = placeStatus;
+                                console.log('Updated status badge with place status:', placeStatus);
+                            }
+                        } else {
+                            console.log('No status found in place data');
+                        }
+                    })
+                    .catch(e => {
+                        console.warn('Failed to fetch place status:', e);
+                    });
+            } catch (e) {
+                console.warn('Error fetching place status:', e);
+            }
+            console.log('=== END FETCHING PLACE STATUS ===');
+        }
+        
         // نقرأ الفيديو المصرّح به صراحة
         let candidateVideoField = ad['رابط الفيديو'] || ad['linkVideo'] || ad.video || '';
-        // إذا كان حقل الفيديو ليس رابطاً ويبدو أنه حالة، ونقص لدينا حالة، نستخدمه كحالة
+        // إذا كان حقل الفيديو ليس رابطاً وينظر إلى أنه حالة، ونقص لدينا حالة، نستخدمه كحالة
         if (!statusValue && candidateVideoField && !isUrlLike(candidateVideoField)) {
-            statusValue = candidateVideoField;
+            const videoValue = candidateVideoField.trim();
+            if (videoValue === 'مفتوح' || videoValue === 'مغلق' || videoValue === 'مغلق للصلاة') {
+                statusValue = videoValue;
+                console.log('Found status in video field:', statusValue);
+            }
         }
-        console.log('Status value found:', statusValue);
+        
+        // تحسين: البحث في حقل الفيديو حتى لو كان لدينا حالة أخرى
+        if (candidateVideoField && !isUrlLike(candidateVideoField)) {
+            const videoValue = candidateVideoField.trim();
+            if (videoValue === 'مفتوح' || videoValue === 'مغلق' || videoValue === 'مغلق للصلاة') {
+                statusValue = videoValue;
+                console.log('Found status in video field (override):', statusValue);
+            }
+        }
+        
+        console.log('Final status value found:', statusValue);
         console.log('Available columns:', Object.keys(ad));
         
-        if (statusValue === "مفتوح") statusClass = 'open';
-        else if (statusValue === "مغلق") statusClass = 'closed';
-        else if (statusValue === "مغلق للصلاة") statusClass = 'prayer';
+        // طباعة جميع قيم الأعمدة للمساعدة في التشخيص
+        console.log('=== ALL COLUMN VALUES ===');
+        Object.keys(ad).forEach((key, index) => {
+            console.log(`${index}: ${key} =`, ad[key]);
+        });
+        console.log('=== END COLUMN VALUES ===');
+        
+        // طباعة معلومات إضافية عن البحث
+        console.log('=== STATUS SEARCH INFO ===');
+        console.log('Initial statusValue:', statusValue);
+        console.log('placeId:', placeId);
+        console.log('=== END STATUS SEARCH INFO ===');
+        
+        // طباعة معلومات إضافية عن البحث في الفيديو
+        console.log('=== VIDEO FIELD DEBUG ===');
+        console.log('candidateVideoField:', candidateVideoField);
+        console.log('isUrlLike(candidateVideoField):', isUrlLike(candidateVideoField));
+        console.log('=== END VIDEO FIELD DEBUG ===');
+        
+        // تنظيف النص وإزالة المسافات الزائدة
+        statusValue = statusValue ? statusValue.trim() : '';
+        
+        // طباعة الحالة النهائية قبل التطبيع
+        console.log('=== FINAL STATUS BEFORE NORMALIZATION ===');
+        console.log('statusValue before normalization:', statusValue);
+        console.log('=== END FINAL STATUS BEFORE NORMALIZATION ===');
+        
+        // تطبيع النص للتعامل مع الاختلافات في الكتابة
+        const normalizedStatus = statusValue.toLowerCase().replace(/\s+/g, '');
+        
+        console.log('=== NORMALIZATION DEBUG ===');
+        console.log('statusValue:', statusValue);
+        console.log('normalizedStatus:', normalizedStatus);
+        console.log('=== END NORMALIZATION DEBUG ===');
+        
+        if (normalizedStatus === "مفتوح" || normalizedStatus === "open" || normalizedStatus === "مفتوحة") {
+            statusClass = 'open';
+            statusValue = 'مفتوح';
+            console.log('Status set to: مفتوح (open)');
+        }
+        else if (normalizedStatus === "مغلق" || normalizedStatus === "closed" || normalizedStatus === "مغلقة") {
+            statusClass = 'closed';
+            statusValue = 'مغلق';
+            console.log('Status set to: مغلق (closed)');
+        }
+        else if (normalizedStatus === "مغلقللصلاة" || normalizedStatus === "مغلقللصلاة" || normalizedStatus === "prayer") {
+            statusClass = 'prayer';
+            statusValue = 'مغلق للصلاة';
+            console.log('Status set to: مغلق للصلاة (prayer)');
+        }
+        else if (statusValue === "مفتوح") {
+            statusClass = 'open';
+            console.log('Status set to: مفتوح (direct match)');
+        }
+        else if (statusValue === "مغلق") {
+            statusClass = 'closed';
+            console.log('Status set to: مغلق (direct match)');
+        }
+        else if (statusValue === "مغلق للصلاة") {
+            statusClass = 'prayer';
+            console.log('Status set to: مغلق للصلاة (direct match)');
+        }
         else {
             // إذا لم نجد حالة، نعرض "غير محدد"
             statusClass = 'unknown';
+            statusValue = 'غير محدد';
             console.log('No valid status found, using unknown');
+            console.log('=== FINAL STATUS DEBUG ===');
+            console.log('Final statusValue:', statusValue);
+            console.log('Final statusClass:', statusClass);
+            console.log('=== END FINAL STATUS DEBUG ===');
         }
 
         // جمع الصور والفيديو
@@ -455,8 +684,8 @@ function displayAds(ads) {
         console.log('Final images count:', allImages.length);
 
         const adCard = `
-            <div class="ad-card">
-                <div class="status-badge ${statusClass}">${statusValue}</div>
+            <div class="ad-card" data-place-id="${placeId || ''}">
+                <div class="status-badge ${statusClass}">${statusValue}${getStatusIcon(statusValue)}</div>
                 <div class="ad-details">${placeDescriptionHtml}</div>
                 ${imagesHtml ? `<div class="ad-images">${imagesHtml}</div>` : '<p>لا توجد صور</p>'}
                 ${videoHtml ? `<div class="ad-video">${videoHtml}</div>` : ''}
@@ -467,6 +696,27 @@ function displayAds(ads) {
                     <p><strong>تاريخ البداية:</strong> ${ad['تاريخ البداية'] || ad['بداية'] || ad['Start Date'] || ad['start_date'] || ad.startDate || ''}</p>
                     <p><strong>تاريخ النهاية:</strong> ${ad['تاريخ النهاية'] || ad['نهاية'] || ad['End Date'] || ad['end_date'] || ad.endDate || ''}</p>
                     ${ad.coupon || ad['كوبون خصم'] ? `<div class="coupon">كوبون الخصم: ${ad.coupon || ad['كوبون خصم']}</div>` : ''}
+                    <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #007bff;">
+                        <p style="margin: 0; font-weight: 600; color: #495057;">
+                            <strong>حالة المكان:</strong> ${statusValue}
+                        </p>
+                        <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #6c757d;">
+                            ${statusValue === 'مفتوح' ? 'المكان متاح للزيارة الآن' : 
+                              statusValue === 'مغلق' ? 'المكان مغلق حالياً' : 
+                              statusValue === 'مغلق للصلاة' ? 'المكان مغلق مؤقتاً للصلاة' : 
+                              'حالة المكان غير محددة'}
+                        </p>
+                    </div>
+                    ${ad.registrationStatus || ad['حالة التسجيل'] ? `<div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+                        <p style="margin: 0; font-weight: 600; color: #1976d2;">
+                            <strong>حالة التسجيل:</strong> ${ad.registrationStatus || ad['حالة التسجيل']}
+                        </p>
+                    </div>` : ''}
+                    ${ad.packageStatus || ad['حالة الباقة'] ? `<div style="margin-top: 10px; padding: 10px; background: #f3e5f5; border-radius: 8px; border-left: 4px solid #9c27b0;">
+                        <p style="margin: 0; font-weight: 600; color: #7b1fa2;">
+                            <strong>حالة الباقة:</strong> ${ad.packageStatus || ad['حالة الباقة']}
+                        </p>
+                    </div>` : ''}
                 </div>
             </div>
         `;
@@ -476,6 +726,16 @@ function displayAds(ads) {
 
 fetchAds();
 setInterval(fetchAds, 20000);
+
+// اختبار البيانات عند تحميل الصفحة
+const urlParams = new URLSearchParams(window.location.search);
+const testPlaceId = urlParams.get('placeId');
+if (testPlaceId) {
+    console.log('=== AUTO TESTING DATA ===');
+    setTimeout(() => {
+        testAdData(testPlaceId);
+    }, 2000); // انتظار ثانيتين لتحميل البيانات
+}
 </script>
 
 </body>

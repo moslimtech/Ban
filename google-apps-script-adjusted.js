@@ -17,6 +17,8 @@ function doGet(e) {
     if (action == "getFilters") output = getFilters();
     else if (action == "getPlaces") output = getPlaces();
     else if (action == "getAdsByPlaceId") output = getAdsByPlaceId(e.parameter.placeId);
+    else if (action == "getPlaceById") output = getPlaceById(e.parameter.placeId);
+    else if (action == "debugAdData") output = debugAdData(e.parameter.placeId);
     else output = JSON.stringify({ error: "Invalid action" });
 
     return callback ?
@@ -515,6 +517,17 @@ function getPlaces() {
     var placeId = String(r[0]);
     var visits = calculateVisitsCombined(placeId, r[17], r[16]); // 17: dailyVisits, 16: totalVisits
     
+    // البحث عن الحالة في بيانات المكان
+    var placeStatus = '';
+    for (var i = 0; i < r.length; i++) {
+      var value = String(r[i] || '').trim();
+      if (value === 'مفتوح' || value === 'مغلق' || value === 'مغلق للصلاة') {
+        placeStatus = value;
+        console.log('Found place status in column ' + (i + 1) + ': ' + placeStatus);
+        break;
+      }
+    }
+    
     return {
       id: placeId,                        // ID المكان
       name: String(r[1]),                 // اسم المكان
@@ -534,7 +547,8 @@ function getPlaces() {
       description: String(r[18]),         // وصف مختصر (العمود 18)
       dailyVisits: visits.daily,          // عدد الزيارات اليومية من السجل (يضاف للبيانات الموجودة)
       totalVisits: visits.total,          // عدد الزيارات الكلي من السجل (يضاف للبيانات الموجودة)
-      status: String(r[19]),              // حالة التسجيل
+      status: placeStatus,                // حالة المكان
+      registrationStatus: String(r[19]),  // حالة التسجيل
       startDate: String(r[20]),           // تاريخ بداية الاشتراك
       endDate: String(r[21]),             // تاريخ نهاية الاشتراك
       package: String(r[22])              // الباقة
@@ -544,11 +558,62 @@ function getPlaces() {
   return JSON.stringify(places);
 }
 
+// --- دالة مساعدة لطباعة معلومات التشخيص ---
+function debugAdData(placeId) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("الاعلانات");
+  var data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 25).getValues(); // 25 عمود
+  
+  console.log('=== DEBUG: Searching for placeId ' + placeId + ' ===');
+  
+  var foundAds = data.filter(r => String(r[1]) === String(placeId));
+  
+  if (foundAds.length === 0) {
+    console.log('No ads found for placeId: ' + placeId);
+    return;
+  }
+  
+  console.log('Found ' + foundAds.length + ' ads for placeId: ' + placeId);
+  
+  foundAds.forEach((ad, index) => {
+    console.log('--- Ad ' + (index + 1) + ' ---');
+    console.log('ID الإعلان:', ad[0]);
+    console.log('ID المكان:', ad[1]);
+    console.log('نوع الاعلان:', ad[2]);
+    console.log('العنوان:', ad[3]);
+    console.log('الوصف:', ad[4]);
+    console.log('تاريخ البداية:', ad[5]);
+    console.log('تاريخ النهاية:', ad[6]);
+    console.log('كوبون خصم:', ad[7]);
+    console.log('صورة1:', ad[17]);
+    console.log('صورة2:', ad[18]);
+    console.log('صورة3:', ad[19]);
+    console.log('صورة4:', ad[20]);
+    console.log('صورة5:', ad[21]);
+    console.log('صورة7:', ad[22]);
+    console.log('صورة8:', ad[23]);
+    console.log('رابط الفيديو:', ad[24]);
+    console.log('الحالة:', ad[24]); // العمود 24: الحالة
+    
+    // البحث عن الحالة في جميع الأعمدة
+    console.log('--- Searching for status in all columns ---');
+    for (var i = 0; i < ad.length; i++) {
+      var value = String(ad[i] || '').trim();
+      if (value === 'مفتوح' || value === 'مغلق' || value === 'مغلق للصلاة') {
+        console.log('Found status in column ' + (i + 1) + ': ' + value);
+      }
+    }
+    console.log('--- End Ad ' + (index + 1) + ' ---');
+  });
+  
+  console.log('=== END DEBUG ===');
+}
+
 // --- API: getAdsByPlaceId (مضبوط حسب الشيت) ---
 function getAdsByPlaceId(placeId) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName("الاعلانات");
-  var data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 26).getValues(); // 26 عمود
+  var data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 25).getValues(); // 25 عمود بدلاً من 26
 
   function normalizeDate(v) {
     if (v instanceof Date) {
@@ -575,13 +640,42 @@ function getAdsByPlaceId(placeId) {
       // قراءة الفيديو من العمود 24
       var videoUrl = String(r[24] || '');
       
-      // قراءة الحالة من العمود 25
-      var status = String(r[25] || '');
+      // قراءة الحالة من العمود 25 (العمود الأخير)
+      var status = String(r[24] || ''); // العمود 24: الحالة
+      
+      console.log('Reading status from column 24:', status);
+      
+      // تنظيف النص وإزالة المسافات الزائدة
+      status = status.trim();
+      
+      // التحقق من أن الحالة صحيحة
+      if (status === 'مفتوح' || status === 'مغلق' || status === 'مغلق للصلاة') {
+        console.log('Valid status found:', status);
+      } else {
+        console.log('Invalid or empty status:', status);
+        status = ''; // إعادة تعيين إذا كانت غير صحيحة
+      }
+
+      // البحث في جميع الأعمدة عن الحالة إذا لم نجدها في العمود المخصص
+      if (!status) {
+        for (var i = 0; i < r.length; i++) {
+          var value = String(r[i] || '').trim();
+          if (value === 'مفتوح' || value === 'مغلق' || value === 'مغلق للصلاة') {
+            status = value;
+            console.log('Found status in column ' + (i + 1) + ': ' + status);
+            break;
+          }
+        }
+      }
 
       // إذا كان الفيديو يحتوي على نص الحالة بدلاً من رابط
-      if (videoUrl && !isUrlLike(videoUrl) && !status) {
-        status = videoUrl;
-        videoUrl = '';
+      if (videoUrl && !isUrlLike(videoUrl)) {
+        var videoValue = videoUrl.trim();
+        if (videoValue === 'مفتوح' || videoValue === 'مغلق' || videoValue === 'مغلق للصلاة') {
+          status = videoValue;
+          videoUrl = '';
+          console.log('Found status in video field:', status);
+        }
       }
 
       // استخراج الفيديو من الصور إذا كان موجوداً
@@ -607,9 +701,48 @@ function getAdsByPlaceId(placeId) {
         images: images,                      // روابط الصور
         video: videoUrl,                     // رابط الفيديو
         status: status,                      // الحالة
-        adStatus: String(r[25] || '')        // حالة الاعلان
+        adStatus: String(r[24] || ''),       // حالة الاعلان (العمود 24)
+        // إضافة أعمدة إضافية للحالة
+        'الحالة': status,
+        'حالة الاعلان': status,
+        'حالة المكان': status
       };
     });
 
   return JSON.stringify(ads);
+}
+
+// --- API: getPlaceById ---
+function getPlaceById(placeId) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("الاماكن او الخدمات");
+  var data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 23).getValues();
+  
+  var place = data.find(r => String(r[0]) === String(placeId));
+  
+  if (!place) {
+    return JSON.stringify({ error: "Place not found" });
+  }
+  
+  // البحث عن الحالة في بيانات المكان
+  var status = '';
+  for (var i = 0; i < place.length; i++) {
+    var value = String(place[i] || '').trim();
+    if (value === 'مفتوح' || value === 'مغلق' || value === 'مغلق للصلاة') {
+      status = value;
+      console.log('Found status in place column ' + (i + 1) + ': ' + status);
+      break;
+    }
+  }
+  
+  return JSON.stringify({
+    id: String(place[0]),
+    name: String(place[1]),
+    activity: String(place[2]),
+    city: String(place[3]),
+    area: String(place[4]),
+    status: status,
+    registrationStatus: String(place[19] || ''),
+    packageStatus: String(place[22] || '')
+  });
 } 
