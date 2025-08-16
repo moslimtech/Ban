@@ -50,6 +50,7 @@
             transition: all 0.3s ease;
             border: 2px solid #f8f9fa;
             flex-shrink: 0;
+            cursor: pointer;
         }
         .ad-images img:hover { 
             transform: scale(1.05); 
@@ -231,47 +232,126 @@
                 font-size: 1.8em;
             }
         }
-		.back-bar {
-			position: sticky;
-			top: 0;
-			z-index: 50;
-			background: #ffffff;
-			border-bottom: 1px solid #e9ecef;
-			max-width: 1200px;
-			margin: 0 auto 12px;
-			padding: 10px 20px;
-			display: flex;
-		}
-		.back-btn {
-			display: inline-flex;
-			align-items: center;
-			gap: 10px;
-			background: linear-gradient(135deg, #0d6efd, #4dabf7);
-			color: #ffffff;
-			border: none;
-			border-radius: 999px;
-			padding: 10px 16px;
-			cursor: pointer;
-			text-decoration: none;
-			font-weight: 700;
-			font-size: 15px;
-			box-shadow: 0 6px 18px rgba(13, 110, 253, 0.28);
-			transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-		}
-		.back-btn:hover {
-			transform: translateY(-1px) scale(1.02);
-			box-shadow: 0 10px 24px rgba(13, 110, 253, 0.34);
-		}
-		.back-btn:active {
-			transform: translateY(0);
-			opacity: 0.95;
-		}
+        .back-bar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: #ffffff;
+            border-bottom: 1px solid #e9ecef;
+            max-width: 1200px;
+            margin: 0 auto 12px;
+            padding: 10px 20px;
+            display: flex;
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #0d6efd, #4dabf7);
+            color: #ffffff;
+            border: none;
+            border-radius: 999px;
+            padding: 10px 16px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 15px;
+            box-shadow: 0 6px 18px rgba(13, 110, 253, 0.28);
+            transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+        }
+        .back-btn:hover {
+            transform: translateY(-1px) scale(1.02);
+            box-shadow: 0 10px 24px rgba(13, 110, 253, 0.34);
+        }
+        .back-btn:active {
+            transform: translateY(0);
+            opacity: 0.95;
+        }
+        
+        /* Lightbox Styles */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .lightbox.active {
+            display: flex;
+            opacity: 1;
+        }
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+        .lightbox-img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .lightbox-close {
+            position: absolute;
+            top: -40px;
+            right: -10px;
+            color: white;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px 15px;
+        }
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+        }
+        .lightbox-prev, .lightbox-next {
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 20px;
+            user-select: none;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+            margin: 0 20px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .lightbox-prev:hover, .lightbox-next:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .lightbox-counter {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 16px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
     </style>
 </head>
 <body>
 
 <div class="back-bar">
-	<button id="backBtn" class="back-btn" aria-label="الرجوع إلى الصفحة الرئيسية">← رجوع</button>
+    <button id="backBtn" class="back-btn" aria-label="الرجوع إلى الصفحة الرئيسية">← رجوع</button>
 </div>
 
 <div id="loader" class="loader" role="status" aria-live="polite">
@@ -283,15 +363,98 @@
 <h2>الإعلانات</h2>
 <div class="ads-container" id="adsContainer"></div>
 
+<!-- Lightbox HTML -->
+<div id="lightbox" class="lightbox">
+    <span class="lightbox-close">&times;</span>
+    <div class="lightbox-content">
+        <img class="lightbox-img" id="lightbox-img" src="" alt="صورة مكبرة">
+        <div class="lightbox-counter" id="lightbox-counter"></div>
+    </div>
+    <div class="lightbox-nav">
+        <span class="lightbox-prev">&#10094;</span>
+        <span class="lightbox-next">&#10095;</span>
+    </div>
+</div>
+
 <div class="dev-footer">
-	<div class="dev-banner">
-		<div>تطوير: <strong>Muslim Tech _ مسلم تيك</strong></div>
-		<a href="https://wa.me/01108857529" target="_blank" rel="noopener">تواصل واتساب: 01108857529</a>
-	</div>
+    <div class="dev-banner">
+        <div>تطوير: <strong>Muslim Tech _ مسلم تيك</strong></div>
+        <a href="https://wa.me/01108857529" target="_blank" rel="noopener">تواصل واتساب: 01108857529</a>
+    </div>
 </div>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwB0VE5COC0e6NQNKrxQeNRu2Mtt_QuMbVoBrH7tE6Da3X3BP6UxK926bt9fDO0WPU5/exec";
+
+// Lightbox functionality
+let currentImageIndex = 0;
+let imagesArray = [];
+
+function initLightbox() {
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxClose = document.querySelector('.lightbox-close');
+    const lightboxPrev = document.querySelector('.lightbox-prev');
+    const lightboxNext = document.querySelector('.lightbox-next');
+    const lightboxCounter = document.getElementById('lightbox-counter');
+    
+    // Open lightbox when clicking on an image
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('ad-images') || e.target.classList.contains('ad-details')) return;
+        
+        const img = e.target.closest('img');
+        if (img && img.parentElement.classList.contains('ad-images')) {
+            e.preventDefault();
+            const card = img.closest('.ad-card');
+            const images = Array.from(card.querySelectorAll('.ad-images img'));
+            currentImageIndex = images.indexOf(img);
+            imagesArray = images.map(img => img.src);
+            
+            updateLightboxImage();
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    });
+    
+    // Close lightbox
+    lightboxClose.addEventListener('click', function() {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    });
+    
+    // Previous image
+    lightboxPrev.addEventListener('click', function() {
+        currentImageIndex = (currentImageIndex - 1 + imagesArray.length) % imagesArray.length;
+        updateLightboxImage();
+    });
+    
+    // Next image
+    lightboxNext.addEventListener('click', function() {
+        currentImageIndex = (currentImageIndex + 1) % imagesArray.length;
+        updateLightboxImage();
+    });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        if (!lightbox.classList.contains('active')) return;
+        
+        if (e.key === 'Escape') {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        } else if (e.key === 'ArrowLeft') {
+            currentImageIndex = (currentImageIndex - 1 + imagesArray.length) % imagesArray.length;
+            updateLightboxImage();
+        } else if (e.key === 'ArrowRight') {
+            currentImageIndex = (currentImageIndex + 1) % imagesArray.length;
+            updateLightboxImage();
+        }
+    });
+    
+    function updateLightboxImage() {
+        lightboxImg.src = imagesArray[currentImageIndex];
+        lightboxCounter.textContent = `${currentImageIndex + 1} / ${imagesArray.length}`;
+    }
+}
 
 // دالة مساعدة لاختبار البيانات مباشرة
 function testAdData(placeId) {
@@ -332,13 +495,13 @@ function testAdData(placeId) {
 // تفعيل زر الرجوع
 const backBtn = document.getElementById('backBtn');
 if (backBtn) {
-	backBtn.addEventListener('click', () => {
-		if (history.length > 1) {
-			history.back();
-		} else {
-			window.location.href = 'index.html';
-		}
-	});
+    backBtn.addEventListener('click', () => {
+        if (history.length > 1) {
+            history.back();
+        } else {
+            window.location.href = 'index.html';
+        }
+    });
 }
 
 // Loader elements
@@ -724,7 +887,12 @@ function displayAds(ads) {
     });
 }
 
-fetchAds();
+// Initialize the page
+document.addEventListener('DOMContentLoaded', function() {
+    fetchAds();
+    initLightbox(); // Initialize lightbox functionality
+});
+
 setInterval(fetchAds, 20000);
 
 // اختبار البيانات عند تحميل الصفحة
@@ -739,4 +907,4 @@ if (testPlaceId) {
 </script>
 
 </body>
-</html> 
+</html>
