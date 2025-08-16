@@ -118,7 +118,11 @@
     // خريطة: cityId -> cityName
     let CITY_ID_TO_NAME = {};
     let PLACE_CARDS_BY_ID = new Map();
-
+    let FIRST_LOAD_DONE = false;
+    let SCROLL_POSITION = 0;
+    let FILTER_STATE = {};
+    let IS_RETURNING_FROM_ADS = false;
+    
     // عناصر DOM
     const citySelect = document.getElementById('citySelect');
     const areaSelect = document.getElementById('areaSelect');
@@ -168,10 +172,102 @@
     const fallbackImg = 'https://via.placeholder.com/600x400?text=%D9%85%D9%83%D8%A7%D9%86%D9%83';
     const showLoader = () => { if (loaderEl) loaderEl.style.display = 'flex'; };
     const hideLoader = () => { if (loaderEl) loaderEl.style.display = 'none'; };
-    let FIRST_LOAD_DONE = false;
     
-    // فحص إذا كان المستخدم عائد من صفحة الإعلانات
-    const isReturningFromAds = document.referrer && document.referrer.includes('ads.html');
+    // التحقق من العودة من صفحة الإعلانات وحفظ/استعادة الحالة
+    function checkReturnFromAds() {
+      const isReturning = document.referrer.includes('ads.html');
+      if (isReturning) {
+        IS_RETURNING_FROM_ADS = true;
+        // استعادة موقع التمرير وحالة الفلترة
+        restoreState();
+      }
+    }
+    
+    // حفظ الحالة الحالية
+    function saveState() {
+      FILTER_STATE = {
+        city: citySelect.value,
+        area: areaSelect.value,
+        activity: activitySelect.value,
+        search: searchInput.value,
+        sort: sortSelect.value
+      };
+      SCROLL_POSITION = window.scrollY;
+      
+      // حفظ في localStorage للاستخدام لاحقاً
+      localStorage.setItem('makank_filter_state', JSON.stringify(FILTER_STATE));
+      localStorage.setItem('makank_scroll_position', SCROLL_POSITION.toString());
+    }
+    
+    // استعادة الحالة المحفوظة
+    function restoreState() {
+      try {
+        const savedFilterState = localStorage.getItem('makank_filter_state');
+        const savedScrollPosition = localStorage.getItem('makank_scroll_position');
+        
+        if (savedFilterState) {
+          FILTER_STATE = JSON.parse(savedFilterState);
+        }
+        
+        if (savedScrollPosition) {
+          SCROLL_POSITION = parseInt(savedScrollPosition);
+        }
+      } catch (e) {
+        console.warn('فشل في استعادة الحالة المحفوظة:', e);
+      }
+    }
+    
+    // تطبيق الحالة المحفوظة
+    function applySavedState() {
+      if (!IS_RETURNING_FROM_ADS) return;
+      
+      // تطبيق الفلاتر المحفوظة
+      if (FILTER_STATE.city) {
+        citySelect.value = FILTER_STATE.city;
+        handleCityChange(); // هذا سيحدث المناطق أيضاً
+      }
+      
+      if (FILTER_STATE.area) {
+        areaSelect.value = FILTER_STATE.area;
+      }
+      
+      if (FILTER_STATE.activity) {
+        activitySelect.value = FILTER_STATE.activity;
+      }
+      
+      if (FILTER_STATE.search) {
+        searchInput.value = FILTER_STATE.search;
+      }
+      
+      if (FILTER_STATE.sort) {
+        sortSelect.value = FILTER_STATE.sort;
+      }
+      
+      // تطبيق الفلترة
+      applyFilters();
+      
+      // استعادة موقع التمرير بعد تحميل البطاقات
+      setTimeout(() => {
+        window.scrollTo(0, SCROLL_POSITION);
+      }, 100);
+    }
+   
+   // تنظيف الحالة المحفوظة
+   function clearSavedState() {
+     localStorage.removeItem('makank_filter_state');
+     localStorage.removeItem('makank_scroll_position');
+     FILTER_STATE = {};
+     SCROLL_POSITION = 0;
+     IS_RETURNING_FROM_ADS = false;
+     console.log('تم تنظيف الحالة المحفوظة');
+   }
+   
+   // تنظيف الحالة عند تحميل الصفحة لأول مرة (وليس العودة من الإعلانات)
+   function clearStateOnFreshLoad() {
+     if (!document.referrer.includes('ads.html')) {
+       clearSavedState();
+     }
+   }
 
     // Helpers for status badge
     const isUrlLike = (v) => typeof v === 'string' && /(https?:\/\/|\.mp4|\.mov|\.avi|youtube\.com|youtu\.be)/i.test(v);
@@ -200,8 +296,6 @@
         return;
       }
       el.textContent = finalStatus;
-      el.classList.remove('hidden');
-      // reset bg classes
       el.classList.remove('bg-emerald-500','bg-rose-500','bg-amber-500','bg-slate-500');
       switch (finalStatus) {
         case 'مفتوح':
@@ -279,6 +373,9 @@
 
         // عند الضغط على الكارت: نقدر لاحقًا نعرض الإعلانات الخاصة بالمكان (اختياري الآن)
         card.addEventListener('click', () => {
+          // حفظ الحالة الحالية قبل الانتقال
+          saveState();
+          
           // تسجيل الزيارة قبل الانتقال
           const placeId = p.id || p["ID المكان"] || '';
           if (placeId) {
@@ -472,6 +569,9 @@
               </div>`;
  
             card.addEventListener('click', () => {
+              // حفظ الحالة الحالية قبل الانتقال
+              saveState();
+              
               // تسجيل الزيارة قبل الانتقال
               const placeId = placeIdVal;
               if (placeId) {
@@ -514,33 +614,68 @@
       searchInput._t = setTimeout(applyFilters, 200);
     });
 
+    // حفظ الحالة عند تغيير الفلاتر
+    function saveStateOnFilterChange() {
+      saveState();
+    }
+    
+    // إضافة مستمعي حفظ الحالة للفلاتر
+    citySelect.addEventListener('change', saveStateOnFilterChange);
+    areaSelect.addEventListener('change', saveStateOnFilterChange);
+    activitySelect.addEventListener('change', saveStateOnFilterChange);
+    sortSelect.addEventListener('change', saveStateOnFilterChange);
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchInput._t);
+      searchInput._t = setTimeout(() => {
+        applyFilters();
+        saveStateOnFilterChange();
+      }, 200);
+    });
+
     // init
     (async function init() {
+      // التحقق من العودة من صفحة الإعلانات
+      checkReturnFromAds();
+     
+      // تنظيف الحالة إذا كانت زيارة جديدة (وليس عودة من الإعلانات)
+      clearStateOnFreshLoad();
+      
       let startTs = Date.now();
       try {
-        // إظهار اللودر دائماً ليعرف الناس أن هناك تحميل
-        showLoader();
+        // إظهار اللودر فقط إذا لم نكن عائدين من صفحة الإعلانات
+        if (!IS_RETURNING_FROM_ADS) {
+          showLoader();
+        }
+        
         await loadFilters();
+        
+        // تطبيق الحالة المحفوظة إذا كنا عائدين من صفحة الإعلانات
+        if (IS_RETURNING_FROM_ADS) {
+          applySavedState();
+        }
+        
         await loadPlaces();
-        const elapsed = Date.now() - startTs;
-        // مدة أقصر للمستخدمين العائدين
-        const minDuration = isReturningFromAds ? 3000 : 5000;
-        const remaining = Math.max(0, minDuration - elapsed);
-        setTimeout(() => { 
-          hideLoader(); 
+        
+        // إذا كنا عائدين من صفحة الإعلانات، لا نحتاج لإظهار اللودر
+        if (IS_RETURNING_FROM_ADS) {
+          hideLoader();
           FIRST_LOAD_DONE = true;
-        }, remaining);
+        } else {
+          const elapsed = Date.now() - startTs;
+          const minDuration = 2000; // تقليل مدة اللودنج إلى 2 ثانية
+          const remaining = Math.max(0, minDuration - elapsed);
+          setTimeout(() => { 
+            hideLoader(); 
+            FIRST_LOAD_DONE = true;
+          }, remaining);
+        }
+        
         // تحديث تلقائي بدون إعادة بناء الصفحة
         setInterval(refreshPlacesIncrementally, REFRESH_MS);
       } catch (e) {
         console.error(e);
         cardsGrid.innerHTML = `<div class="col-span-full text-center text-red-600">حدث خطأ أثناء تحميل البيانات. تأكد من رابط الويب آب وصلاحيات الوصول.</div>`;
-        const elapsed = Date.now() - startTs;
-        const minDuration = isReturningFromAds ? 3000 : 5000;
-        const remaining = Math.max(0, minDuration - elapsed);
-        setTimeout(() => { 
-          hideLoader();
-        }, remaining);
+        hideLoader();
       }
     })();
 
