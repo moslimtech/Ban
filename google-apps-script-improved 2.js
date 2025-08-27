@@ -825,11 +825,11 @@ function doGet(e) {
     return JSON.stringify(places);
   }
   
-  // --- API: getAdsByPlaceId (مضبوط حسب الشيت) ---
+  // --- API: getAdsByPlaceId (مضبوط حسب الشيت الجديد - 25 عمود) ---
   function getAdsByPlaceId(placeId) {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheetByName("الاعلانات");
-    var data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 26).getValues(); // 26 عمود
+    var data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 25).getValues(); // 25 عمود
   
     function normalizeDate(v) {
       if (v instanceof Date) {
@@ -845,37 +845,11 @@ function doGet(e) {
     var ads = data
       .filter(r => String(r[1]) === String(placeId)) // ID المكان في العمود 1
       .map(r => {
-        // جمع الصور من الأعمدة 17-23 (رابط صورة1 إلى رابط صورة8)
-        var images = [];
-        for (var i = 17; i <= 23; i++) {
-          if (r[i] && String(r[i]).trim() !== '') {
-            images.push(String(r[i]));
-          }
-        }
-  
-        // قراءة الفيديو من العمود 24
-        var videoUrl = String(r[24] || '');
+        // قراءة الفيديو من عمود "رابط الفيديو" (العمود 23)
+        var videoUrl = String(r[23] || '');
         
-        // قراءة الحالة من العمود 25
-        var status = String(r[25] || '');
-  
-        // إذا كان الفيديو يحتوي على نص الحالة بدلاً من رابط
-        if (videoUrl && !isUrlLike(videoUrl) && !status) {
-          status = videoUrl;
-          videoUrl = '';
-        }
-  
-        // استخراج الفيديو من الصور إذا كان موجوداً
-        if (!videoUrl) {
-          for (var k = 0; k < images.length; k++) {
-            var url = images[k];
-            if (isUrlLike(url) && /(youtube\.com|youtu\.be|\.mp4|\.mov|\.avi)/i.test(url)) {
-              videoUrl = url;
-              images.splice(k, 1); // إزالة الفيديو من الصور
-              break;
-            }
-          }
-        }
+        // قراءة الحالة من العمود 24
+        var status = String(r[24] || '');
   
         return {
           id: String(r[0]),                    // ID الإعلان
@@ -885,10 +859,16 @@ function doGet(e) {
           startDate: normalizeDate(r[5]),      // تاريخ البداية
           endDate: normalizeDate(r[6]),        // تاريخ النهاية
           coupon: String(r[7] || ''),          // كوبون خصم
-          images: images,                      // روابط الصور
-          video: videoUrl,                     // رابط الفيديو
+          'رابط صورة1': String(r[16] || ''),   // رابط صورة1
+          'رابط صورة2': String(r[17] || ''),   // رابط صورة2
+          'رابط صورة3': String(r[18] || ''),   // رابط صورة3
+          'رابط صورة4': String(r[19] || ''),   // رابط صورة4
+          'رابط صورة5': String(r[20] || ''),   // رابط صورة5
+          'رابط صورة7': String(r[21] || ''),   // رابط صورة7
+          'رابط صورة8': String(r[22] || ''),   // رابط صورة8
+          'رابط الفيديو': videoUrl,            // رابط الفيديو
           status: status,                      // الحالة
-          adStatus: String(r[25] || '')        // حالة الاعلان
+          adStatus: String(r[24] || '')        // حالة الاعلان
         };
       });
   

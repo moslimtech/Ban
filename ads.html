@@ -741,17 +741,17 @@ function displayAds(ads) {
         console.log('normalizedStatus:', normalizedStatus);
         console.log('=== END NORMALIZATION DEBUG ===');
         
-        if (normalizedStatus === "مفتوح" || normalizedStatus === "open" || normalizedStatus === "مفتوحة") {
+        if (normalizedStatus === "مفتوح" || normalizedStatus === "open" || normalizedStatus === "مفتوحة" || normalizedStatus === "نشط" || normalizedStatus === "active") {
             statusClass = 'open';
-            statusValue = 'مفتوح';
-            console.log('Status set to: مفتوح (open)');
+            statusValue = 'نشط';
+            console.log('Status set to: نشط (active/open)');
         }
         else if (normalizedStatus === "مغلق" || normalizedStatus === "closed" || normalizedStatus === "مغلقة") {
             statusClass = 'closed';
             statusValue = 'مغلق';
             console.log('Status set to: مغلق (closed)');
         }
-        else if (normalizedStatus === "مغلقللصلاة" || normalizedStatus === "مغلقللصلاة" || normalizedStatus === "prayer") {
+        else if (normalizedStatus === "مغلقللصلاة" || normalizedStatus === "prayer") {
             statusClass = 'prayer';
             statusValue = 'مغلق للصلاة';
             console.log('Status set to: مغلق للصلاة (prayer)');
@@ -779,102 +779,29 @@ function displayAds(ads) {
             console.log('=== END FINAL STATUS DEBUG ===');
         }
 
-        // جمع الصور والفيديو
-        const allImages = [];
+        // جمع الصور والفيديو من الروابط
+        // تعديل هنا: جلب الصور من ad.images مباشرة
+        const allImages = Array.isArray(ad.images) ? ad.images.filter(img => img && img.trim() !== '') : [];
         let videoUrl = '';
         
-        // إعطاء أولوية لعمود "رابط الفيديو"/linkVideo/ad.video إذا كان رابطاً فعلاً
-        if (candidateVideoField && isUrlLike(candidateVideoField)) {
-            videoUrl = candidateVideoField.trim();
-        }
-        
-        // محاولة قراءة من عمود 'images' أولاً (من Google Apps Script)
-        if (ad.images && Array.isArray(ad.images)) {
-            ad.images.forEach((item) => {
-                if (item && item.trim() !== '') {
-                    if (!videoUrl && (item.includes('youtube') || item.includes('youtu.be') || item.includes('.mp4') || item.includes('.avi') || item.includes('.mov'))) {
-                        videoUrl = item;
-                        console.log('Found video URL from images:', videoUrl);
-                    } else {
-                        allImages.push(item);
-                    }
-                }
-            });
-            console.log('Found images in images array:', allImages);
-        } else if (ad.images && typeof ad.images === 'string') {
-            const imageUrls = ad.images.split(',').map(url => url.trim()).filter(url => url !== '');
-            imageUrls.forEach(item => {
-                if (!videoUrl && (item.includes('youtube') || item.includes('youtu.be') || item.includes('.mp4') || item.includes('.avi') || item.includes('.mov'))) {
-                    videoUrl = item;
-                    console.log('Found video URL in string:', videoUrl);
-                } else {
-                    allImages.push(item);
-                }
-            });
-            console.log('Found images in images string:', allImages);
-        } else {
-            const imageColumns = [
-                'رابط صورة1', 'رابط صورة2', 'رابط صورة3', 'رابط صورة4', 
-                'رابط صورة5', 'رابط صورة7', 'رابط صورة8'
-            ];
-            console.log('Checking image columns:', imageColumns);
-            imageColumns.forEach(colName => {
-                if (ad[colName] && ad[colName].trim() !== '') {
-                    allImages.push(ad[colName]);
-                    console.log(`Found image in ${colName}:`, ad[colName]);
-                }
-            });
-        }
-
-        console.log('Ad data:', ad);
-        console.log('All column names:', Object.keys(ad));
-        console.log('Found images:', allImages);
-        console.log('Found video URL:', videoUrl);
-        
-        console.log('=== ALL COLUMN VALUES ===');
-        Object.keys(ad).forEach((key, index) => {
-            console.log(`${index}: ${key} =`, ad[key]);
-        });
-        console.log('=== END COLUMN VALUES ===');
-
-        const placeDescriptionHtml = ad.placeDescription ? `<p>${ad.placeDescription}</p>` : '';
-        const imagesHtml = allImages.map(img => `<img src="${img}" alt="صورة" style="max-width: 100%; height: auto;">`).join('');
-        
-        // تحويل روابط YouTube إلى رابط embed
-        const toYouTubeEmbed = (url) => {
-            try {
-                let videoId = '';
-                if (url.includes('youtu.be/')) {
-                    videoId = url.split('youtu.be/')[1].split(/[?&]/)[0];
-                } else if (url.includes('youtube.com/watch')) {
-                    const u = new URL(url);
-                    videoId = u.searchParams.get('v') || '';
-                }
-                return videoId ? `https://www.youtube.com/embed/${videoId}` : '';
-            } catch (e) {
-                return '';
-            }
-        };
-        
-        let videoHtml = '';
-        if (videoUrl) {
-            if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
-                const embedUrl = toYouTubeEmbed(videoUrl);
-                if (embedUrl) {
-                    videoHtml = `<iframe src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
-                }
-            } else {
-                videoHtml = `<video controls><source src="${videoUrl}" type="video/mp4"></video>`;
-            }
+        // قراءة الفيديو من "رابط الفيديو"
+        if (ad['رابط الفيديو'] && ad['رابط الفيديو'].trim() !== '') {
+            videoUrl = ad['رابط الفيديو'].trim();
+            console.log('Found video URL from رابط الفيديو:', videoUrl);
+        } else if (ad.video && ad.video.trim() !== '') {
+            videoUrl = ad.video.trim();
+            console.log('Found video URL from ad.video:', videoUrl);
         }
         
         console.log('Final video URL:', videoUrl);
         console.log('Final images count:', allImages.length);
 
+        const imagesHtml = allImages.map(img => `<img src="${img}" alt="صورة" style="max-width: 100%; height: auto;">`).join('');
+        const videoHtml = videoUrl ? `<video src="${videoUrl}" controls muted></video>` : '';
+
+        // إزالة شارة الحالة من البطاقة
         const adCard = `
             <div class="ad-card" data-place-id="${placeId || ''}">
-                <div class="status-badge ${statusClass}">${statusValue}${getStatusIcon(statusValue)}</div>
-                <div class="ad-details">${placeDescriptionHtml}</div>
                 ${imagesHtml ? `<div class="ad-images">${imagesHtml}</div>` : '<p>لا توجد صور</p>'}
                 ${videoHtml ? `<div class="ad-video">${videoHtml}</div>` : ''}
                 <div class="ad-details">
@@ -884,17 +811,6 @@ function displayAds(ads) {
                     <p><strong>تاريخ البداية:</strong> ${ad['تاريخ البداية'] || ad['بداية'] || ad['Start Date'] || ad['start_date'] || ad.startDate || ''}</p>
                     <p><strong>تاريخ النهاية:</strong> ${ad['تاريخ النهاية'] || ad['نهاية'] || ad['End Date'] || ad['end_date'] || ad.endDate || ''}</p>
                     ${ad.coupon || ad['كوبون خصم'] ? `<div class="coupon">كوبون الخصم: ${ad.coupon || ad['كوبون خصم']}</div>` : ''}
-                    <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #007bff;">
-                        <p style="margin: 0; font-weight: 600; color: #495057;">
-                            <strong>حالة المكان:</strong> ${statusValue}
-                        </p>
-                        <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #6c757d;">
-                            ${statusValue === 'مفتوح' ? 'المكان متاح للزيارة الآن' : 
-                              statusValue === 'مغلق' ? 'المكان مغلق حالياً' : 
-                              statusValue === 'مغلق للصلاة' ? 'المكان مغلق مؤقتاً للصلاة' : 
-                              'حالة المكان غير محددة'}
-                        </p>
-                    </div>
                     ${ad.registrationStatus || ad['حالة التسجيل'] ? `<div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
                         <p style="margin: 0; font-weight: 600; color: #1976d2;">
                             <strong>حالة التسجيل:</strong> ${ad.registrationStatus || ad['حالة التسجيل']}

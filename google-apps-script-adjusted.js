@@ -609,105 +609,67 @@ function debugAdData(placeId) {
   console.log('=== END DEBUG ===');
 }
 
-// --- API: getAdsByPlaceId (مضبوط حسب الشيت) ---
+// getAdsByPlaceId (قراءة الصور والفيديو حسب اسم العمود)
 function getAdsByPlaceId(placeId) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName("الاعلانات");
-  var data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 25).getValues(); // 25 عمود بدلاً من 26
+  if (!sheet || sheet.getLastRow() < 2) return JSON.stringify([]);
+
+  // قراءة رؤوس الأعمدة
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(function(h){ return String(h || '').trim(); });
+  var raw = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
+
+  // فلترة الأسطر الفارغة والتأكد من تطابق ID المكان
+  var data = raw.filter(function(r) {
+    var adId = String(r[0] || '').trim();
+    var pId = String(r[1] || '').trim();
+    return adId !== '' && pId !== '' && String(pId) === String(placeId || '');
+  });
 
   function normalizeDate(v) {
-    if (v instanceof Date) {
-      return Utilities.formatDate(v, Session.getScriptTimeZone(), 'yyyy-MM-dd');
-    }
+    if (v instanceof Date) return Utilities.formatDate(v, Session.getScriptTimeZone(), 'yyyy-MM-dd');
     return v != null ? String(v) : '';
   }
-
   function isUrlLike(v) {
     return typeof v === 'string' && /(https?:\/\/|\.mp4|\.mov|\.avi|youtube\.com|youtu\.be)/i.test(v);
   }
 
-  var ads = data
-    .filter(r => String(r[1]) === String(placeId)) // ID المكان في العمود 1
-    .map(r => {
-      // جمع الصور من الأعمدة 17-23 (رابط صورة1 إلى رابط صورة8)
-      var images = [];
-      for (var i = 17; i <= 23; i++) {
-        if (r[i] && String(r[i]).trim() !== '') {
-          images.push(String(r[i]));
-        }
-      }
+  // البحث عن أعمدة الصور والفيديو حسب الاسم
+  var imageCols = [];
+  var videoCol = -1;
+  for (var i = 0; i < headers.length; i++) {
+    var h = headers[i];
+    if (/^رابط\s*صورة\d*$/i.test(h)) {
+      imageCols.push(i);
+    }
+    if (h === 'رابط الفيديو') {
+      videoCol = i;
+    }
+  }
 
-      // قراءة الفيديو من العمود 24
-      var videoUrl = String(r[24] || '');
-      
-      // قراءة الحالة من العمود 25 (العمود الأخير)
-      var status = String(r[24] || ''); // العمود 24: الحالة
-      
-      console.log('Reading status from column 24:', status);
-      
-      // تنظيف النص وإزالة المسافات الزائدة
-      status = status.trim();
-      
-      // التحقق من أن الحالة صحيحة
-      if (status === 'مفتوح' || status === 'مغلق' || status === 'مغلق للصلاة') {
-        console.log('Valid status found:', status);
-      } else {
-        console.log('Invalid or empty status:', status);
-        status = ''; // إعادة تعيين إذا كانت غير صحيحة
-      }
-
-      // البحث في جميع الأعمدة عن الحالة إذا لم نجدها في العمود المخصص
-      if (!status) {
-        for (var i = 0; i < r.length; i++) {
-          var value = String(r[i] || '').trim();
-          if (value === 'مفتوح' || value === 'مغلق' || value === 'مغلق للصلاة') {
-            status = value;
-            console.log('Found status in column ' + (i + 1) + ': ' + status);
-            break;
-          }
-        }
-      }
-
-      // إذا كان الفيديو يحتوي على نص الحالة بدلاً من رابط
-      if (videoUrl && !isUrlLike(videoUrl)) {
-        var videoValue = videoUrl.trim();
-        if (videoValue === 'مفتوح' || videoValue === 'مغلق' || videoValue === 'مغلق للصلاة') {
-          status = videoValue;
-          videoUrl = '';
-          console.log('Found status in video field:', status);
-        }
-      }
-
-      // استخراج الفيديو من الصور إذا كان موجوداً
-      if (!videoUrl) {
-        for (var k = 0; k < images.length; k++) {
-          var url = images[k];
-          if (isUrlLike(url) && /(youtube\.com|youtu\.be|\.mp4|\.mov|\.avi)/i.test(url)) {
-            videoUrl = url;
-            images.splice(k, 1); // إزالة الفيديو من الصور
-            break;
-          }
-        }
-      }
-
-      return {
-        id: String(r[0]),                    // ID الإعلان
-        type: String(r[2] || ''),            // نوع الاعلان
-        title: String(r[3] || ''),           // العنوان
-        description: String(r[4] || ''),     // الوصف
-        startDate: normalizeDate(r[5]),      // تاريخ البداية
-        endDate: normalizeDate(r[6]),        // تاريخ النهاية
-        coupon: String(r[7] || ''),          // كوبون خصم
-        images: images,                      // روابط الصور
-        video: videoUrl,                     // رابط الفيديو
-        status: status,                      // الحالة
-        adStatus: String(r[24] || ''),       // حالة الاعلان (العمود 24)
-        // إضافة أعمدة إضافية للحالة
-        'الحالة': status,
-        'حالة الاعلان': status,
-        'حالة المكان': status
-      };
+  var ads = data.map(function(r) {
+    // الصور من الأعمدة التي اسمها يبدأ بـ 'رابط صورة'
+    var images = [];
+    imageCols.forEach(function(idx) {
+      if (r[idx] && String(r[idx]).trim() !== '') images.push(String(r[idx]));
     });
+    // الفيديو من عمود 'رابط الفيديو'
+    var videoUrl = videoCol !== -1 ? String(r[videoCol] || '') : '';
+
+    return {
+      id: String(r[0]),                 // 1: ID الإعلان
+      placeId: String(r[1]),            // 2: ID المكان
+      type: String(r[2] || ''),         // 3: نوع الاعلان
+      title: String(r[3] || ''),        // 4: العنوان
+      description: String(r[4] || ''),  // 5: الوصف
+      startDate: normalizeDate(r[5]),   // 6
+      endDate: normalizeDate(r[6]),     // 7
+      coupon: String(r[7] || ''),       // 8: كوبون خصم
+      images: images,
+      video: videoUrl,
+      status: String(r[r.length-1] || '') // آخر عمود للحالة
+    };
+  });
 
   return JSON.stringify(ads);
 }
