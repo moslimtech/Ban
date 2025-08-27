@@ -778,7 +778,9 @@
             if (totalElement) totalElement.textContent = `الإجمالي: ${totalVisits}`;
 
             const packageBadge = existing.querySelector('.package-badge');
-            updatePackageBadge(packageBadge, p.packageStatus || p['حالة الباقة'] || '');
+            // عرض حالة المكان فقط في البادج الأيمن
+            const placeStatusNow = p.status || p['الحالة'] || '';
+            updatePlaceStatusBadge(packageBadge, placeStatusNow);
 
             const registrationTextEl = existing.querySelector('.registration-status-text');
             if (registrationTextEl) {
@@ -841,12 +843,12 @@
                     <span class="registration-status-text">حالة التسجيل: ${registrationStatus}</span>
                   </div>
                 </div>` : ''}
-                ${packageStatus ? `<div class="mt-2 text-xs text-slate-500">
+                ${placeStatus ? `<div class="mt-2 text-xs text-slate-500">
                   <div class="flex items-center gap-1">
                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                       <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                     </svg>
-                    <span>الحالة: ${packageStatus}</span>
+                    <span>حالة المكان: ${placeStatus}</span>
                   </div>
                 </div>` : ''}
               </div>`;
@@ -879,7 +881,8 @@
             updateStatusBadge(badge, { placeId: placeIdVal, status: '' });
 
             const packageBadge = card.querySelector('.package-badge');
-            updatePackageBadge(packageBadge, packageStatus);
+            // عرض حالة المكان فقط في البادج الأيمن
+            updatePlaceStatusBadge(packageBadge, placeStatus);
  
             cardsGrid.appendChild(card);
             PLACE_CARDS_BY_ID.set(key, card);
