@@ -61,19 +61,8 @@
             <option value="">الكل</option>
           </select>
         </div>
-        <div class="col-span-2">
-          <label class="block text-sm font-semibold mb-1">بحث بالاسم / العنوان</label>
-          <input id="searchInput" type="text" placeholder="اكتب كلمة للبحث..." class="w-full rounded-2xl border-slate-300 focus:ring-2 focus:ring-indigo-500" />
-        </div>
-        <div class="col-span-1">
-          <label class="block text-sm font-semibold mb-1">ترتيب حسب</label>
-          <select id="sortSelect" class="w-full rounded-2xl border-slate-300 focus:ring-2 focus:ring-indigo-500">
-            <option value="name">الاسم</option>
-            <option value="dailyVisits">الأكثر زيارة اليوم</option>
-            <option value="totalVisits">الأكثر زيارة إجمالي</option>
-            <option value="recent">الأحدث</option>
-          </select>
-        </div>
+        <!-- <input id="searchInput" type="text" placeholder="اكتب كلمة للبحث..." class="w-full rounded-2xl border-slate-300 focus:ring-2 focus:ring-indigo-500" /> -->
+        <!-- تم حذف كل ما يخص 'ترتيب حسب' و'الاسم' من الفلتر بناءً على طلب المستخدم -->
       </div>
     </div>
   </section>
@@ -135,11 +124,11 @@
     const citySelect = document.getElementById('citySelect');
     const areaSelect = document.getElementById('areaSelect');
     const activitySelect = document.getElementById('activitySelect');
-    const searchInput = document.getElementById('searchInput');
+    // const searchInput = document.getElementById('searchInput'); // تم حذف جميع الأكواد المتعلقة بـ searchInput والبحث بالاسم/العنوان بناءً على طلب المستخدم
     const cardsGrid = document.getElementById('cardsGrid');
     const emptyState = document.getElementById('emptyState');
     const stats = document.getElementById('stats');
-    const sortSelect = document.getElementById('sortSelect');
+    // const sortSelect = document.getElementById('sortSelect'); // تم حذف جميع الأكواد المتعلقة بـ sortSelect بناءً على طلب المستخدم
     const loaderEl = document.getElementById('loader');
 
     // Helpers
@@ -168,24 +157,23 @@
     const normalize = (s) => (s || '').toString().toLowerCase().trim();
  
     // جعل البحث والفلاتر حصريين (mutual exclusive)
-    const isSearchActive = () => normalize(searchInput.value) !== '';
-    const isAnyFilterActive = () => Boolean(citySelect.value || areaSelect.value || activitySelect.value);
+    // تم حذف جميع الأكواد المتعلقة بـ searchInput والبحث بالاسم/العنوان بناءً على طلب المستخدم
     function updateControlLocking() {
-      const searchActive = isSearchActive();
-      const filtersActive = isAnyFilterActive();
-      if (searchActive) {
-        [citySelect, areaSelect, activitySelect].forEach(el => { el.disabled = true; el.classList.add('opacity-50', 'cursor-not-allowed'); });
-        searchInput.disabled = false;
-        searchInput.classList.remove('opacity-50', 'cursor-not-allowed');
-      } else if (filtersActive) {
-        [citySelect, areaSelect, activitySelect].forEach(el => { el.disabled = false; el.classList.remove('opacity-50', 'cursor-not-allowed'); });
-        searchInput.disabled = true;
-        searchInput.classList.add('opacity-50', 'cursor-not-allowed');
-      } else {
-        [citySelect, areaSelect, activitySelect].forEach(el => { el.disabled = false; el.classList.remove('opacity-50', 'cursor-not-allowed'); });
-        searchInput.disabled = false;
-        searchInput.classList.remove('opacity-50', 'cursor-not-allowed');
-      }
+      // const searchActive = isSearchActive(); // تم حذف جميع الأكواد المتعلقة بـ searchInput والبحث بالاسم/العنوان بناءً على طلب المستخدم
+      // const filtersActive = isAnyFilterActive(); // تم حذف جميع الأكواد المتعلقة بـ searchInput والبحث بالاسم/العنوان بناءً على طلب المستخدم
+      // if (searchActive) {
+      //   [citySelect, areaSelect, activitySelect].forEach(el => { el.disabled = true; el.classList.add('opacity-50', 'cursor-not-allowed'); });
+      //   searchInput.disabled = false;
+      //   searchInput.classList.remove('opacity-50', 'cursor-not-allowed');
+      // } else if (filtersActive) {
+      //   [citySelect, areaSelect, activitySelect].forEach(el => { el.disabled = false; el.classList.remove('opacity-50', 'cursor-not-allowed'); });
+      //   searchInput.disabled = true;
+      //   searchInput.classList.add('opacity-50', 'cursor-not-allowed');
+      // } else {
+      //   [citySelect, areaSelect, activitySelect].forEach(el => { el.disabled = false; el.classList.remove('opacity-50', 'cursor-not-allowed'); });
+      //   searchInput.disabled = false;
+      //   searchInput.classList.remove('opacity-50', 'cursor-not-allowed');
+      // }
     }
 
     const phoneHref = (v) => v ? `tel:${v}` : '#';
@@ -216,8 +204,8 @@
         city: citySelect.value,
         area: areaSelect.value,
         activity: activitySelect.value,
-        search: searchInput.value,
-        sort: sortSelect.value
+        // search: searchInput.value, // تم حذف جميع الأكواد المتعلقة بـ searchInput والبحث بالاسم/العنوان بناءً على طلب المستخدم
+        // sort: sortSelect.value // تم حذف جميع الأكواد المتعلقة بـ sortSelect بناءً على طلب المستخدم
       };
       SCROLL_POSITION = window.scrollY;
       
@@ -262,13 +250,13 @@
         activitySelect.value = FILTER_STATE.activity;
       }
       
-      if (FILTER_STATE.search) {
-        searchInput.value = FILTER_STATE.search;
-      }
+      // if (FILTER_STATE.search) { // تم حذف جميع الأكواد المتعلقة بـ searchInput والبحث بالاسم/العنوان بناءً على طلب المستخدم
+      //   searchInput.value = FILTER_STATE.search;
+      // }
       
-      if (FILTER_STATE.sort) {
-        sortSelect.value = FILTER_STATE.sort;
-      }
+      // if (FILTER_STATE.sort) { // تم حذف جميع الأكواد المتعلقة بـ sortSelect بناءً على طلب المستخدم
+      //   sortSelect.value = FILTER_STATE.sort;
+      // }
       
       // تطبيق الفلترة
       applyFilters();
@@ -657,8 +645,8 @@
       const selectedCityId = citySelect.value; // قد يكون فارغ
       const selectedAreaName = areaSelect.value; // نخزّن الاسم مباشرة
       const selectedActivity = activitySelect.value;
-      const q = normalize(searchInput.value);
-      const sortBy = sortSelect.value;
+      // const q = normalize(searchInput.value); // تم حذف جميع الأكواد المتعلقة بـ searchInput والبحث بالاسم/العنوان بناءً على طلب المستخدم
+      // const sortBy = sortSelect.value; // تم حذف جميع الأكواد المتعلقة بـ sortSelect بناءً على طلب المستخدم
 
       // لو اختار مدينة، جيب اسم المدينة من الخريطة
       const selectedCityName = selectedCityId ? (CITY_ID_TO_NAME[selectedCityId] || '') : '';
@@ -666,10 +654,10 @@
       // ضبط تمكين/تعطيل الحقول
       updateControlLocking();
 
-      const searchActive = q !== '';
+      // const searchActive = q !== ''; // تم حذف جميع الأكواد المتعلقة بـ searchInput والبحث بالاسم/العنوان بناءً على طلب المستخدم
       const filtersActive = Boolean(selectedCityId || selectedAreaName || selectedActivity);
       const applyByFilters = filtersActive; // الفلتر له أولوية
-      const applyBySearch = !filtersActive && searchActive; // البحث يعمل فقط إذا لم توجد فلاتر
+      // const applyBySearch = !filtersActive && searchActive; // البحث يعمل فقط إذا لم توجد فلاتر
 
       const filtered = ALL_PLACES.filter(p => {
         const city = p.city || p["city"] || p["المدينة"] || '';
@@ -681,32 +669,32 @@
         const byCity = applyByFilters ? (selectedCityName ? (city === selectedCityName) : true) : true;
         const byArea = applyByFilters ? (selectedAreaName ? (area === selectedAreaName) : true) : true;
         const byAct  = applyByFilters ? (selectedActivity ? (activity === selectedActivity) : true) : true;
-        const byQ    = applyBySearch ? (normalize(name).includes(q) || normalize(activity).includes(q) || normalize(address).includes(q)) : true;
+        // const byQ    = applyBySearch ? (normalize(name).includes(q) || normalize(activity).includes(q) || normalize(address).includes(q)) : true; // تم حذف جميع الأكواد المتعلقة بـ searchInput والبحث بالاسم/العنوان بناءً على طلب المستخدم
 
-        return byCity && byArea && byAct && byQ;
+        return byCity && byArea && byAct; // تم حذف جميع الأكواد المتعلقة بـ searchInput والبحث بالاسم/العنوان بناءً على طلب المستخدم
       });
 
       // ترتيب النتائج
       filtered.sort((a, b) => {
-        switch (sortBy) {
-          case 'dailyVisits':
-            const dailyA = Number(a.dailyVisits || a["عدد الزيارات اليومية"] || 0);
-            const dailyB = Number(b.dailyVisits || b["عدد الزيارات اليومية"] || 0);
-            return dailyB - dailyA; // تنازلي (الأكثر أولاً)
-          case 'totalVisits':
-            const totalA = Number(a.totalVisits || a["عدد الزيارات الكلي"] || 0);
-            const totalB = Number(b.totalVisits || b["عدد الزيارات الكلي"] || 0);
-            return totalB - totalA; // تنازلي (الأكثر أولاً)
-          case 'recent':
-            const dateA = new Date(a.startDate || a["تاريخ بداية الاشتراك"] || 0);
-            const dateB = new Date(b.startDate || b["تاريخ بداية الاشتراك"] || 0);
-            return dateB - dateA; // تنازلي (الأحدث أولاً)
-          case 'name':
-          default:
+        // switch (sortBy) { // تم حذف جميع الأكواد المتعلقة بـ sortSelect بناءً على طلب المستخدم
+        //   case 'dailyVisits':
+        //     const dailyA = Number(a.dailyVisits || a["عدد الزيارات اليومية"] || 0);
+        //     const dailyB = Number(b.dailyVisits || b["عدد الزيارات اليومية"] || 0);
+        //     return dailyB - dailyA; // تنازلي (الأكثر أولاً)
+        //   case 'totalVisits':
+        //     const totalA = Number(a.totalVisits || a["عدد الزيارات الكلي"] || 0);
+        //     const totalB = Number(b.totalVisits || b["عدد الزيارات الكلي"] || 0);
+        //     return totalB - totalA; // تنازلي (الأكثر أولاً)
+        //   case 'recent':
+        //     const dateA = new Date(a.startDate || a["تاريخ بداية الاشتراك"] || 0);
+        //     const dateB = new Date(b.startDate || b["تاريخ بداية الاشتراك"] || 0);
+        //     return dateB - dateA; // تنازلي (الأحدث أولاً)
+        //   case 'name':
+        //   default:
             const nameA = (a.name || a["name"] || a["اسم المكان"] || '').toLowerCase();
             const nameB = (b.name || b["name"] || b["اسم المكان"] || '').toLowerCase();
             return nameA.localeCompare(nameB);
-        }
+        // }
       });
 
       renderCards(filtered);
@@ -718,6 +706,11 @@
       FILTERS.cities = data.cities || [];
       FILTERS.areas = data.areas || [];
       FILTERS.activities = data.activities || [];
+
+      // حفظ الفلاتر في التخزين المحلي لتسريع الرجوع من صفحة الإعلانات
+      try {
+        localStorage.setItem('makank_filters_cache', JSON.stringify(FILTERS));
+      } catch (e) { /* ignore */ }
 
       // خريطة آي دي المدينة إلى اسمها
       CITY_ID_TO_NAME = Object.fromEntries(FILTERS.cities.map(c => [String(c.id), c.name]));
@@ -749,6 +742,11 @@
       // بعض الإصدارات قد ترجع مصفوفة مباشرة
       ALL_PLACES = Array.isArray(data) ? data : (data.places || []);
       renderCards(ALL_PLACES);
+
+      // حفظ الأماكن في التخزين المحلي لتسريع الرجوع من صفحة الإعلانات
+      try {
+        localStorage.setItem('makank_places_cache', JSON.stringify(ALL_PLACES));
+      } catch (e) { /* ignore */ }
     }
 
     // تحديث تدريجي دون وميض: نحدّث الشارات ونضيف أي كروت جديدة فقط
@@ -893,12 +891,12 @@
     citySelect.addEventListener('change', handleCityChange);
     areaSelect.addEventListener('change', applyFilters);
     activitySelect.addEventListener('change', applyFilters);
-    sortSelect.addEventListener('change', applyFilters);
-    searchInput.addEventListener('input', () => {
-      // Debounce خفيف
-      clearTimeout(searchInput._t);
-      searchInput._t = setTimeout(applyFilters, 200);
-    });
+    // sortSelect.addEventListener('change', applyFilters); // تم حذف جميع الأكواد المتعلقة بـ sortSelect بناءً على طلب المستخدم
+    // searchInput.addEventListener('input', () => { // تم حذف جميع الأكواد المتعلقة بـ searchInput والبحث بالاسم/العنوان بناءً على طلب المستخدم
+    //   // Debounce خفيف
+    //   clearTimeout(searchInput._t);
+    //   searchInput._t = setTimeout(applyFilters, 200);
+    // });
 
     // حفظ الحالة عند تغيير الفلاتر
     function saveStateOnFilterChange() {
@@ -909,14 +907,14 @@
     citySelect.addEventListener('change', saveStateOnFilterChange);
     areaSelect.addEventListener('change', saveStateOnFilterChange);
     activitySelect.addEventListener('change', saveStateOnFilterChange);
-    sortSelect.addEventListener('change', saveStateOnFilterChange);
-    searchInput.addEventListener('input', () => {
-      clearTimeout(searchInput._t);
-      searchInput._t = setTimeout(() => {
-        applyFilters();
-        saveStateOnFilterChange();
-      }, 200);
-    });
+    // sortSelect.addEventListener('change', saveStateOnFilterChange); // تم حذف جميع الأكواد المتعلقة بـ sortSelect بناءً على طلب المستخدم
+    // searchInput.addEventListener('input', () => { // تم حذف جميع الأكواد المتعلقة بـ searchInput والبحث بالاسم/العنوان بناءً على طلب المستخدم
+    //   clearTimeout(searchInput._t);
+    //   searchInput._t = setTimeout(() => {
+    //     applyFilters();
+    //     saveStateOnFilterChange();
+    //   }, 200);
+    // });
 
     // init
     (async function init() {
@@ -933,16 +931,53 @@
           showLoader();
         }
         
-        await loadFilters();
-        updateControlLocking();
-        
-        // تطبيق الحالة المحفوظة إذا كنا عائدين من صفحة الإعلانات
+        // في حالة الرجوع من صفحة الإعلانات: جرّب استخدام الكاش لتجنّب التحميل الكامل وإبقاء مكان التمرير
+        let usedCache = false;
         if (IS_RETURNING_FROM_ADS) {
-          applySavedState();
-          updateControlLocking();
+          try {
+            const cachedFilters = localStorage.getItem('makank_filters_cache');
+            const cachedPlaces = localStorage.getItem('makank_places_cache');
+            if (cachedFilters && cachedPlaces) {
+              // استعادة الفلاتر
+              const parsedFilters = JSON.parse(cachedFilters);
+              if (parsedFilters && parsedFilters.cities && parsedFilters.areas && parsedFilters.activities) {
+                FILTERS = parsedFilters;
+                // خريطة آي دي المدينة إلى اسمها
+                CITY_ID_TO_NAME = Object.fromEntries(FILTERS.cities.map(c => [String(c.id), c.name]));
+                // تعبئة القوائم المنسدلة من الكاش
+                setOptions(citySelect, FILTERS.cities.map(c => ({ value: String(c.id), label: c.name })));
+                setOptions(activitySelect, FILTERS.activities.map(a => ({ value: String(a.id), label: a.name })));
+                setOptions(areaSelect, FILTERS.areas.map(a => ({ value: a.name, label: a.name })));
+              }
+              
+              // استعادة الأماكن
+              const parsedPlaces = JSON.parse(cachedPlaces);
+              if (Array.isArray(parsedPlaces)) {
+                ALL_PLACES = parsedPlaces;
+                renderCards(ALL_PLACES);
+                applySavedState();
+                updateControlLocking();
+                hideLoader();
+                FIRST_LOAD_DONE = true;
+                usedCache = true;
+              }
+            }
+          } catch (e) { /* ignore */ }
         }
-        
-        await loadPlaces();
+
+        // لو لم نستخدم الكاش، نحمّل كالمعتاد
+        if (!usedCache) {
+          await loadFilters();
+          updateControlLocking();
+          
+          // تطبيق الحالة المحفوظة إذا كنا عائدين من صفحة الإعلانات
+          if (IS_RETURNING_FROM_ADS) {
+            applySavedState();
+            updateControlLocking();
+          }
+          
+          await loadPlaces();
+        }
         
         // إذا كنا عائدين من صفحة الإعلانات، لا نحتاج لإظهار اللودر
         if (IS_RETURNING_FROM_ADS) {

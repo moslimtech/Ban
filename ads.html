@@ -142,7 +142,7 @@
             max-width: 1200px;
             margin: 0 auto 10px;
             padding: 0 20px;
-            display: none;
+            display: flex;
             align-items: center;
             gap: 12px;
         }
@@ -346,6 +346,10 @@
             padding: 5px 15px;
             border-radius: 20px;
         }
+        @keyframes pulseLogo {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
     </style>
 </head>
 <body>
@@ -355,7 +359,7 @@
 </div>
 
 <div id="loader" class="loader" role="status" aria-live="polite">
-    <div class="spinner" aria-hidden="true"></div>
+    <img src="Logo Design with Icon and Arabic Text.png" alt="شعار خدماتك" class="w-24 h-24 object-contain mb-4 mx-auto logo-pulse" style="width: 96px; height: 96px; display: block; margin: 0 auto 16px; border-radius: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); animation: pulseLogo 1.2s infinite cubic-bezier(.4,0,.6,1);">
     <div>جارٍ التحميل...</div>
     <span class="sr-only">جاري تحميل البيانات</span>
  </div>
@@ -556,12 +560,12 @@ async function fetchAds() {
         const data = await res.json();
         displayAds(data);
         const elapsed = Date.now() - startTs;
-        const remaining = Math.max(0, 5000 - elapsed);
+        const remaining = Math.max(0, 3000 - elapsed);
         setTimeout(() => { hideLoader(); firstLoadDone = true; }, remaining);
     } catch (error) {
         console.error("حدث خطأ في جلب البيانات:", error);
         const elapsed = Date.now() - startTs;
-        const remaining = Math.max(0, 5000 - elapsed);
+        const remaining = Math.max(0, 3000 - elapsed);
         setTimeout(() => hideLoader(), remaining);
     }
 }
