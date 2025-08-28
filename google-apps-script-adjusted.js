@@ -442,120 +442,167 @@ function cleanPlacesSheet() {
 
 // --- API: getFilters ---
 function getFilters() {
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get("filters");
+  if (cached) return cached;
+
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  
   var citiesSheet = ss.getSheetByName("المدن");
-  var cities = citiesSheet.getRange(2, 1, citiesSheet.getLastRow() - 1, 2).getValues()
-    .map(r => ({ id: String(r[0]), name: String(r[1]) }));
-
+  var cities = [];
+  if (citiesSheet && citiesSheet.getLastRow() > 1) {
+    cities = citiesSheet
+      .getRange(2, 1, citiesSheet.getLastRow() - 1, 2)
+      .getValues()
+      .map(function(r) { return { id: String(r[0]), name: String(r[1]) }; });
+  }
   var areasSheet = ss.getSheetByName("المناطق");
-  var areas = areasSheet.getRange(2, 1, areasSheet.getLastRow() - 1, 3).getValues()
-    .map(r => ({ id: String(r[0]), name: String(r[1]), cityId: String(r[2]) }));
-
+  var areas = [];
+  if (areasSheet && areasSheet.getLastRow() > 1) {
+    areas = areasSheet
+      .getRange(2, 1, areasSheet.getLastRow() - 1, 3)
+      .getValues()
+      .map(function(r) { return { id: String(r[0]), name: String(r[1]), cityId: String(r[2]) }; });
+  }
   var activitySheet = ss.getSheetByName("نوع النشاط");
-  var activities = activitySheet.getRange(2, 1, activitySheet.getLastRow() - 1, 2).getValues()
-    .map(r => ({ id: String(r[0]), name: String(r[1]) }));
-
-  return JSON.stringify({
-    cities: cities,
-    areas: areas,
-    activities: activities
-  });
+  var activities = [];
+  if (activitySheet && activitySheet.getLastRow() > 1) {
+    activities = activitySheet
+      .getRange(2, 1, activitySheet.getLastRow() - 1, 2)
+      .getValues()
+      .map(function(r) { return { id: String(r[0]), name: String(r[1]) }; });
+  }
+  var result = JSON.stringify({ cities: cities, areas: areas, activities: activities });
+  cache.put("filters", result, 60); // كاش 60 ثانية
+  return result;
 }
 
 // --- API: getPlaces (مضبوط حسب الشيت) ---
 function getPlaces() {
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get("places");
+  if (cached) return cached;
+
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName("الاماكن او الخدمات");
   var logSheet = ss.getSheetByName("سجل الزيارات");
-  var data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 23).getValues(); // 23 عمود
+  if (!sheet || sheet.getLastRow() < 2) return JSON.stringify([]);
 
-  // حساب عدد الزيارات من سجل الزيارات
+  // قراءة + فلترة الصفوف: ID واسم المكان لازم موجودين
+  var raw = sheet.getRange(2, 1, sheet.getLastRow() - 1, 27).getValues();
+  var data = raw.filter(function(r) {
+    var id = String(r[0] || '').trim();
+    var name = String(r[1] || '').trim();
+    return id !== '' && name !== '';
+  });
+
+  // تحميل جداول التحويل: id -> name
+  function toMap(sheetName, idCol, nameCol) {
+    var sh = ss.getSheetByName(sheetName);
+    if (!sh || sh.getLastRow() < 2) return {};
+    var vals = sh.getRange(2, 1, sh.getLastRow() - 1, Math.max(idCol, nameCol)).getValues();
+    var m = {};
+    vals.forEach(function(r){
+      var id = String(r[idCol - 1] || '').trim();
+      var nm = String(r[nameCol - 1] || '').trim();
+      if (id !== '' && nm !== '') m[id] = nm;
+    });
+    return m;
+  }
+
+  var activityMap = toMap("نوع النشاط", 1, 2);
+  var cityMap     = toMap("المدن", 1, 2);
+  var areaMap     = toMap("المناطق", 1, 2);
+
+  // الموقع/المول: جرّب أكثر من اسم شيت
+  var mallMap = {};
+  var mallSheetsCandidates = ["المولات", "الموقع او المول", "المواقع او المول", "المواقع"];
+  for (var ms = 0; ms < mallSheetsCandidates.length; ms++) {
+    var cand = mallSheetsCandidates[ms];
+    var m = toMap(cand, 1, 2);
+    if (Object.keys(m).length) { mallMap = m; break; }
+  }
+
   function calculateVisits(placeId) {
-    if (!logSheet) return { daily: 0, total: 0 };
-    
-    var logs = logSheet.getRange(2, 1, logSheet.getLastRow() - 1, 12).getValues(); // 12 عمود
+    if (!logSheet || logSheet.getLastRow() < 2) return { daily: 0, total: 0 };
+    var logs = logSheet.getRange(2, 1, logSheet.getLastRow() - 1, logSheet.getLastColumn()).getValues();
     var daily = 0, total = 0;
-    var today = new Date();
-    
-    logs.forEach(log => {
+    var todayStr = new Date().toDateString();
+
+    logs.forEach(function(log) {
       var placeIdInLog = '';
       var logDate = null;
-      
-      // التعامل مع النظام القديم والجديد
+
+      // يدعم صيغ قديمة/جديدة
       if (log[0] && log[0] instanceof Date) {
-        // النظام القديم: [التاريخ, نوع, ID المكان, الاسم, المصدر]
+        // قديم: [التاريخ, نوع, ID المكان, الاسم, المصدر]
         placeIdInLog = String(log[2] || '');
         logDate = log[0];
       } else if (log[1]) {
-        // النظام الجديد: [ID الإعلان, ID المكان, نوع الزيارة, التاريخ, ...]
+        // جديد: [ID الإعلان, ID المكان, نوع الزيارة, التاريخ, ...]
         placeIdInLog = String(log[1] || '');
-        logDate = log[3] instanceof Date ? log[3] : new Date(log[3]);
+        logDate = (log[3] instanceof Date) ? log[3] : (log[3] ? new Date(log[3]) : null);
       }
-      
+
       if (placeIdInLog === String(placeId) && logDate) {
         total++;
-        if (logDate.toDateString() === today.toDateString()) {
-          daily++;
-        }
+        if (logDate.toDateString() === todayStr) daily++;
       }
     });
-    
+
     return { daily: daily, total: total };
   }
 
-  // حساب عدد الزيارات مع الجمع بين البيانات الموجودة والسجل
-  function calculateVisitsCombined(placeId, existingDaily, existingTotal) {
-    var visits = calculateVisits(placeId);
-    return {
-      daily: visits.daily + (Number(existingDaily) || 0),
-      total: visits.total + (Number(existingTotal) || 0)
-    };
-  }
-
-  var places = data.map(r => {
+  var places = data.map(function(r) {
     var placeId = String(r[0]);
-    var visits = calculateVisitsCombined(placeId, r[17], r[16]); // 17: dailyVisits, 16: totalVisits
-    
-    // البحث عن الحالة في بيانات المكان
-    var placeStatus = '';
-    for (var i = 0; i < r.length; i++) {
-      var value = String(r[i] || '').trim();
-      if (value === 'مفتوح' || value === 'مغلق' || value === 'مغلق للصلاة') {
-        placeStatus = value;
-        console.log('Found place status in column ' + (i + 1) + ': ' + placeStatus);
-        break;
-      }
-    }
-    
+    var activityId = String(r[2] || '').trim();
+    var cityId     = String(r[3] || '').trim();
+    var areaId     = String(r[4] || '').trim();
+    var mallId     = String(r[5] || '').trim();
+    var activityName = activityMap[activityId] || activityId;
+    var cityName     = cityMap[cityId] || cityId;
+    var areaName     = areaMap[areaId] || areaId;
+    var mallName     = mallMap[mallId] || mallId;
+    var visitsFromLog = calculateVisits(placeId);
     return {
-      id: placeId,                        // ID المكان
-      name: String(r[1]),                 // اسم المكان
-      activity: String(r[2]),             // نوع النشاط / الفئة
-      city: String(r[3]),                 // المدينة
-      area: String(r[4]),                 // المنطقة
-      mall: String(r[5]),                 // الموقع او المول
-      address: String(r[6]),              // العنوان التفصيلي
-      mapLink: String(r[7]),              // رابط الموقع على الخريطة
-      phone: String(r[8]),                // رقم التواصل
-      whatsapp: String(r[9]),             // رابط واتساب
-      email: String(r[10]),               // البريد الإلكتروني
-      website: String(r[11]),             // الموقع الالكتروني
-      workHours: String(r[12]),           // ساعات العمل
-      delivery: String(r[13]),            // خدمات التوصيل
-      image: String(r[15]),               // رابط صورة شعار المكان
-      description: String(r[18]),         // وصف مختصر (العمود 18)
-      dailyVisits: visits.daily,          // عدد الزيارات اليومية من السجل (يضاف للبيانات الموجودة)
-      totalVisits: visits.total,          // عدد الزيارات الكلي من السجل (يضاف للبيانات الموجودة)
-      status: placeStatus,                // حالة المكان
-      registrationStatus: String(r[19]),  // حالة التسجيل
-      startDate: String(r[20]),           // تاريخ بداية الاشتراك
-      endDate: String(r[21]),             // تاريخ نهاية الاشتراك
-      package: String(r[22])              // الباقة
+      id: placeId,
+      name: String(r[1] || ''),
+      activity: activityName,
+      city: cityName,
+      area: areaName,
+      mall: mallName,
+      activityId: activityId,
+      cityId: cityId,
+      areaId: areaId,
+      mallId: mallId,
+      address: String(r[6] || ''),
+      mapLink: String(r[7] || ''),
+      phone: String(r[8] || ''),
+      whatsapp: String(r[9] || ''),
+      email: String(r[10] || ''),
+      website: String(r[11] || ''),
+      workHours: String(r[12] || ''),
+      delivery: String(r[13] || ''),
+      image: String(r[15] || ''),
+      logoImage: String(r[14] || ''),
+      description: String(r[18] || ''),
+      dailyVisits: visitsFromLog.daily,
+      totalVisits: visitsFromLog.total,
+      registrationStatus: String(r[19] || ''),
+      startDate: String(r[20] || ''),
+      endDate: String(r[21] || ''),
+      package: String(r[22] || ''),
+      packageStatus: String(r[23] || ''),
+      status: String(r[25] || ''),
+      paymentRequestId: String(r[26] || ''),
+      'حالة التسجيل': String(r[19] || ''),
+      'حالة الباقة': String(r[23] || ''),
+      'الحالة': String(r[25] || '')
     };
   });
 
-  return JSON.stringify(places);
+  var result = JSON.stringify(places);
+  cache.put("places", result, 60); // كاش 60 ثانية
+  return result;
 }
 
 // --- دالة مساعدة لطباعة معلومات التشخيص ---
@@ -611,21 +658,22 @@ function debugAdData(placeId) {
 
 // getAdsByPlaceId (قراءة الصور والفيديو حسب اسم العمود)
 function getAdsByPlaceId(placeId) {
+  var cache = CacheService.getScriptCache();
+  var cacheKey = "ads_" + placeId;
+  var cached = cache.get(cacheKey);
+  if (cached) return cached;
+
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName("الاعلانات");
   if (!sheet || sheet.getLastRow() < 2) return JSON.stringify([]);
 
-  // قراءة رؤوس الأعمدة
   var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(function(h){ return String(h || '').trim(); });
   var raw = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
-
-  // فلترة الأسطر الفارغة والتأكد من تطابق ID المكان
   var data = raw.filter(function(r) {
     var adId = String(r[0] || '').trim();
     var pId = String(r[1] || '').trim();
     return adId !== '' && pId !== '' && String(pId) === String(placeId || '');
   });
-
   function normalizeDate(v) {
     if (v instanceof Date) return Utilities.formatDate(v, Session.getScriptTimeZone(), 'yyyy-MM-dd');
     return v != null ? String(v) : '';
@@ -633,8 +681,6 @@ function getAdsByPlaceId(placeId) {
   function isUrlLike(v) {
     return typeof v === 'string' && /(https?:\/\/|\.mp4|\.mov|\.avi|youtube\.com|youtu\.be)/i.test(v);
   }
-
-  // البحث عن أعمدة الصور والفيديو حسب الاسم
   var imageCols = [];
   var videoCol = -1;
   for (var i = 0; i < headers.length; i++) {
@@ -646,32 +692,29 @@ function getAdsByPlaceId(placeId) {
       videoCol = i;
     }
   }
-
   var ads = data.map(function(r) {
-    // الصور من الأعمدة التي اسمها يبدأ بـ 'رابط صورة'
     var images = [];
     imageCols.forEach(function(idx) {
       if (r[idx] && String(r[idx]).trim() !== '') images.push(String(r[idx]));
     });
-    // الفيديو من عمود 'رابط الفيديو'
     var videoUrl = videoCol !== -1 ? String(r[videoCol] || '') : '';
-
     return {
-      id: String(r[0]),                 // 1: ID الإعلان
-      placeId: String(r[1]),            // 2: ID المكان
-      type: String(r[2] || ''),         // 3: نوع الاعلان
-      title: String(r[3] || ''),        // 4: العنوان
-      description: String(r[4] || ''),  // 5: الوصف
-      startDate: normalizeDate(r[5]),   // 6
-      endDate: normalizeDate(r[6]),     // 7
-      coupon: String(r[7] || ''),       // 8: كوبون خصم
+      id: String(r[0]),
+      placeId: String(r[1]),
+      type: String(r[2] || ''),
+      title: String(r[3] || ''),
+      description: String(r[4] || ''),
+      startDate: normalizeDate(r[5]),
+      endDate: normalizeDate(r[6]),
+      coupon: String(r[7] || ''),
       images: images,
       video: videoUrl,
-      status: String(r[r.length-1] || '') // آخر عمود للحالة
+      status: String(r[r.length-1] || '')
     };
   });
-
-  return JSON.stringify(ads);
+  var result = JSON.stringify(ads);
+  cache.put(cacheKey, result, 60); // كاش 60 ثانية
+  return result;
 }
 
 // --- API: getPlaceById ---

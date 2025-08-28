@@ -36,7 +36,10 @@
           <p class="text-xs text-slate-500 -mt-1">دليل الأماكن والعروض حولك</p>
         </div>
       </div>
-      <a target="_blank" rel="noreferrer" href="https://moslimtech.github.io/khedmatakdashboard/" class="bg-gradient-to-r from-indigo-500 to-violet-600 text-white px-3 py-2 sm:px-5 sm:py-3 rounded-2xl shadow-lg text-sm sm:text-base font-bold hover:from-indigo-600 hover:to-violet-700 transition-all duration-200 border-2 border-indigo-100 mx-auto sm:mx-0 block sm:inline-block mt-2 sm:mt-0">لو انت تمتلك خدمه وحابب تعلن عنها اضغط هنا</a>
+      <a target="_blank" rel="noreferrer" href="https://moslimtech.github.io/khedmatakdashboard/"
+         class="block w-full sm:w-auto text-center bg-gradient-to-r from-indigo-500 to-violet-600 text-white px-3 py-2 sm:px-5 sm:py-3 rounded-2xl shadow-lg text-sm sm:text-base font-bold hover:from-indigo-600 hover:to-violet-700 transition-all duration-200 border-2 border-indigo-100 mx-auto sm:mx-0 mt-4 sm:mt-0 mb-2 sm:mb-0">
+        لو انت تمتلك خدمه وحابب تعلن عنها اضغط هنا
+      </a>
     </div>
   </header>
 
@@ -714,6 +717,7 @@
       // حفظ الفلاتر في التخزين المحلي لتسريع الرجوع من صفحة الإعلانات
       try {
         localStorage.setItem('makank_filters_cache', JSON.stringify(FILTERS));
+        localStorage.setItem('makank_filters_cache_ts', Date.now().toString());
       } catch (e) { /* ignore */ }
 
       // خريطة آي دي المدينة إلى اسمها
@@ -750,6 +754,7 @@
       // حفظ الأماكن في التخزين المحلي لتسريع الرجوع من صفحة الإعلانات
       try {
         localStorage.setItem('makank_places_cache', JSON.stringify(ALL_PLACES));
+        localStorage.setItem('makank_places_cache_ts', Date.now().toString());
       } catch (e) { /* ignore */ }
     }
 
@@ -944,19 +949,20 @@
           try {
             const cachedFilters = localStorage.getItem('makank_filters_cache');
             const cachedPlaces = localStorage.getItem('makank_places_cache');
-            if (cachedFilters && cachedPlaces) {
+            const filtersTs = parseInt(localStorage.getItem('makank_filters_cache_ts') || '0');
+            const placesTs = parseInt(localStorage.getItem('makank_places_cache_ts') || '0');
+            const now = Date.now();
+            const maxAge = 10 * 60 * 1000; // 10 دقائق
+            if (cachedFilters && cachedPlaces && (now - filtersTs < maxAge) && (now - placesTs < maxAge)) {
               // استعادة الفلاتر
               const parsedFilters = JSON.parse(cachedFilters);
               if (parsedFilters && parsedFilters.cities && parsedFilters.areas && parsedFilters.activities) {
                 FILTERS = parsedFilters;
-                // خريطة آي دي المدينة إلى اسمها
                 CITY_ID_TO_NAME = Object.fromEntries(FILTERS.cities.map(c => [String(c.id), c.name]));
-                // تعبئة القوائم المنسدلة من الكاش
                 setOptions(citySelect, FILTERS.cities.map(c => ({ value: String(c.id), label: c.name })));
                 setOptions(activitySelect, FILTERS.activities.map(a => ({ value: String(a.id), label: a.name })));
                 setOptions(areaSelect, FILTERS.areas.map(a => ({ value: a.name, label: a.name })));
               }
-              
               // استعادة الأماكن
               const parsedPlaces = JSON.parse(cachedPlaces);
               if (Array.isArray(parsedPlaces)) {
@@ -992,7 +998,7 @@
           FIRST_LOAD_DONE = true;
         } else {
           const elapsed = Date.now() - startTs;
-          const minDuration = 3000; // تقليل مدة اللودنج إلى 3 ثواني
+          const minDuration = 1000; // تقليل مدة اللودنج إلى 1 ثانية فقط
           const remaining = Math.max(0, minDuration - elapsed);
           setTimeout(() => { 
             hideLoader(); 
