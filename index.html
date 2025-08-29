@@ -548,6 +548,10 @@
         const registrationStatus = p.registrationStatus || p["حالة التسجيل"] || '';
         const packageStatus = p.packageStatus || p["حالة الباقة"] || '';
         const placeStatus = p.status || p['الحالة'] || '';
+        const mall = p.mall || p["الموقع او المول"] || '';
+        const address = p.address || p["العنوان التفصيلي"] || '';
+        const email = p.email || p["البريد الإلكتروني"] || '';
+        const website = p.website || p["الموقع الالكتروني"] || '';
 
         card.innerHTML = `
           <span class="status-badge absolute top-3 left-3 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 backdrop-blur-sm"></span>
@@ -557,6 +561,8 @@
           </div>
           <div class="p-4">
             <h3 class="text-lg font-bold">${name}</h3>
+            ${mall ? `<div class="text-xs text-indigo-700 font-semibold mt-1">الموقع أو المول: ${mall}</div>` : ''}
+            ${address ? `<div class="text-xs text-slate-600 mt-1">العنوان: ${address}</div>` : ''}
             <p class="text-sm text-slate-600 mt-1">${activity ? activity + ' • ' : ''}${city}${city && area ? ' - ' : ''}${area}</p>
             ${desc ? `<p class="text-sm text-slate-600 mt-2 line-clamp-2">${desc}</p>` : ''}
             <div class="flex items-center gap-4 mt-3 text-xs text-slate-500">
@@ -577,6 +583,8 @@
             <div class="flex items-center gap-2 mt-3">
               ${phone ? `<a href="${phoneHref(phone)}" class="px-3 py-1.5 rounded-xl text-sm bg-slate-100 hover:bg-slate-200">اتصال</a>` : ''}
               ${whatsapp ? `<a target="_blank" href="${waHref(whatsapp)}" class="px-3 py-1.5 rounded-xl text-sm bg-emerald-100 hover:bg-emerald-200">واتساب</a>` : ''}
+              ${email ? `<a href="mailto:${email}" class="px-3 py-1.5 rounded-xl text-sm bg-blue-100 hover:bg-blue-200">إيميل</a>` : ''}
+              ${website ? `<a target="_blank" href="${website}" class="px-3 py-1.5 rounded-xl text-sm bg-violet-100 hover:bg-violet-200">الموقع</a>` : ''}
               ${mapLink ? `<a target="_blank" href="${mapLink}" class="px-3 py-1.5 rounded-xl text-sm bg-indigo-100 hover:bg-indigo-200">الخريطة</a>` : ''}
             </div>
             ${registrationStatus ? `<div class="mt-2 text-xs text-slate-500">
@@ -672,7 +680,7 @@
         const area = p.area || p["area"] || p["المنطقة"] || '';
         const activity = p.activity || p["activity"] || p["نوع النشاط / الفئة"] || '';
         const name = p.name || p["name"] || p["اسم المكان"] || '';
-        const address = p.address || p["العنوان التفصيلي"] || '';
+        const address = p.address || p.address || p["العنوان التفصيلي"] || '';
 
         const byCity = applyByFilters ? (selectedCityName ? (city === selectedCityName) : true) : true;
         const byArea = applyByFilters ? (selectedAreaName ? (area === selectedAreaName) : true) : true;
@@ -940,29 +948,29 @@
       let startTs = Date.now();
       try {
         // جرب استخدام الكاش دائماً
-        const cachedFilters = localStorage.getItem('makank_filters_cache');
-        const cachedPlaces = localStorage.getItem('makank_places_cache');
-        const filtersTs = parseInt(localStorage.getItem('makank_filters_cache_ts') || '0');
-        const placesTs = parseInt(localStorage.getItem('makank_places_cache_ts') || '0');
-        const now = Date.now();
-        const maxAge = 10 * 60 * 1000; // 10 دقائق
-        if (cachedFilters && cachedPlaces && (now - filtersTs < maxAge) && (now - placesTs < maxAge)) {
-          // استعادة الفلاتر
-          const parsedFilters = JSON.parse(cachedFilters);
-          if (parsedFilters && parsedFilters.cities && parsedFilters.areas && parsedFilters.activities) {
-            FILTERS = parsedFilters;
+            const cachedFilters = localStorage.getItem('makank_filters_cache');
+            const cachedPlaces = localStorage.getItem('makank_places_cache');
+            const filtersTs = parseInt(localStorage.getItem('makank_filters_cache_ts') || '0');
+            const placesTs = parseInt(localStorage.getItem('makank_places_cache_ts') || '0');
+            const now = Date.now();
+            const maxAge = 10 * 60 * 1000; // 10 دقائق
+            if (cachedFilters && cachedPlaces && (now - filtersTs < maxAge) && (now - placesTs < maxAge)) {
+              // استعادة الفلاتر
+              const parsedFilters = JSON.parse(cachedFilters);
+              if (parsedFilters && parsedFilters.cities && parsedFilters.areas && parsedFilters.activities) {
+                FILTERS = parsedFilters;
             CITY_ID_TO_NAME = Object.fromEntries(FILTERS.cities.map(c => [String(c.name), c.name]));
             setOptions(citySelect, FILTERS.cities.map(c => ({ value: c.name, label: c.name })));
             setOptions(activitySelect, FILTERS.activities.map(a => ({ value: a.name, label: a.name })));
-            setOptions(areaSelect, FILTERS.areas.map(a => ({ value: a.name, label: a.name })));
-          }
-          // استعادة الأماكن
-          const parsedPlaces = JSON.parse(cachedPlaces);
-          if (Array.isArray(parsedPlaces)) {
-            ALL_PLACES = parsedPlaces;
-            renderCards(ALL_PLACES);
-            applySavedState();
-            updateControlLocking();
+                setOptions(areaSelect, FILTERS.areas.map(a => ({ value: a.name, label: a.name })));
+              }
+              // استعادة الأماكن
+              const parsedPlaces = JSON.parse(cachedPlaces);
+              if (Array.isArray(parsedPlaces)) {
+                ALL_PLACES = parsedPlaces;
+                renderCards(ALL_PLACES);
+                applySavedState();
+                updateControlLocking();
             // أظهر رسالة تحميل بيانات أحدث إذا استخدم الكاش
             if (cacheLoadingMsg) cacheLoadingMsg.classList.remove('hidden');
           }
@@ -970,9 +978,9 @@
         // أظهر رسالة تحميل بيانات أحدث إذا استخدم الكاش
         if (cacheLoadingMsg) cacheLoadingMsg.classList.remove('hidden');
         // حمّل بيانات جديدة دائماً من السيرفر
-        await loadFilters();
-        updateControlLocking();
-        await loadPlaces();
+          await loadFilters();
+          updateControlLocking();
+          await loadPlaces();
         if (cacheLoadingMsg) cacheLoadingMsg.classList.add('hidden');
       } catch (e) {
         console.error(e);
