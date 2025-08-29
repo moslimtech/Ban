@@ -581,12 +581,12 @@ async function fetchAds() {
         const data = await res.json();
         displayAds(data);
         const elapsed = Date.now() - startTs;
-        const remaining = Math.max(0, 3000 - elapsed);
+        const remaining = Math.max(0, 1000 - elapsed);
         setTimeout(() => { hideLoader(); firstLoadDone = true; }, remaining);
     } catch (error) {
         console.error("حدث خطأ في جلب البيانات:", error);
         const elapsed = Date.now() - startTs;
-        const remaining = Math.max(0, 3000 - elapsed);
+        const remaining = Math.max(0, 1000 - elapsed);
         setTimeout(() => hideLoader(), remaining);
     }
 }

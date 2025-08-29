@@ -527,11 +527,11 @@ function getPlaces() {
     var logs = logSheet.getRange(2, 1, logSheet.getLastRow() - 1, logSheet.getLastColumn()).getValues();
     var daily = 0, total = 0;
     var todayStr = new Date().toDateString();
-
+    
     logs.forEach(function(log) {
       var placeIdInLog = '';
       var logDate = null;
-
+      
       // يدعم صيغ قديمة/جديدة
       if (log[0] && log[0] instanceof Date) {
         // قديم: [التاريخ, نوع, ID المكان, الاسم, المصدر]
@@ -542,13 +542,13 @@ function getPlaces() {
         placeIdInLog = String(log[1] || '');
         logDate = (log[3] instanceof Date) ? log[3] : (log[3] ? new Date(log[3]) : null);
       }
-
+      
       if (placeIdInLog === String(placeId) && logDate) {
         total++;
         if (logDate.toDateString() === todayStr) daily++;
       }
     });
-
+    
     return { daily: daily, total: total };
   }
 
