@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -73,12 +72,8 @@
 
   <!-- Content -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div id="loader" class="loader" role="status" aria-live="polite">
-      <img src="WhatsApp Image 2025-08-28 at 17.53.25_9c5c4875.jpg" alt="شعار اشتري وقتك" class="w-24 h-24 object-contain mb-4 mx-auto logo-pulse" />
-      <div>جارٍ التحميل...</div>
-      <span class="sr-only">جاري تحميل البيانات</span>
-    </div>
     <div id="stats" class="mb-4 text-sm text-slate-600"></div>
+    <div id="cacheLoadingMsg" class="mb-4 text-sm text-indigo-600 hidden">جاري تحميل بيانات أحدث...</div>
 
     <div id="cardsGrid" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
 
@@ -95,6 +90,11 @@
         <div class="bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl px-4 py-3 shadow-lg flex items-center justify-between gap-3 flex-wrap">
           <div class="text-sm sm:text-base font-semibold">
             تطوير: <span class="font-bold">Muslim Tech _ مسلم تيك</span>
+          </div>
+          <div class="text-xs sm:text-sm font-normal mt-1 flex flex-col items-center sm:items-start">
+            <span>المطور:</span>
+            <span>م/ احمد نجيب</span>
+            <span>م/ ابراهيم مبروك</span>
           </div>
           <div class="flex items-center gap-2">
             <span class="text-white/90 text-sm sm:text-base">تواصل واتساب:</span>
@@ -133,7 +133,8 @@
     const emptyState = document.getElementById('emptyState');
     const stats = document.getElementById('stats');
     // const sortSelect = document.getElementById('sortSelect'); // تم حذف جميع الأكواد المتعلقة بـ sortSelect بناءً على طلب المستخدم
-    const loaderEl = document.getElementById('loader');
+    // const loaderEl = document.getElementById('loader');
+    const cacheLoadingMsg = document.getElementById('cacheLoadingMsg');
 
     // Helpers
     const fetchJSON = async (url) => {
@@ -189,8 +190,8 @@
     };
 
     const fallbackImg = 'Logo Design with Icon and Arabic Text.png';
-    const showLoader = () => { if (loaderEl) loaderEl.style.display = 'flex'; };
-    const hideLoader = () => { if (loaderEl) loaderEl.style.display = 'none'; };
+    // const showLoader = () => { if (loaderEl) loaderEl.style.display = 'flex'; };
+    // const hideLoader = () => { if (loaderEl) loaderEl.style.display = 'none'; };
     
     // التحقق من العودة من صفحة الإعلانات وحفظ/استعادة الحالة
     function checkReturnFromAds() {
@@ -724,10 +725,10 @@
       CITY_ID_TO_NAME = Object.fromEntries(FILTERS.cities.map(c => [String(c.id), c.name]));
 
       // تعبئة المدن
-      setOptions(citySelect, FILTERS.cities.map(c => ({ value: String(c.id), label: c.name })));
+      setOptions(citySelect, FILTERS.cities.map(c => ({ value: c.name, label: c.name })));
 
       // تعبئة الأنشطة (بدون تكرار جاي أصلاً من السيرفر)
-      setOptions(activitySelect, FILTERS.activities.map(a => ({ value: String(a.id), label: a.name })));
+      setOptions(activitySelect, FILTERS.activities.map(a => ({ value: a.name, label: a.name })));
 
       // تعبئة المناطق (كل المناطق مبدئيًا)
       setOptions(areaSelect, FILTERS.areas.map(a => ({ value: a.name, label: a.name })));
@@ -738,7 +739,7 @@
       const cityId = citySelect.value;
       let areas = FILTERS.areas;
       if (cityId) {
-        areas = areas.filter(a => String(a.cityId) === String(cityId));
+        areas = areas.filter(a => a.cityName === citySelect.value);
       }
       setOptions(areaSelect, areas.map(a => ({ value: a.name, label: a.name })));
       applyFilters();
@@ -938,80 +939,44 @@
       
       let startTs = Date.now();
       try {
-        // إظهار اللودر فقط إذا لم نكن عائدين من صفحة الإعلانات
-        if (!IS_RETURNING_FROM_ADS) {
-          showLoader();
-        }
-        
-        // في حالة الرجوع من صفحة الإعلانات: جرّب استخدام الكاش لتجنّب التحميل الكامل وإبقاء مكان التمرير
-        let usedCache = false;
-        if (IS_RETURNING_FROM_ADS) {
-          try {
-            const cachedFilters = localStorage.getItem('makank_filters_cache');
-            const cachedPlaces = localStorage.getItem('makank_places_cache');
-            const filtersTs = parseInt(localStorage.getItem('makank_filters_cache_ts') || '0');
-            const placesTs = parseInt(localStorage.getItem('makank_places_cache_ts') || '0');
-            const now = Date.now();
-            const maxAge = 10 * 60 * 1000; // 10 دقائق
-            if (cachedFilters && cachedPlaces && (now - filtersTs < maxAge) && (now - placesTs < maxAge)) {
-              // استعادة الفلاتر
-              const parsedFilters = JSON.parse(cachedFilters);
-              if (parsedFilters && parsedFilters.cities && parsedFilters.areas && parsedFilters.activities) {
-                FILTERS = parsedFilters;
-                CITY_ID_TO_NAME = Object.fromEntries(FILTERS.cities.map(c => [String(c.id), c.name]));
-                setOptions(citySelect, FILTERS.cities.map(c => ({ value: String(c.id), label: c.name })));
-                setOptions(activitySelect, FILTERS.activities.map(a => ({ value: String(a.id), label: a.name })));
-                setOptions(areaSelect, FILTERS.areas.map(a => ({ value: a.name, label: a.name })));
-              }
-              // استعادة الأماكن
-              const parsedPlaces = JSON.parse(cachedPlaces);
-              if (Array.isArray(parsedPlaces)) {
-                ALL_PLACES = parsedPlaces;
-                renderCards(ALL_PLACES);
-                applySavedState();
-                updateControlLocking();
-                hideLoader();
-                FIRST_LOAD_DONE = true;
-                usedCache = true;
-              }
-            }
-          } catch (e) { /* ignore */ }
-        }
-
-        // لو لم نستخدم الكاش، نحمّل كالمعتاد
-        if (!usedCache) {
-          await loadFilters();
-          updateControlLocking();
-          
-          // تطبيق الحالة المحفوظة إذا كنا عائدين من صفحة الإعلانات
-          if (IS_RETURNING_FROM_ADS) {
+        // جرب استخدام الكاش دائماً
+        const cachedFilters = localStorage.getItem('makank_filters_cache');
+        const cachedPlaces = localStorage.getItem('makank_places_cache');
+        const filtersTs = parseInt(localStorage.getItem('makank_filters_cache_ts') || '0');
+        const placesTs = parseInt(localStorage.getItem('makank_places_cache_ts') || '0');
+        const now = Date.now();
+        const maxAge = 10 * 60 * 1000; // 10 دقائق
+        if (cachedFilters && cachedPlaces && (now - filtersTs < maxAge) && (now - placesTs < maxAge)) {
+          // استعادة الفلاتر
+          const parsedFilters = JSON.parse(cachedFilters);
+          if (parsedFilters && parsedFilters.cities && parsedFilters.areas && parsedFilters.activities) {
+            FILTERS = parsedFilters;
+            CITY_ID_TO_NAME = Object.fromEntries(FILTERS.cities.map(c => [String(c.name), c.name]));
+            setOptions(citySelect, FILTERS.cities.map(c => ({ value: c.name, label: c.name })));
+            setOptions(activitySelect, FILTERS.activities.map(a => ({ value: a.name, label: a.name })));
+            setOptions(areaSelect, FILTERS.areas.map(a => ({ value: a.name, label: a.name })));
+          }
+          // استعادة الأماكن
+          const parsedPlaces = JSON.parse(cachedPlaces);
+          if (Array.isArray(parsedPlaces)) {
+            ALL_PLACES = parsedPlaces;
+            renderCards(ALL_PLACES);
             applySavedState();
             updateControlLocking();
+            // أظهر رسالة تحميل بيانات أحدث إذا استخدم الكاش
+            if (cacheLoadingMsg) cacheLoadingMsg.classList.remove('hidden');
           }
-          
-          await loadPlaces();
         }
-        
-        // إذا كنا عائدين من صفحة الإعلانات، لا نحتاج لإظهار اللودر
-        if (IS_RETURNING_FROM_ADS) {
-          hideLoader();
-          FIRST_LOAD_DONE = true;
-        } else {
-          const elapsed = Date.now() - startTs;
-          const minDuration = 1000; // تقليل مدة اللودنج إلى 1 ثانية فقط
-          const remaining = Math.max(0, minDuration - elapsed);
-          setTimeout(() => { 
-            hideLoader(); 
-            FIRST_LOAD_DONE = true;
-          }, remaining);
-        }
-        
-        // تحديث تلقائي بدون إعادة بناء الصفحة
-        setInterval(refreshPlacesIncrementally, REFRESH_MS);
+        // أظهر رسالة تحميل بيانات أحدث إذا استخدم الكاش
+        if (cacheLoadingMsg) cacheLoadingMsg.classList.remove('hidden');
+        // حمّل بيانات جديدة دائماً من السيرفر
+        await loadFilters();
+        updateControlLocking();
+        await loadPlaces();
+        if (cacheLoadingMsg) cacheLoadingMsg.classList.add('hidden');
       } catch (e) {
         console.error(e);
         cardsGrid.innerHTML = `<div class="col-span-full text-center text-red-600">حدث خطأ أثناء تحميل البيانات. تأكد من رابط الويب آب وصلاحيات الوصول.</div>`;
-        hideLoader();
       }
     })();
 
@@ -1036,8 +1001,19 @@
 
     // بدء التحديث الشامل بعد 30 ثانية من التحميل الأول
     setTimeout(() => {
-      setInterval(refreshAllData, 30000);
-    }, 30000);
+      setInterval(refreshAllData, 60000);
+    }, 60000);
+  </script>
+  <script>
+    // منع أي submit أو ريفرش للصفحة في الفلاتر
+    document.querySelectorAll('form').forEach(f => {
+      f.addEventListener('submit', e => e.preventDefault());
+    });
+    [citySelect, areaSelect, activitySelect].forEach(el => {
+      el.addEventListener('keydown', e => {
+        if (e.key === 'Enter') e.preventDefault();
+      });
+    });
   </script>
 </body>
 </html> 
