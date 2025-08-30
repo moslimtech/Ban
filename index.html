@@ -641,7 +641,7 @@
       // const sortBy = sortSelect.value; // تم حذف جميع الأكواد المتعلقة بـ sortSelect بناءً على طلب المستخدم
 
       // لو اختار مدينة، جيب اسم المدينة من الخريطة
-      const selectedCityName = selectedCityId ? (CITY_ID_TO_NAME[selectedCityId] || '') : '';
+      // const selectedCityName = selectedCityId ? (CITY_ID_TO_NAME[selectedCityId] || '') : '';
 
       // ضبط تمكين/تعطيل الحقول
       updateControlLocking();
@@ -658,7 +658,7 @@
         const name = p.name || p["name"] || p["اسم المكان"] || '';
         const address = p.address || p.address || p["العنوان التفصيلي"] || '';
 
-        const byCity = applyByFilters ? (selectedCityName ? (city === selectedCityName) : true) : true;
+        const byCity = applyByFilters ? (selectedCityId ? (city === selectedCityId) : true) : true;
         const byArea = applyByFilters ? (selectedAreaName ? (area === selectedAreaName) : true) : true;
         const byAct  = applyByFilters ? (selectedActivity ? (activity === selectedActivity) : true) : true;
         // const byQ    = applyBySearch ? (normalize(name).includes(q) || normalize(activity).includes(q) || normalize(address).includes(q)) : true; // تم حذف جميع الأكواد المتعلقة بـ searchInput والبحث بالاسم/العنوان بناءً على طلب المستخدم
