@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:
+Sitemap: https://moslimtech.github.io/Ban/sitemap.xml
