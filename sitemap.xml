@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- الصفحة الرئيسية -->
+  <url>
+    <loc>https://moslimtech.github.io/Ban/</loc>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- صفحة الإعلانات الرئيسية -->
+  <url>
+    <loc>https://moslimtech.github.io/Ban/ads.html</loc>
+    <priority>0.8</priority>
+  </url>
+
+</urlset>
