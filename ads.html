@@ -112,7 +112,6 @@
         .prayer { background: linear-gradient(135deg, #fd7e14, #ffc107); }
         .unknown { background: linear-gradient(135deg, #6c757d, #495057); }
         
-        /* أيقونات الحالة */
         .status-icon {
             display: inline-block;
             width: 16px;
@@ -137,7 +136,6 @@
             font-size: 2.5em; 
             font-weight: 600;
         }
-        /* Loader */
         .loader {
             max-width: 1200px;
             margin: 0 auto 10px;
@@ -173,7 +171,6 @@
             color: #495057; 
             font-weight: 600;
         }
-        /* Dev footer banner */
         .dev-footer {
             max-width: 1200px;
             margin: 20px auto;
@@ -202,7 +199,6 @@
         }
         .dev-banner a:hover { background: rgba(255,255,255,0.25); }
         
-        /* Responsive Design */
         @media (max-width: 768px) {
             .ads-container {
                 grid-template-columns: 1fr;
@@ -268,7 +264,6 @@
             opacity: 0.95;
         }
         
-        /* Lightbox Styles */
         .lightbox {
             display: none;
             position: fixed;
@@ -359,9 +354,9 @@
             border-radius: 20px;
         }
         @keyframes pulseLogo {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-}
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.15); }
+        }
     </style>
 </head>
 <body>
@@ -371,10 +366,10 @@
 </div>
 
 <div id="loader" class="loader" role="status" aria-live="polite">
-    <img src="WhatsApp Image 2025-08-31 at 20.32.13_8048a3a3.jpg" alt=" شعار بانclass="w-24 h-24 object-contain mb-4 mx-auto logo-pulse" style="width: 96px; height: 96px; display: block; margin: 0 auto 16px; border-radius: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); animation: pulseLogo 1.2s infinite cubic-bezier(.4,0,.6,1);">
+    <img src="WhatsApp Image 2025-08-31 at 20.32.13_8048a3a3.jpg" alt="شعار بان" style="width: 96px; height: 96px; display: block; margin: 0 auto 16px; border-radius: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); animation: pulseLogo 1.2s infinite cubic-bezier(.4,0,.6,1);">
     <div>جارٍ التحميل...</div>
     <span class="sr-only">جاري تحميل البيانات</span>
- </div>
+</div>
 
 <h2>الإعلانات</h2>
 <div id="placeNameHeader" class="text-center text-2xl font-extrabold text-indigo-700 my-6"></div>
@@ -415,7 +410,6 @@ function initLightbox() {
     const lightboxNext = document.querySelector('.lightbox-next');
     const lightboxCounter = document.getElementById('lightbox-counter');
     
-    // Open lightbox when clicking on an image
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('ad-images') || e.target.classList.contains('ad-details')) return;
         
@@ -433,13 +427,11 @@ function initLightbox() {
         }
     });
     
-    // Close lightbox
     lightboxClose.addEventListener('click', function() {
         lightbox.classList.remove('active');
         document.body.style.overflow = 'auto';
     });
 
-    // Close when clicking outside the content (on overlay)
     lightbox.addEventListener('click', function(e) {
         const clickedInsideContent = e.target.closest('.lightbox-content') || e.target.closest('.lightbox-prev') || e.target.closest('.lightbox-next');
         if (!clickedInsideContent) {
@@ -448,19 +440,16 @@ function initLightbox() {
         }
     });
     
-    // Previous image
     lightboxPrev.addEventListener('click', function() {
         currentImageIndex = (currentImageIndex - 1 + imagesArray.length) % imagesArray.length;
         updateLightboxImage();
     });
     
-    // Next image
     lightboxNext.addEventListener('click', function() {
         currentImageIndex = (currentImageIndex + 1) % imagesArray.length;
         updateLightboxImage();
     });
     
-    // Keyboard navigation
     document.addEventListener('keydown', function(e) {
         if (!lightbox.classList.contains('active')) return;
         
@@ -501,7 +490,6 @@ function testAdData(placeId) {
                     console.log('ad["حالة المكان"]:', ad['حالة المكان']);
                     console.log('ad.video:', ad.video);
                     
-                    // البحث عن الحالة في جميع الخصائص
                     Object.keys(ad).forEach(key => {
                         const value = ad[key];
                         if (typeof value === 'string' && (value === 'مفتوح' || value === 'مغلق' || value === 'مغلق للصلاة')) {
@@ -518,7 +506,7 @@ function testAdData(placeId) {
         });
 }
 
-// تفعيل زر الرجوع
+// زر الرجوع
 const backBtn = document.getElementById('backBtn');
 if (backBtn) {
     backBtn.addEventListener('click', () => {
@@ -530,13 +518,13 @@ if (backBtn) {
     });
 }
 
-// Loader elements
+// Loader
 const loaderEl = document.getElementById('loader');
 function showLoader() { if (loaderEl) loaderEl.style.display = 'flex'; }
 function hideLoader() { if (loaderEl) loaderEl.style.display = 'none'; }
 let firstLoadDone = false;
 
-// دالة للحصول على أيقونة الحالة
+// أيقونة الحالة (غير مستخدمة حاليًا لكن نحتفظ بها)
 function getStatusIcon(status) {
     switch (status.trim()) {
         case 'مفتوح':
@@ -556,6 +544,86 @@ function getStatusIcon(status) {
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
             </svg>`;
     }
+}
+
+// دالة إنشاء كود الفيديو (يوتيوب/Vimeo/ملفات مباشرة)
+function createVideoHtml(videoUrl) {
+    if (!videoUrl) return '';
+    const url = videoUrl.trim();
+
+    // محاولة استعمال URL لسهولة التحليل
+    try {
+        const u = new URL(url);
+        const host = u.hostname.replace(/^www\./, '').toLowerCase();
+
+        // YouTube
+        if (host.includes('youtube.com') || host === 'youtu.be') {
+            let videoId = '';
+            if (host === 'youtu.be') {
+                videoId = u.pathname.replace('/', '');
+            } else if (u.pathname.startsWith('/embed/')) {
+                videoId = u.pathname.split('/embed/')[1];
+            } else {
+                videoId = u.searchParams.get('v') || '';
+            }
+            if (videoId) {
+                const embed = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+                return `<iframe src="${embed}"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowfullscreen></iframe>`;
+            }
+            return `<iframe src="${url}"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen></iframe>`;
+        }
+
+        // Vimeo
+        if (host.includes('vimeo.com')) {
+            let id = '';
+            if (host === 'vimeo.com') {
+                const parts = u.pathname.split('/').filter(Boolean);
+                id = parts[0] || '';
+            } else if (host === 'player.vimeo.com' && u.pathname.startsWith('/video/')) {
+                id = u.pathname.split('/video/')[1].split('/')[0] || '';
+            }
+            const embed = id ? `https://player.vimeo.com/video/${id}` : url;
+            return `<iframe src="${embed}"
+                            frameborder="0"
+                            allow="autoplay; fullscreen; picture-in-picture"
+                            allowfullscreen></iframe>`;
+        }
+
+        // ملفات فيديو مباشرة
+        if (/\.(mp4|webm|ogg|mov|avi)(\?.*)?$/i.test(u.pathname)) {
+            const extMatch = u.pathname.match(/\.(mp4|webm|ogg|mov|avi)/i);
+            const type = (extMatch && extMatch[1] || 'mp4').toLowerCase();
+            const mime =
+                type === 'mp4' ? 'video/mp4' :
+                type === 'webm' ? 'video/webm' :
+                type === 'ogg' ? 'video/ogg' :
+                type === 'mov' ? 'video/quicktime' :
+                type === 'avi' ? 'video/x-msvideo' : 'video/mp4';
+            return `<video controls playsinline>
+                        <source src="${url}" type="${mime}">
+                        متصفحك لا يدعم تشغيل الفيديو.
+                    </video>`;
+        }
+    } catch (e) {
+        // إذا فشل تحليل URL، نكمل بالأنماط البسيطة
+    }
+
+    // fallback: إذا كان الرابط يبدو يوتيوب/فيميو، استخدم iframe
+    if (/youtube\.com|youtu\.be|vimeo\.com/i.test(url)) {
+        return `<iframe src="${url}"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen></iframe>`;
+    }
+
+    // غير ذلك، جرّب video
+    return `<video src="${url}" controls playsinline></video>`;
 }
 
 async function fetchAds() {
@@ -596,7 +664,7 @@ function displayAds(ads) {
     const container = document.getElementById("adsContainer");
     container.innerHTML = "";
     
-    // استخراج اسم المكان من أول إعلان أو من بيانات المكان
+    // استخراج اسم المكان من أول إعلان
     let placeName = '';
     if (Array.isArray(ads) && ads.length > 0) {
         placeName = ads[0].placeName || ads[0]['اسم المكان'] || ads[0]['name'] || '';
@@ -607,16 +675,13 @@ function displayAds(ads) {
         document.getElementById('placeNameHeader').textContent = '';
     }
 
-    // الحصول على placeId من URL
     const urlParams = new URLSearchParams(window.location.search);
     const placeId = urlParams.get('placeId') || '';
 
     ads.forEach(ad => {
         let statusClass = '';
-        // تحديد دالة مساعدة لاختبار الروابط
         const isUrlLike = (v) => typeof v === 'string' && /(https?:\/\/|\.mp4|\.mov|\.avi|youtube\.com|youtu\.be)/i.test(v);
         
-        // نقرأ الحالة من الأعمدة المخصصة للحالة أولاً
         let statusValue = ad['الحالة'] || ad['حالة الاعلان'] || ad.status || ad['حالة المكان'] || ad['state'] || '';
         
         console.log('=== STATUS SEARCH DEBUG ===');
@@ -627,7 +692,6 @@ function displayAds(ads) {
         console.log('ad["state"]:', ad['state']);
         console.log('Initial statusValue:', statusValue);
         
-        // طباعة جميع خصائص الإعلان للبحث عن الحالة
         console.log('=== ALL AD PROPERTIES ===');
         Object.keys(ad).forEach(key => {
             const value = ad[key];
@@ -638,15 +702,12 @@ function displayAds(ads) {
         console.log('=== END ALL AD PROPERTIES ===');
         console.log('=== END STATUS SEARCH DEBUG ===');
         
-        // إذا لم نجد حالة في الأعمدة المخصصة، نبحث في جميع الأعمدة
         if (!statusValue) {
-            // البحث في جميع الأعمدة عن قيم تشبه الحالة
             const allColumns = Object.keys(ad);
             for (let col of allColumns) {
                 const value = ad[col];
                 if (value && typeof value === 'string') {
                     const trimmedValue = value.trim();
-                    // التحقق من أن القيمة تشبه حالة
                     if (trimmedValue === 'مفتوح' || trimmedValue === 'مغلق' || trimmedValue === 'مغلق للصلاة') {
                         statusValue = trimmedValue;
                         console.log(`Found status in column "${col}":`, statusValue);
@@ -656,18 +717,15 @@ function displayAds(ads) {
             }
         }
         
-        // إذا لم نجد حالة في الإعلان، نحاول جلبها من بيانات المكان
         if (!statusValue && placeId) {
             console.log('=== FETCHING PLACE STATUS ===');
             try {
-                // محاولة جلب بيانات المكان للحصول على الحالة
                 fetch(`${API_URL}?action=getPlaceById&placeId=${placeId}`, { cache: "no-store" })
                     .then(res => res.json())
                     .then(placeData => {
                         console.log('Place data received:', placeData);
                         if (placeData && placeData.status) {
                             console.log('Found status from place data:', placeData.status);
-                            // تحديث الحالة في البطاقة
                             const statusBadge = document.querySelector(`[data-place-id="${placeId}"] .status-badge`);
                             if (statusBadge) {
                                 let placeStatus = placeData.status;
@@ -695,9 +753,7 @@ function displayAds(ads) {
             console.log('=== END FETCHING PLACE STATUS ===');
         }
         
-        // نقرأ الفيديو المصرّح به صراحة
         let candidateVideoField = ad['رابط الفيديو'] || ad['linkVideo'] || ad.video || '';
-        // إذا كان حقل الفيديو ليس رابطاً وينظر إلى أنه حالة، ونقص لدينا حالة، نستخدمه كحالة
         if (!statusValue && candidateVideoField && !isUrlLike(candidateVideoField)) {
             const videoValue = candidateVideoField.trim();
             if (videoValue === 'مفتوح' || videoValue === 'مغلق' || videoValue === 'مغلق للصلاة') {
@@ -705,8 +761,6 @@ function displayAds(ads) {
                 console.log('Found status in video field:', statusValue);
             }
         }
-        
-        // تحسين: البحث في حقل الفيديو حتى لو كان لدينا حالة أخرى
         if (candidateVideoField && !isUrlLike(candidateVideoField)) {
             const videoValue = candidateVideoField.trim();
             if (videoValue === 'مفتوح' || videoValue === 'مغلق' || videoValue === 'مغلق للصلاة') {
@@ -718,34 +772,28 @@ function displayAds(ads) {
         console.log('Final status value found:', statusValue);
         console.log('Available columns:', Object.keys(ad));
         
-        // طباعة جميع قيم الأعمدة للمساعدة في التشخيص
         console.log('=== ALL COLUMN VALUES ===');
         Object.keys(ad).forEach((key, index) => {
             console.log(`${index}: ${key} =`, ad[key]);
         });
         console.log('=== END COLUMN VALUES ===');
         
-        // طباعة معلومات إضافية عن البحث
         console.log('=== STATUS SEARCH INFO ===');
         console.log('Initial statusValue:', statusValue);
         console.log('placeId:', placeId);
         console.log('=== END STATUS SEARCH INFO ===');
         
-        // طباعة معلومات إضافية عن البحث في الفيديو
         console.log('=== VIDEO FIELD DEBUG ===');
         console.log('candidateVideoField:', candidateVideoField);
         console.log('isUrlLike(candidateVideoField):', isUrlLike(candidateVideoField));
         console.log('=== END VIDEO FIELD DEBUG ===');
         
-        // تنظيف النص وإزالة المسافات الزائدة
         statusValue = statusValue ? statusValue.trim() : '';
         
-        // طباعة الحالة النهائية قبل التطبيع
         console.log('=== FINAL STATUS BEFORE NORMALIZATION ===');
         console.log('statusValue before normalization:', statusValue);
         console.log('=== END FINAL STATUS BEFORE NORMALIZATION ===');
         
-        // تطبيع النص للتعامل مع الاختلافات في الكتابة
         const normalizedStatus = statusValue.toLowerCase().replace(/\s+/g, '');
         
         console.log('=== NORMALIZATION DEBUG ===');
@@ -781,7 +829,6 @@ function displayAds(ads) {
             console.log('Status set to: مغلق للصلاة (direct match)');
         }
         else {
-            // إذا لم نجد حالة، نعرض "غير محدد"
             statusClass = 'unknown';
             statusValue = 'غير محدد';
             console.log('No valid status found, using unknown');
@@ -791,12 +838,10 @@ function displayAds(ads) {
             console.log('=== END FINAL STATUS DEBUG ===');
         }
 
-        // جمع الصور والفيديو من الروابط
-        // تعديل هنا: جلب الصور من ad.images مباشرة
+        // الصور والفيديو
         const allImages = Array.isArray(ad.images) ? ad.images.filter(img => img && img.trim() !== '') : [];
         let videoUrl = '';
         
-        // قراءة الفيديو من "رابط الفيديو"
         if (ad['رابط الفيديو'] && ad['رابط الفيديو'].trim() !== '') {
             videoUrl = ad['رابط الفيديو'].trim();
             console.log('Found video URL from رابط الفيديو:', videoUrl);
@@ -809,9 +854,8 @@ function displayAds(ads) {
         console.log('Final images count:', allImages.length);
 
         const imagesHtml = allImages.map(img => `<img src="${img}" alt="صورة" style="max-width: 100%; height: auto;">`).join('');
-        const videoHtml = videoUrl ? `<video src="${videoUrl}" controls muted></video>` : '';
+        const videoHtml = videoUrl ? createVideoHtml(videoUrl) : '';
 
-        // إزالة شارة الحالة من البطاقة
         const adCard = `
             <div class="ad-card" data-place-id="${placeId || ''}">
                 ${imagesHtml ? `<div class="ad-images">${imagesHtml}</div>` : '<p>لا توجد صور</p>'}
@@ -842,22 +886,22 @@ function displayAds(ads) {
     });
 }
 
-// Initialize the page
+// Initialize
 document.addEventListener('DOMContentLoaded', function() {
     fetchAds();
-    initLightbox(); // Initialize lightbox functionality
+    initLightbox();
 });
 
 setInterval(fetchAds, 20000);
 
-// اختبار البيانات عند تحميل الصفحة
-const urlParams = new URLSearchParams(window.location.search);
-const testPlaceId = urlParams.get('placeId');
+// اختبار تلقائي
+const urlParams2 = new URLSearchParams(window.location.search);
+const testPlaceId = urlParams2.get('placeId');
 if (testPlaceId) {
     console.log('=== AUTO TESTING DATA ===');
     setTimeout(() => {
         testAdData(testPlaceId);
-    }, 2000); // انتظار ثانيتين لتحميل البيانات
+    }, 2000);
 }
 </script>
 
