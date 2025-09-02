@@ -3,26 +3,60 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>بان | دليل الإعلانات</title>
+  
+  <title>منصة بان | دليل الإعلانات - Muslim Tech</title>
+  <meta name="description" content="منصة بان من Muslim Tech - دليل الإعلانات لعرض وحجز الإعلانات بسهولة. تطوير: م/ أحمد نجيب و م/ إبراهيم مبروك.">
+
+  <!-- Tailwind & Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Google Verification -->
   <meta name="google-site-verification" content="uCnALjYiLbrlatRJKgg6BYdo-G6vs-Ic-68FW4ieqNk" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="https://moslimtech.github.io/Ban/logo.jpg" type="image/jpeg">
+
   <style>
     body { font-family: 'Cairo', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
     /* Loader */
     .loader { display: none; align-items: center; justify-content: center; flex-direction: column; gap: 10px; color: #475569; min-height: 60vh; }
-    .logo-pulse {
-      animation: pulseLogo 1.2s infinite cubic-bezier(.4,0,.6,1);
-    }
-    @keyframes pulseLogo {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.15); }
-    }
+    .logo-pulse { animation: pulseLogo 1.2s infinite cubic-bezier(.4,0,.6,1); }
+    @keyframes pulseLogo { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
     .spinner { display: none; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "منصة بان",
+    "url": "https://moslimtech.github.io/Ban/",
+    "logo": "https://moslimtech.github.io/Ban/logo.jpg",
+    "creator": [
+      {
+        "@type": "Person",
+        "name": "م/ أحمد نجيب"
+      },
+      {
+        "@type": "Person",
+        "name": "م/ إبراهيم مبروك"
+      }
+    ],
+    "publisher": {
+      "@type": "Organization",
+      "name": "Muslim Tech",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://moslimtech.github.io/Ban/logo.jpg"
+      }
+    }
+  }
+  </script>
 </head>
 <body class="bg-slate-50 text-slate-900">
   <!-- Header -->
