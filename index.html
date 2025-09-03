@@ -4,44 +4,29 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   
-  <!-- عنوان محسّن يعكس المحتوى والكلمات المفتاحية -->
-  <title>بان | دليل الإعلانات والخدمات في منطقتك</title>
+<title>بان | منصة بان للإعلانات والخدمات</title>
+<meta name="description" content="منصة بان - أفضل دليل للإعلانات والخدمات. اكتشف مطاعم، محلات، عروض والمزيد في منصة بان. تطوير: م/ أحمد نجيب و م/ إبراهيم مبروك.">
+<meta name="keywords" content="بان, منصة بان, موقع بان, إعلانات بان, خدمات بان, دليل بان, عروض بان, مطاعم بان">
+<meta name="robots" content="index, follow">
 
-  <!-- وصف ميتا مُحسّن لتحسين الظهور في نتائج البحث -->
-  <meta name="description" content="منصة بان - دليلك الشامل للإعلانات والخدمات في منطقتك. اكتشف مطاعم، محلات، عروض وخدمات قريبة. طورها Muslim Tech.">
-  <meta name="keywords" content="بان, منصة بان, موقع بان, إعلانات بان, خدمات بان, دليل بان, عروض بان, مطاعم بان, محلات بان, دليل محلات">
-  <meta name="robots" content="index, follow">
+<!-- OG Tags -->
+<meta property="og:title" content="منصة بان">
+<meta property="og:description" content="بان - موقعك الأول للإعلانات والخدمات.">
+<meta property="og:image" content="https://github.com/moslimtech/Ban/blob/f25e3f2590ea8d36c8fa688a677b4708ea3295d5/WhatsApp%20Image%202025-08-31%20at%2020.32.13_8048a3a3.jpg?raw=true">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ar_AR">
 
-  <!--Canonical URL-->
-  <link rel="canonical" href="https://moslimtech.github.io/Ban/">
-
-  <!-- OG Tags لتشارك على الشبكات الاجتماعية -->
-  <meta property="og:title" content="بان | دليل الإعلانات والخدمات في منطقتك">
-  <meta property="og:description" content="بان هو دليلك الأول للإعلانات والخدمات: اكتشف مطاعم، محلات وعروض بجوارك بسهولة.">
-  <meta property="og:image" content="https://raw.githubusercontent.com/moslimtech/Ban/main/WhatsApp%20Image%202025-08-31%20at%2020.32.13_8048a3a3.jpg?raw=true">
-  <meta property="og:url" content="https://moslimtech.github.io/Ban/">
-  <meta property="og:type" content="website">
-  <meta property="og:locale" content="ar_AR">
-
-  <!-- Twitter Card (اختياري) -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="بان | دليل الإعلانات والخدمات في منطقتك">
-  <meta name="twitter:description" content="منصة بان - دليلك الشامل للإعلانات والخدمات في منطقتك. اكتشف مطاعم، محلات، عروض وخدمات قريبة.">
-  <meta name="twitter:image" content="https://raw.githubusercontent.com/moslimtech/Ban/main/WhatsApp%20Image%202025-08-31%20at%2020.32.13_8048a3a3.jpg?raw=true">
+  <!-- Tailwind & Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Google Verification -->
   <meta name="google-site-verification" content="uCnALjYiLbrlatRJKgg6BYdo-G6vs-Ic-68FW4ieqNk" />
 
   <!-- Favicon -->
-  <link rel="icon" href="https://raw.githubusercontent.com/moslimtech/Ban/main/WhatsApp%20Image%202025-08-31%20at%2020.32.13_8048a3a3.jpg?raw=true" type="image/jpeg">
-
-  <!-- Preconnects & Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Tailwind CSS (عنصر رئيسي في التصميم) مع defer لتحسين سرعة التحميل -->
-  <script src="https://cdn.tailwindcss.com" defer></script>
+  <link rel="icon" href="https://raw.githubusercontent.com/moslimtech/Ban/f25e3f2590ea8d36c8fa688a677b4708ea3295d5/WhatsApp%20Image%202025-08-31%20at%2020.32.13_8048a3a3.jpg?raw=true" type="image/jpeg">
 
   <style>
     body { font-family: 'Cairo', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
@@ -51,51 +36,34 @@
     @keyframes pulseLogo { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
     .spinner { display: none; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* استايل خاص لعرض اسم المول المرتبط بالـ id بدلاً من عرضه كـ id */
-    .mall-label {
-      display: inline-block;
-      max-width: 260px; /* تعديل العرض ليناسب التخطيط */
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      vertical-align: middle;
-    }
   </style>
 
-  <!-- Structured Data (JSON-LD) لتعزيز ظهور البحث -->
+  <!-- Structured Data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "بان",
+    "name": "منصة بان",
     "url": "https://moslimtech.github.io/Ban/",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://moslimtech.github.io/Ban/?s={search_term_string}",
-      "query-input": "required name=search_term_string"
+    "logo": "https://moslimtech.github.io/Ban/logo.jpg",
+    "creator": [
+      {
+        "@type": "Person",
+        "name": "م/ أحمد نجيب"
+      },
+      {
+        "@type": "Person",
+        "name": "م/ إبراهيم مبروك"
+      }
+    ],
+    "publisher": {
+      "@type": "Organization",
+      "name": "Muslim Tech",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://moslimtech.github.io/Ban/logo.jpg"
+      }
     }
-  }
-  </script>
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "الرئيسية", "item": "https://moslimtech.github.io/Ban/" },
-      { "@type": "ListItem", "position": 2, "name": "الإعلانات", "item": "https://moslimtech.github.io/Ban/ads.html" }
-    ]
-  }
-  </script>
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "Muslim Tech",
-    "url": "https://moslimtech.github.io/Ban/",
-    "logo": "https://raw.githubusercontent.com/moslimtech/Ban/main/WhatsApp%20Image%202025-08-31%20at%2020.32.13_8048a3a3.jpg?raw=true"
   }
   </script>
 </head>
@@ -104,7 +72,7 @@
   <header class="bg-white/80 backdrop-blur sticky top-0 z-20 border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <img src="https://raw.githubusercontent.com/moslimtech/Ban/main/WhatsApp%20Image%202025-08-31%20at%2020.32.13_8048a3a3.jpg?raw=true" alt="شعاربان" class="w-16 h-16 object-contain rounded-2xl shadow" />
+        <img src="WhatsApp Image 2025-08-31 at 20.32.13_8048a3a3.jpg" alt="شعاربان" class="w-16 h-16 object-contain rounded-2xl shadow" />
         <div>
           <h1 class="text-2xl font-extrabold leading-none">بان</h1>
           <p class="text-xs text-slate-500 -mt-1">دليل الأماكن والعروض حولك</p>
@@ -123,19 +91,19 @@
       <div class="grid md:grid-cols-5 sm:grid-cols-2 grid-cols-1 gap-3">
         <div class="col-span-1">
           <label class="block text-sm font-semibold mb-1">المدينة</label>
-          <select id="citySelect" class="w-full rounded-2xl border-slate-300 focus:ring-2 focus:ring-indigo-500" aria-label="اختيار المدينة">
+          <select id="citySelect" class="w-full rounded-2xl border-slate-300 focus:ring-2 focus:ring-indigo-500">
             <option value="">الكل</option>
           </select>
         </div>
         <div class="col-span-1">
           <label class="block text-sm font-semibold mb-1">المنطقة</label>
-          <select id="areaSelect" class="w-full rounded-2xl border-slate-300 focus:ring-2 focus:ring-indigo-500" aria-label="اختيار المنطقة">
+          <select id="areaSelect" class="w-full rounded-2xl border-slate-300 focus:ring-2 focus:ring-indigo-500">
             <option value="">الكل</option>
           </select>
         </div>
         <div class="col-span-1">
           <label class="block text-sm font-semibold mb-1">نوع النشاط</label>
-          <select id="activitySelect" class="w-full rounded-2xl border-slate-300 focus:ring-2 focus:ring-indigo-500" aria-label="اختيار نوع النشاط">
+          <select id="activitySelect" class="w-full rounded-2xl border-slate-300 focus:ring-2 focus:ring-indigo-500">
             <option value="">الكل</option>
           </select>
         </div>
@@ -297,37 +265,19 @@
     function resolveMallLabelElement(el) {
       if (!el) return;
       const raw = el.getAttribute('data-mall-id');
-      if (!raw) { el.textContent = ''; el.removeAttribute('title'); return; }
-
-      if (/^\d+$/.test(raw)) {
-        const found = ALL_PLACES.find(x => {
-          const pid = x.id || x["ID مكان"] || x["ID المكان"] || x["placeId"] || x["placeID"] || x["ID"];
-          return String(pid) === String(raw);
-        });
-        if (found) {
-          const name = found.name || found["name"] || found["اسم المكان"] || '';
-          const city = found.city || found["city"] || found["المدينة"] || '';
-          const area = found.area || found["area"] || found["المنطقة"] || '';
-          const address = found.address || found["العنوان التفصيلي"] || '';
-
-          const displayText = [name, city, area].filter(Boolean).join(' • ');
-          el.textContent = displayText || '';
-
-          const detailsParts = [];
-          if (name) detailsParts.push('المول/الموقع: ' + name);
-          if (city) detailsParts.push('المدينة: ' + city);
-          if (area) detailsParts.push('المنطقة: ' + area);
-          if (address) detailsParts.push('العنوان: ' + address);
-
-          if (detailsParts.length) el.setAttribute('title', detailsParts.join(' | '));
-          else el.removeAttribute('title');
-        } else {
-          el.textContent = '';
-          el.removeAttribute('title');
-        }
-      } else {
+      if (!raw) { el.textContent = ''; return; }
+      if (!isLikelyId(raw)) {
         el.textContent = raw;
-        el.removeAttribute('title');
+        return;
+      }
+      const found = ALL_PLACES.find(x => {
+        const pid = x.id || x["ID مكان"] || x["ID المكان"] || x["placeId"] || x["placeID"] || x["ID"];
+        return String(pid) === String(raw);
+      });
+      if (found) {
+        el.textContent = found.name || found["name"] || found["اسم المكان"] || '';
+      } else {
+        el.textContent = '';
       }
     }
 
@@ -414,6 +364,7 @@
       cardsGrid.innerHTML = '';
       PLACE_CARDS_BY_ID = new Map();
 
+      // اعرض فقط الأماكن التي باقتها مفعلة
       const visible = (list || []).filter(p => {
         const pkg = p.packageStatus || p["حالة الباقة"] || p.package || p["packageStatus"] || '';
         return isPackageEnabled(pkg);
@@ -457,7 +408,7 @@
           <span class="status-badge absolute top-3 left-3 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 backdrop-blur-sm"></span>
           <span class="package-badge absolute top-12 right-3 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 backdrop-blur-sm"></span>
           <div class="aspect-[16/10] bg-slate-100 overflow-hidden">
-            <img src="${imgSrc}" onerror="this.src='${fallbackImg}'" class="w-full h-full object-cover" alt="${name}" loading="lazy" decoding="async">
+            <img src="${imgSrc}" onerror="this.src='${fallbackImg}'" class="w-full h-full object-cover" alt="${name}">
           </div>
           <div class="p-4">
             <h3 class="text-lg font-bold">${name}</h3>
@@ -647,7 +598,7 @@
                <span class="status-badge absolute top-3 left-3 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 backdrop-blur-sm"></span>
                <span class="package-badge absolute top-12 right-3 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 backdrop-blur-sm"></span>
                <div class="aspect-[16/10] bg-slate-100 overflow-hidden">
-                 <img src="${imgSrc}" onerror="this.src='${fallbackImg}'" class="w-full h-full object-cover" alt="${name}" loading="lazy" decoding="async">
+                 <img src="${imgSrc}" onerror="this.src='${fallbackImg}'" class="w-full h-full object-cover" alt="${name}">
                </div>
                <div class="p-4">
                  <h3 class="text-lg font-bold">${name}</h3>
@@ -655,25 +606,25 @@
                  ${desc ? `<p class="text-sm text-slate-600 mt-2 line-clamp-2">${desc}</p>` : ''}
                  <div class="flex items-center gap-4 mt-3 text-xs text-slate-500">
                    <div class="flex items-center gap-1">
-                     <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg>
+                     <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                       <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                       <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                     </svg>
                      <span>اليوم: ${dailyVisits}</span>
                    </div>
                    <div class="flex items-center gap-1">
-                     <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+                     <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                       <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                     </svg>
                      <span>الإجمالي: ${totalVisits}</span>
                    </div>
                  </div>
-               <div class="flex flex-wrap items-center gap-2 mt-3">
-                 ${phone ? `<a href="${phoneHref(phone)}" class="px-3 py-1.5 rounded-xl text-sm bg-slate-100 hover:bg-slate-200">اتصال</a>` : ''}
-                 ${whatsapp ? `<a target="_blank" href="${waHref(whatsapp)}" class="px-3 py-1.5 rounded-xl text-sm bg-emerald-100 hover:bg-emerald-200">واتساب</a>` : ''}
-                 ${mapLink ? `<a target="_blank" href="${mapLink}" class="px-3 py-1.5 rounded-xl text-sm bg-indigo-100 hover:bg-indigo-200">الخريطة</a>` : ''}
-                 ${email ? `<a href="mailto:${email}" class="px-3 py-1.5 rounded-xl text-sm bg-blue-100 hover:bg-blue-200">إيميل</a>` : ''}
-                 ${website ? `<a target="_blank" href="${website}" class="px-3 py-1.5 rounded-xl text-sm bg-violet-100 hover:bg-violet-200">الموقع</a>` : ''}
-               </div>
-             </div>`;
+               </div>`;
  
             cardsGrid.appendChild(card);
             PLACE_CARDS_BY_ID.set(key, card);
+
+            // حلّل تسمية المول للكارت المُضاف حديثًا
             resolveAllMallLabels(card);
           }
         });
@@ -764,15 +715,30 @@
     citySelect.addEventListener('change', handleCityChange);
     areaSelect.addEventListener('change', applyFilters);
     activitySelect.addEventListener('change', applyFilters);
+    // sortSelect.addEventListener('change', applyFilters); // تم حذف جميع الأكواد المتعلقة بـ sortSelect بناءً على طلب المستخدم
+    // searchInput.addEventListener('input', () => { // تم حذف جميع الأكواد المتعلقة بـ searchInput والبحث بالاسم/العنوان بناءً على طلب المستخدم
+    //   // Debounce خفيف
+    //   clearTimeout(searchInput._t);
+    //   searchInput._t = setTimeout(applyFilters, 200);
+    // });
 
     // حفظ الحالة عند تغيير الفلاتر
     function saveStateOnFilterChange() {
       saveState();
     }
     
+    // إضافة مستمعي حفظ الحالة للفلاتر
     citySelect.addEventListener('change', saveStateOnFilterChange);
     areaSelect.addEventListener('change', saveStateOnFilterChange);
     activitySelect.addEventListener('change', saveStateOnFilterChange);
+    // sortSelect.addEventListener('change', saveStateOnFilterChange); // تم حذف جميع الأكواد المتعلقة بـ sortSelect بناءً على طلب المستخدم
+    // searchInput.addEventListener('input', () => { // تم حذف جميع الأكواد المتعلقة بـ searchInput والبحث بالاسم/العنوان بناءً على طلب المستخدم
+    //   clearTimeout(searchInput._t);
+    //   searchInput._t = setTimeout(() => {
+    //     applyFilters();
+    //     saveStateOnFilterChange();
+    //   }, 200);
+    // });
 
     // init
     (async function init() {
@@ -927,7 +893,6 @@
       setInterval(refreshAllData, 120000); // 120000ms = 2 minutes
     }, 120000);
   </script>
-
   <script>
     // منع أي submit أو ريفرش للصفحة في الفلاتر
     document.querySelectorAll('form').forEach(f => {
