@@ -631,18 +631,28 @@ async function fetchAds() {
     const urlParams = new URLSearchParams(window.location.search);
     const placeId = urlParams.get('placeId') || '';
 
-    // تسجيل الزيارة عند فتح الصفحة
-    if (placeId) {
-        try {
-            await fetch(`${API_URL}?type=place&id=${placeId}&source=ads_page`, { 
-                method: 'GET',
-                cache: 'no-store'
-            });
-            console.log('تم تسجيل الزيارة للمكان:', placeId);
-        } catch (e) {
-            console.warn('فشل في تسجيل الزيارة:', e);
-        }
+   // تسجيل الزيارة عند فتح الصفحة
+if (placeId) {
+    try {
+        const visitData = {
+            action: 'recordVisit', // الإجراء الذي سينفذه السكريبت
+            placeId: placeId,
+            type: 'place',
+            source: 'ads_page'
+        };
+
+        await fetch(API_URL, { 
+            method: 'POST', // تغيير الطريقة إلى POST
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(visitData)
+        });
+        console.log('تم تسجيل الزيارة للمكان:', placeId);
+    } catch (e) {
+        console.warn('فشل في تسجيل الزيارة:', e);
     }
+}
 
     try {
         if (!firstLoadDone) showLoader();
@@ -892,7 +902,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initLightbox();
 });
 
-setInterval(fetchAds, 20000);
+setInterval(fetchAds, 600000);
 
 // اختبار تلقائي
 const urlParams2 = new URLSearchParams(window.location.search);
