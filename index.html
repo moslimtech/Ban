@@ -49,6 +49,15 @@
     }
     .azkar-marquee-container:hover .azkar-marquee-content { animation-play-state: paused; }
     .azkar-seq { display: inline-block; padding-inline-end: 2rem; }
+    /* Skeleton placeholders */
+    .skeleton { position: relative; overflow: hidden; background: #e5e7eb; }
+    .skeleton::after {
+      content: "";
+      position: absolute; inset: 0; transform: translateX(-100%);
+      background: linear-gradient(90deg, rgba(229,231,235,0) 0%, rgba(255,255,255,0.6) 50%, rgba(229,231,235,0) 100%);
+      animation: shimmer 1.2s infinite;
+    }
+    @keyframes shimmer { 100% { transform: translateX(100%); } }
   </style>
 
   <!-- Structured Data -->
@@ -139,9 +148,23 @@
   <!-- Content -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div id="stats" class="mb-4 text-sm text-slate-600"></div>
-    <div id="cacheLoadingMsg" class="mb-4 text-sm text-indigo-600 hidden">جاري تحميل بيانات أحدث...</div>
+    <div id="cacheLoadingMsg" class="hidden"></div>
 
     <div id="cardsGrid" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
+    <template id="cardSkeletonTemplate">
+      <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+        <div class="aspect-[16/10] skeleton"></div>
+        <div class="p-4">
+          <div class="h-5 w-2/3 skeleton rounded mb-2"></div>
+          <div class="h-3 w-1/2 skeleton rounded mb-3"></div>
+          <div class="flex gap-2">
+            <div class="h-7 w-16 skeleton rounded"></div>
+            <div class="h-7 w-16 skeleton rounded"></div>
+            <div class="h-7 w-16 skeleton rounded"></div>
+          </div>
+        </div>
+      </article>
+    </template>
 
     <div id="emptyState" class="hidden rounded-2xl border border-dashed border-slate-300 p-10 text-center text-slate-500">
       لا توجد نتائج مطابقة للفلاتر الحالية.
@@ -195,6 +218,7 @@
     const stats = document.getElementById('stats');
     const cacheLoadingMsg = document.getElementById('cacheLoadingMsg');
     const searchInput = document.getElementById('searchInput');
+    const cardSkeletonTemplate = document.getElementById('cardSkeletonTemplate');
 
     const fetchJSON = async (url) => {
       try {
@@ -662,6 +686,17 @@
       setOptions(areaSelect, FILTERS.areas.map(a => ({ value: a.name, label: a.name })));
     }
 
+    function showSkeletons(count = 8) {
+      if (!cardSkeletonTemplate) return;
+      const frag = document.createDocumentFragment();
+      for (let i = 0; i < count; i++) {
+        const node = cardSkeletonTemplate.content.cloneNode(true);
+        frag.appendChild(node);
+      }
+      cardsGrid.innerHTML = '';
+      cardsGrid.appendChild(frag);
+    }
+
     function handleCityChange() {
       const selectedCityName = citySelect.value;
       let areas = FILTERS.areas;
@@ -685,6 +720,7 @@
     }
 
     async function loadPlaces() {
+      showSkeletons(12);
       const data = await fetchJSON(`${API_BASE}?action=getPlaces`);
       ALL_PLACES = Array.isArray(data) ? data : (data.places || []);
       renderCards(ALL_PLACES);
@@ -968,12 +1004,10 @@
                 renderCards(ALL_PLACES);
                 applySavedState();
                 updateControlLocking();
-            // أظهر رسالة تحميل بيانات أحدث إذا استخدم الكاش
-            if (cacheLoadingMsg) cacheLoadingMsg.classList.remove('hidden');
+            // تم إلغاء رسالة "تحميل بيانات أحدث"
           }
         }
-        // أظهر رسالة تحميل بيانات أحدث إذا استخدم الكاش
-        if (cacheLoadingMsg) cacheLoadingMsg.classList.remove('hidden');
+        // تم إلغاء رسالة "تحميل بيانات أحدث"
         // حمّل بيانات جديدة دائماً من السيرفر
           await loadFilters();
           updateControlLocking();
