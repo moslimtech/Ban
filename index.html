@@ -120,6 +120,10 @@
             <option value="">الكل</option>
           </select>
         </div>
+        <div class="md:col-span-2 col-span-1">
+          <label class="block text-sm font-semibold mb-1">بحث</label>
+          <input id="searchInput" type="search" placeholder="ابحث بالاسم، النشاط، العنوان..." class="w-full rounded-2xl border-slate-300 focus:ring-2 focus:ring-indigo-500 px-3 py-2" aria-label="بحث في الموقع">
+        </div>
       </div>
     </div>
   </section>
@@ -190,6 +194,7 @@
     const emptyState = document.getElementById('emptyState');
     const stats = document.getElementById('stats');
     const cacheLoadingMsg = document.getElementById('cacheLoadingMsg');
+    const searchInput = document.getElementById('searchInput');
 
     const fetchJSON = async (url) => {
       try {
@@ -533,7 +538,6 @@
 
         card.innerHTML = `
           <span class="status-badge absolute top-3 left-3 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 backdrop-blur-sm"></span>
-          <span class="package-badge absolute top-12 right-3 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 backdrop-blur-sm"></span>
           <div class="aspect-[16/10] bg-slate-100 overflow-hidden">
             <img src="${imgSrc}" onerror="this.src='${fallbackImg}'" class="w-full h-full object-cover" alt="${name}" loading="lazy" decoding="async" fetchpriority="low">
           </div>
@@ -611,6 +615,7 @@
       const selectedCityId = citySelect.value;
       const selectedAreaName = areaSelect.value;
       const selectedActivity = activitySelect.value;
+      const q = (searchInput && searchInput.value || '').toString().trim().toLowerCase();
 
       updateControlLocking();
 
@@ -618,12 +623,17 @@
         const city = p.city || p["city"] || p["المدينة"] || '';
         const area = p.area || p["area"] || p["المنطقة"] || '';
         const activity = p.activity || p["activity"] || p["نوع النشاط / الفئة"] || '';
+        const name = p.name || p["name"] || p["اسم المكان"] || '';
+        const desc = p.description || p["description"] || p["وصف مختصر"] || '';
+        const address = p.address || p["العنوان التفصيلي"] || '';
+        const mall = p.mall || p["الموقع او المول"] || '';
 
         const byCity = selectedCityId ? (city === selectedCityId) : true;
         const byArea = selectedAreaName ? (area === selectedAreaName) : true;
         const byAct  = selectedActivity ? (activity === selectedActivity) : true;
+        const byQuery = !q || [name, activity, city, area, desc, address, mall].some(v => String(v).toLowerCase().includes(q));
 
-        return byCity && byArea && byAct;
+        return byCity && byArea && byAct && byQuery;
       });
 
       filtered.sort((a, b) => {
@@ -709,8 +719,7 @@
             if (dailyElement) dailyElement.textContent = `اليوم: ${dailyVisits}`;
             if (totalElement) totalElement.textContent = `الإجمالي: ${totalVisits}`;
 
-            const packageBadge = existing.querySelector('.package-badge');
-            updatePlaceStatusBadge(packageBadge, placeStatusNow);
+            // تمت إزالة شارة ثانية لتفادي التكرار
 
             // إظهار/إخفاء البطاقة بناءً على الباقة وحالة التسجيل
             const pkgNow = p.packageStatus || p["حالة الباقة"] || p.package || p["packageStatus"] || '';
@@ -754,7 +763,6 @@
  
              card.innerHTML = `
                <span class="status-badge absolute top-3 left-3 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 backdrop-blur-sm"></span>
-               <span class="package-badge absolute top-12 right-3 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 backdrop-blur-sm"></span>
                <div class="aspect-[16/10] bg-slate-100 overflow-hidden">
                  <img src="${imgSrc}" onerror="this.src='${fallbackImg}'" class="w-full h-full object-cover" alt="${name}" loading="lazy" decoding="async" fetchpriority="low">
                </div>
@@ -873,6 +881,13 @@
     citySelect.addEventListener('change', handleCityChange);
     areaSelect.addEventListener('change', applyFilters);
     activitySelect.addEventListener('change', applyFilters);
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        clearTimeout(searchInput._t);
+        searchInput._t = setTimeout(applyFilters, 200);
+      });
+      searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
+    }
     // sortSelect.addEventListener('change', applyFilters); // تم حذف جميع الأكواد المتعلقة بـ sortSelect بناءً على طلب المستخدم
     // searchInput.addEventListener('input', () => { // تم حذف جميع الأكواد المتعلقة بـ searchInput والبحث بالاسم/العنوان بناءً على طلب المستخدم
     //   // Debounce خفيف
@@ -889,6 +904,12 @@
     citySelect.addEventListener('change', saveStateOnFilterChange);
     areaSelect.addEventListener('change', saveStateOnFilterChange);
     activitySelect.addEventListener('change', saveStateOnFilterChange);
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        clearTimeout(searchInput._t2);
+        searchInput._t2 = setTimeout(saveStateOnFilterChange, 300);
+      });
+    }
     // sortSelect.addEventListener('change', saveStateOnFilterChange); // تم حذف جميع الأكواد المتعلقة بـ sortSelect بناءً على طلب المستخدم
     // searchInput.addEventListener('input', () => { // تم حذف جميع الأكواد المتعلقة بـ searchInput والبحث بالاسم/العنوان بناءً على طلب المستخدم
     //   clearTimeout(searchInput._t);
@@ -1029,13 +1050,10 @@
 
         // شارات الحالة (تُحدّث عن طريق الوظائف القائمة)
         const statusBadge = card.querySelector('.status-badge');
-        const packageBadge = card.querySelector('.package-badge');
         const placeIdVal = p.id || p["ID المكان"] || '';
         // طلب أحدث حالة إعلانات للمكان (إجبار جلب)
         updateStatusBadge(statusBadge, { placeId: placeIdVal, status: '' });
-        // عرض حالة المكان في البادج الأيمن
-        const placeStatus = p.status || p['الحالة'] || '';
-        updatePlaceStatusBadge(packageBadge, placeStatus);
+        // تمت إزالة شارة ثانية لتفادي التكرار
 
         // روابط (تحديث hrefs إن احتجت)
         const phoneLink = card.querySelector('a[href^="tel:"]');
