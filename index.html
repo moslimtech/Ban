@@ -36,6 +36,18 @@
     @keyframes pulseLogo { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
     .spinner { display: none; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    /* Azkar Marquee */
+    @keyframes marquee {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    .azkar-marquee-container { overflow: hidden; }
+    .azkar-marquee-content {
+      display: inline-block;
+      white-space: nowrap;
+      animation: marquee 120s linear infinite;
+    }
+    .azkar-marquee-container:hover .azkar-marquee-content { animation-play-state: paused; }
   </style>
 
   <!-- Structured Data -->
@@ -111,6 +123,14 @@
     </div>
   </section>
 
+  <!-- Azkar Ticker -->
+  <div class="bg-white border-b border-slate-200 py-2.5 shadow-inner">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 azkar-marquee-container">
+      <p id="azkarBar" class="text-sm text-slate-700 font-medium azkar-marquee-content"></p>
+    </div>
+  </div>
+
+  
   <!-- Content -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div id="stats" class="mb-4 text-sm text-slate-600"></div>
@@ -220,6 +240,28 @@
       return false;
     }
 
+    // إضافة: helper لتحديد ما إذا كانت حالة التسجيل "مفتوح"
+    function isRegistrationOpen(val) {
+      if (val == null) return false;
+      const s = String(val).toLowerCase().trim();
+      if (!s) return false;
+      const openValues = ['open', 'مفتوح', 'فتح', 'available', 'enabled', 'true', 'yes', '1'];
+      if (openValues.includes(s)) return true;
+      const num = Number(s.replace(/[^\d.-]/g, ''));
+      return !isNaN(num) && num > 0;
+    }
+
+    // إضافة: helper لتحديد ما إذا كان الإعلان/المكان نشط/مفتوح
+    function isAdActive(val) {
+      if (val == null) return false;
+      const s = String(val).toLowerCase().trim();
+      if (!s) return false;
+      const activeValues = ['مفتوح', 'نشط', 'نشطة', 'active', 'open', 'enabled', 'on', 'true', 'yes', '1'];
+      if (activeValues.includes(s)) return true;
+      const num = Number(s.replace(/[^\d.-]/g, ''));
+      return !isNaN(num) && num > 0;
+    }
+
     const phoneHref = (v) => {
       if (!v) return '#';
       const cleaned = String(v).trim();
@@ -233,6 +275,82 @@
       const num = s.replace(/\D/g, '');
       return num ? `https://wa.me/${num}` : '#';
     };
+
+    // Azkar: morning/evening sets and time windows (approximate, adjustable)
+    const azkarMorning = [
+      'أصبحنا وأصبح الملك لله، والحمد لله',
+      'سبحان الله وبحمده، سبحان الله العظيم',
+      'لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير',
+      'اللهم بك أصبحنا وبك أمسينا وبك نحيا وبك نموت وإليك النشور',
+      'أعوذ بكلمات الله التامات من شر ما خلق'
+    ];
+    const azkarEvening = [
+      'أمسينا وأمسى الملك لله، والحمد لله',
+      'سبحان الله وبحمده، سبحان الله العظيم',
+      'لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير',
+      'اللهم بك أمسينا وبك أصبحنا وبك نحيا وبك نموت وإليك المصير',
+      'أعوذ بكلمات الله التامات من شر ما خلق'
+    ];
+
+    // Prayer windows (minutes from 00:00). Will be updated from API.
+    let FAJR_MINUTES = 4 * 60;       // default 04:00
+    let ASR_MINUTES  = 15 * 60 + 30; // default 15:30
+    let ISHA_MINUTES = 20 * 60;      // default 20:00
+
+    // Configure default city/country for accurate timings
+    let PRAYER_API_CITY = 'Cairo';
+    let PRAYER_API_COUNTRY = 'Egypt';
+
+    function nowMinutes() {
+      const d = new Date();
+      return d.getHours() * 60 + d.getMinutes();
+    }
+
+    function parseTimeToMinutes(t) {
+      if (!t) return null;
+      const cleaned = String(t).replace(/\([^)]*\)/g, '').trim(); // remove (EET), (GMT+2), etc
+      const m = cleaned.match(/^(\d{1,2}):(\d{2})/);
+      if (!m) return null;
+      const hh = parseInt(m[1], 10);
+      const mm = parseInt(m[2], 10);
+      if (isNaN(hh) || isNaN(mm)) return null;
+      return hh * 60 + mm;
+    }
+
+    async function fetchPrayerTimesByCity(cityName, countryName) {
+      try {
+        const url = `https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(cityName)}&country=${encodeURIComponent(countryName)}&method=5&school=0`;
+        const res = await fetch(url, { cache: 'no-store' });
+        const json = await res.json();
+        if (!json || !json.data || !json.data.timings) throw new Error('Bad response');
+        const t = json.data.timings;
+        const fajr = parseTimeToMinutes(t.Fajr);
+        const asr = parseTimeToMinutes(t.Asr);
+        const isha = parseTimeToMinutes(t.Isha);
+        if (fajr != null) FAJR_MINUTES = fajr;
+        if (asr != null) ASR_MINUTES = asr;
+        if (isha != null) ISHA_MINUTES = isha;
+        // refresh bar after updating windows
+        if (typeof refreshAzkarBar === 'function') refreshAzkarBar();
+      } catch (e) {
+        console.warn('Failed to fetch prayer times, using defaults', e);
+      }
+    }
+
+    function currentAzkarItems() {
+      const m = nowMinutes();
+      if (m >= FAJR_MINUTES && m < ASR_MINUTES) return azkarMorning;
+      if (m >= ASR_MINUTES && m < ISHA_MINUTES) return azkarEvening;
+      // خارج الفترات: استخدم دمج الصباح والمساء لضمان عدم الفراغ
+      return [...azkarMorning, ...azkarEvening];
+    }
+
+    function buildAzkarTickerText(items) {
+      const separator = '  •  ';
+      const joined = items.join(separator);
+      // كرر المحتوى عدة مرات لضمان الطول وتلاشي أي فراغ بين اللفات
+      return Array(6).fill(joined).join(separator);
+    }
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations()
@@ -364,10 +482,11 @@
       cardsGrid.innerHTML = '';
       PLACE_CARDS_BY_ID = new Map();
 
-      // اعرض فقط الأماكن التي باقتها مفعلة
+      // اعرض فقط الأماكن التي باقتها مفعلة وحالة التسجيل مفتوح
       const visible = (list || []).filter(p => {
         const pkg = p.packageStatus || p["حالة الباقة"] || p.package || p["packageStatus"] || '';
-        return isPackageEnabled(pkg);
+        const registrationStatus = p.registrationStatus || p['حالة التسجيل'] || '';
+        return isPackageEnabled(pkg) && isRegistrationOpen(registrationStatus);
       });
 
       if (!visible.length) {
@@ -518,10 +637,22 @@
     }
 
     function handleCityChange() {
-      const cityId = citySelect.value;
+      const selectedCityName = citySelect.value;
       let areas = FILTERS.areas;
-      if (cityId) {
-        areas = areas.filter(a => a.cityName === citySelect.value);
+      if (selectedCityName) {
+        areas = areas.filter(a => {
+          const nameCandidates = [a.cityName, a.city, a['المدينة']].filter(Boolean);
+          if (nameCandidates.some(n => String(n).trim() === String(selectedCityName).trim())) return true;
+          const possibleId = a.cityId ?? a.city_id ?? a.cityID ?? a['cityId'];
+          if (possibleId != null) {
+            const mappedName = CITY_ID_TO_NAME[String(possibleId)];
+            if (mappedName && String(mappedName).trim() === String(selectedCityName).trim()) return true;
+          }
+          return false;
+        });
+        // Update prayer city to selected city (fallback country stays the same)
+        PRAYER_API_CITY = selectedCityName || PRAYER_API_CITY;
+        fetchPrayerTimesByCity(PRAYER_API_CITY, PRAYER_API_COUNTRY);
       }
       setOptions(areaSelect, areas.map(a => ({ value: a.name, label: a.name })));
       applyFilters();
@@ -564,6 +695,15 @@
             const placeStatusNow = p.status || p['الحالة'] || '';
             updatePlaceStatusBadge(packageBadge, placeStatusNow);
 
+            // إظهار/إخفاء البطاقة بناءً على الباقة وحالة التسجيل
+            const pkgNow = p.packageStatus || p["حالة الباقة"] || p.package || p["packageStatus"] || '';
+            const regNow = p.registrationStatus || p['حالة التسجيل'] || '';
+            if (isPackageEnabled(pkgNow) && isRegistrationOpen(regNow)) {
+              existing.classList.remove('hidden');
+            } else {
+              existing.classList.add('hidden');
+            }
+
             const registrationTextEl = existing.querySelector('.registration-status-text');
             if (registrationTextEl) {
               const regStatus = p.registrationStatus || p['حالة التسجيل'] || '';
@@ -572,7 +712,8 @@
           } else {
             // قبل إنشاء كارت جديد: تجاهل الأماكن التي باقتها ليست مفعلة
             const newPackageStatus = p.packageStatus || p["حالة الباقة"] || p.package || p["packageStatus"] || '';
-            if (!isPackageEnabled(newPackageStatus)) {
+            const newRegStatus = p.registrationStatus || p['حالة التسجيل'] || '';
+            if (!isPackageEnabled(newPackageStatus) || !isRegistrationOpen(newRegStatus)) {
               // تجاهل المكان (نخرج من callback للـ forEach)
               return;
             }
@@ -742,6 +883,21 @@
 
     // init
     (async function init() {
+      // Init Azkar Ticker (morning/evening)
+      const azkarBar = document.getElementById('azkarBar');
+      function refreshAzkarBar() {
+        if (!azkarBar) return;
+        const items = currentAzkarItems();
+        const fallback = [...azkarMorning, ...azkarEvening];
+        const feed = items.length ? items : fallback;
+        azkarBar.parentElement.parentElement.classList.remove('hidden');
+        azkarBar.textContent = buildAzkarTickerText(feed);
+      }
+      // Initial city for prayer API
+      refreshAzkarBar();
+      fetchPrayerTimesByCity(PRAYER_API_CITY, PRAYER_API_COUNTRY);
+      // re-evaluate every 5 minutes
+      setInterval(refreshAzkarBar, 5 * 60 * 1000);
       // التحقق من العودة من صفحة الإعلانات
       checkReturnFromAds();
      
