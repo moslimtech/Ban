@@ -28,6 +28,9 @@
             overflow: hidden; 
             transition: all 0.3s ease;
             border: 1px solid #e9ecef;
+            /* تحسين الأداء في المتصفحات الحديثة */
+            content-visibility: auto;
+            contain-intrinsic-size: 400px;
         }
         .ad-card:hover { 
             transform: translateY(-5px); 
@@ -570,11 +573,13 @@ function createVideoHtml(videoUrl) {
                 const embed = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
                 return `<iframe src="${embed}"
                                 frameborder="0"
+                                loading="lazy"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                 allowfullscreen></iframe>`;
             }
             return `<iframe src="${url}"
                             frameborder="0"
+                            loading="lazy"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                             allowfullscreen></iframe>`;
         }
@@ -591,6 +596,7 @@ function createVideoHtml(videoUrl) {
             const embed = id ? `https://player.vimeo.com/video/${id}` : url;
             return `<iframe src="${embed}"
                             frameborder="0"
+                            loading="lazy"
                             allow="autoplay; fullscreen; picture-in-picture"
                             allowfullscreen></iframe>`;
         }
@@ -605,7 +611,7 @@ function createVideoHtml(videoUrl) {
                 type === 'ogg' ? 'video/ogg' :
                 type === 'mov' ? 'video/quicktime' :
                 type === 'avi' ? 'video/x-msvideo' : 'video/mp4';
-            return `<video controls playsinline>
+            return `<video controls playsinline preload="metadata">
                         <source src="${url}" type="${mime}">
                         متصفحك لا يدعم تشغيل الفيديو.
                     </video>`;
@@ -618,12 +624,13 @@ function createVideoHtml(videoUrl) {
     if (/youtube\.com|youtu\.be|vimeo\.com/i.test(url)) {
         return `<iframe src="${url}"
                         frameborder="0"
+                        loading="lazy"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowfullscreen></iframe>`;
     }
 
     // غير ذلك، جرّب video
-    return `<video src="${url}" controls playsinline></video>`;
+    return `<video src="${url}" controls playsinline preload="metadata"></video>`;
 }
 
 async function fetchAds() {
@@ -656,9 +663,21 @@ if (placeId) {
 
     try {
         if (!firstLoadDone) showLoader();
+        // عرض فوري من الكاش المحلي إن وجد
+        const cacheKey = `ads_cache_${placeId}`;
+        const cacheTsKey = `${cacheKey}_ts`;
+        const cached = localStorage.getItem(cacheKey);
+        const cachedTs = parseInt(localStorage.getItem(cacheTsKey) || '0');
+        const now = Date.now();
+        const maxAge = 5 * 60 * 1000; // 5 دقائق
+        if (cached && now - cachedTs < maxAge) {
+            try { displayAds(JSON.parse(cached)); } catch(e) {}
+        }
+
         const res = await fetch(`${API_URL}?action=getAdsByPlaceId&placeId=${placeId}`, { cache: "no-store" });
         const data = await res.json();
         displayAds(data);
+        try { localStorage.setItem(cacheKey, JSON.stringify(data)); localStorage.setItem(cacheTsKey, String(Date.now())); } catch(e) {}
         const elapsed = Date.now() - startTs;
         const remaining = Math.max(0, 1000 - elapsed);
         setTimeout(() => { hideLoader(); firstLoadDone = true; }, remaining);
@@ -679,221 +698,119 @@ function displayAds(ads) {
     if (Array.isArray(ads) && ads.length > 0) {
         placeName = ads[0].placeName || ads[0]['اسم المكان'] || ads[0]['name'] || '';
     }
-    if (placeName) {
-        document.getElementById('placeNameHeader').textContent = placeName;
-    } else {
-        document.getElementById('placeNameHeader').textContent = '';
-    }
+    document.getElementById('placeNameHeader').textContent = placeName || '';
 
     const urlParams = new URLSearchParams(window.location.search);
     const placeId = urlParams.get('placeId') || '';
 
-    ads.forEach(ad => {
-        let statusClass = '';
-        const isUrlLike = (v) => typeof v === 'string' && /(https?:\/\/|\.mp4|\.mov|\.avi|youtube\.com|youtu\.be)/i.test(v);
-        
-        let statusValue = ad['الحالة'] || ad['حالة الاعلان'] || ad.status || ad['حالة المكان'] || ad['state'] || '';
-        
-        console.log('=== STATUS SEARCH DEBUG ===');
-        console.log('ad["الحالة"]:', ad['الحالة']);
-        console.log('ad["حالة الاعلان"]:', ad['حالة الاعلان']);
-        console.log('ad.status:', ad.status);
-        console.log('ad["حالة المكان"]:', ad['حالة المكان']);
-        console.log('ad["state"]:', ad['state']);
-        console.log('Initial statusValue:', statusValue);
-        
-        console.log('=== ALL AD PROPERTIES ===');
-        Object.keys(ad).forEach(key => {
-            const value = ad[key];
-            if (typeof value === 'string' && (value === 'مفتوح' || value === 'مغلق' || value === 'مغلق للصلاة')) {
-                console.log(`Found status in property "${key}":`, value);
-            }
-        });
-        console.log('=== END ALL AD PROPERTIES ===');
-        console.log('=== END STATUS SEARCH DEBUG ===');
-        
-        if (!statusValue) {
-            const allColumns = Object.keys(ad);
-            for (let col of allColumns) {
-                const value = ad[col];
-                if (value && typeof value === 'string') {
-                    const trimmedValue = value.trim();
-                    if (trimmedValue === 'مفتوح' || trimmedValue === 'مغلق' || trimmedValue === 'مغلق للصلاة') {
-                        statusValue = trimmedValue;
-                        console.log(`Found status in column "${col}":`, statusValue);
-                        break;
+    const batchSize = 20;
+    let index = 0;
+
+    function renderBatch() {
+        const frag = document.createDocumentFragment();
+        const end = Math.min(index + batchSize, ads.length);
+        for (; index < end; index++) {
+            const ad = ads[index];
+            let statusClass = '';
+            const isUrlLike = (v) => typeof v === 'string' && /(https?:\/\/|\.mp4|\.mov|\.avi|youtube\.com|youtu\.be)/i.test(v);
+            let statusValue = ad['الحالة'] || ad['حالة الاعلان'] || ad.status || ad['حالة المكان'] || ad['state'] || '';
+
+            if (!statusValue) {
+                const allColumns = Object.keys(ad);
+                for (let col of allColumns) {
+                    const value = ad[col];
+                    if (value && typeof value === 'string') {
+                        const trimmedValue = value.trim();
+                        if (trimmedValue === 'مفتوح' || trimmedValue === 'مغلق' || trimmedValue === 'مغلق للصلاة') {
+                            statusValue = trimmedValue;
+                            break;
+                        }
                     }
                 }
             }
-        }
-        
-        if (!statusValue && placeId) {
-            console.log('=== FETCHING PLACE STATUS ===');
-            try {
-                fetch(`${API_URL}?action=getPlaceById&placeId=${placeId}`, { cache: "no-store" })
-                    .then(res => res.json())
-                    .then(placeData => {
-                        console.log('Place data received:', placeData);
-                        if (placeData && placeData.status) {
-                            console.log('Found status from place data:', placeData.status);
-                            const statusBadge = document.querySelector(`[data-place-id="${placeId}"] .status-badge`);
-                            if (statusBadge) {
-                                let placeStatus = placeData.status;
-                                let placeStatusClass = '';
-                                
-                                if (placeStatus === "مفتوح") placeStatusClass = 'open';
-                                else if (placeStatus === "مغلق") placeStatusClass = 'closed';
-                                else if (placeStatus === "مغلق للصلاة") placeStatusClass = 'prayer';
-                                else placeStatusClass = 'unknown';
-                                
-                                statusBadge.className = `status-badge ${placeStatusClass}`;
-                                statusBadge.textContent = placeStatus;
-                                console.log('Updated status badge with place status:', placeStatus);
-                            }
-                        } else {
-                            console.log('No status found in place data');
-                        }
-                    })
-                    .catch(e => {
-                        console.warn('Failed to fetch place status:', e);
-                    });
-            } catch (e) {
-                console.warn('Error fetching place status:', e);
-            }
-            console.log('=== END FETCHING PLACE STATUS ===');
-        }
-        
-        let candidateVideoField = ad['رابط الفيديو'] || ad['linkVideo'] || ad.video || '';
-        if (!statusValue && candidateVideoField && !isUrlLike(candidateVideoField)) {
-            const videoValue = candidateVideoField.trim();
-            if (videoValue === 'مفتوح' || videoValue === 'مغلق' || videoValue === 'مغلق للصلاة') {
-                statusValue = videoValue;
-                console.log('Found status in video field:', statusValue);
-            }
-        }
-        if (candidateVideoField && !isUrlLike(candidateVideoField)) {
-            const videoValue = candidateVideoField.trim();
-            if (videoValue === 'مفتوح' || videoValue === 'مغلق' || videoValue === 'مغلق للصلاة') {
-                statusValue = videoValue;
-                console.log('Found status in video field (override):', statusValue);
-            }
-        }
-        
-        console.log('Final status value found:', statusValue);
-        console.log('Available columns:', Object.keys(ad));
-        
-        console.log('=== ALL COLUMN VALUES ===');
-        Object.keys(ad).forEach((key, index) => {
-            console.log(`${index}: ${key} =`, ad[key]);
-        });
-        console.log('=== END COLUMN VALUES ===');
-        
-        console.log('=== STATUS SEARCH INFO ===');
-        console.log('Initial statusValue:', statusValue);
-        console.log('placeId:', placeId);
-        console.log('=== END STATUS SEARCH INFO ===');
-        
-        console.log('=== VIDEO FIELD DEBUG ===');
-        console.log('candidateVideoField:', candidateVideoField);
-        console.log('isUrlLike(candidateVideoField):', isUrlLike(candidateVideoField));
-        console.log('=== END VIDEO FIELD DEBUG ===');
-        
-        statusValue = statusValue ? statusValue.trim() : '';
-        
-        console.log('=== FINAL STATUS BEFORE NORMALIZATION ===');
-        console.log('statusValue before normalization:', statusValue);
-        console.log('=== END FINAL STATUS BEFORE NORMALIZATION ===');
-        
-        const normalizedStatus = statusValue.toLowerCase().replace(/\s+/g, '');
-        
-        console.log('=== NORMALIZATION DEBUG ===');
-        console.log('statusValue:', statusValue);
-        console.log('normalizedStatus:', normalizedStatus);
-        console.log('=== END NORMALIZATION DEBUG ===');
-        
-        if (normalizedStatus === "مفتوح" || normalizedStatus === "open" || normalizedStatus === "مفتوحة" || normalizedStatus === "نشط" || normalizedStatus === "active") {
-            statusClass = 'open';
-            statusValue = 'نشط';
-            console.log('Status set to: نشط (active/open)');
-        }
-        else if (normalizedStatus === "مغلق" || normalizedStatus === "closed" || normalizedStatus === "مغلقة") {
-            statusClass = 'closed';
-            statusValue = 'مغلق';
-            console.log('Status set to: مغلق (closed)');
-        }
-        else if (normalizedStatus === "مغلقللصلاة" || normalizedStatus === "prayer") {
-            statusClass = 'prayer';
-            statusValue = 'مغلق للصلاة';
-            console.log('Status set to: مغلق للصلاة (prayer)');
-        }
-        else if (statusValue === "مفتوح") {
-            statusClass = 'open';
-            console.log('Status set to: مفتوح (direct match)');
-        }
-        else if (statusValue === "مغلق") {
-            statusClass = 'closed';
-            console.log('Status set to: مغلق (direct match)');
-        }
-        else if (statusValue === "مغلق للصلاة") {
-            statusClass = 'prayer';
-            console.log('Status set to: مغلق للصلاة (direct match)');
-        }
-        else {
-            statusClass = 'unknown';
-            statusValue = 'غير محدد';
-            console.log('No valid status found, using unknown');
-            console.log('=== FINAL STATUS DEBUG ===');
-            console.log('Final statusValue:', statusValue);
-            console.log('Final statusClass:', statusClass);
-            console.log('=== END FINAL STATUS DEBUG ===');
-        }
 
-        // الصور والفيديو
-        const allImages = Array.isArray(ad.images) ? ad.images.filter(img => img && img.trim() !== '') : [];
-        let videoUrl = '';
-        
-        if (ad['رابط الفيديو'] && ad['رابط الفيديو'].trim() !== '') {
-            videoUrl = ad['رابط الفيديو'].trim();
-            console.log('Found video URL from رابط الفيديو:', videoUrl);
-        } else if (ad.video && ad.video.trim() !== '') {
-            videoUrl = ad.video.trim();
-            console.log('Found video URL from ad.video:', videoUrl);
-        }
-        
-        console.log('Final video URL:', videoUrl);
-        console.log('Final images count:', allImages.length);
+            let candidateVideoField = ad['رابط الفيديو'] || ad['linkVideo'] || ad.video || '';
+            if (!statusValue && candidateVideoField && !isUrlLike(candidateVideoField)) {
+                const videoValue = candidateVideoField.trim();
+                if (videoValue === 'مفتوح' || videoValue === 'مغلق' || videoValue === 'مغلق للصلاة') {
+                    statusValue = videoValue;
+                }
+            }
+            if (candidateVideoField && !isUrlLike(candidateVideoField)) {
+                const videoValue = candidateVideoField.trim();
+                if (videoValue === 'مفتوح' || videoValue === 'مغلق' || videoValue === 'مغلق للصلاة') {
+                    statusValue = videoValue;
+                }
+            }
 
-        const imagesHtml = allImages.map(img => `<img src="${img}" alt="صورة" style="max-width: 100%; height: auto;">`).join('');
-        const videoHtml = videoUrl ? createVideoHtml(videoUrl) : '';
+            statusValue = statusValue ? statusValue.trim() : '';
+            const normalizedStatus = statusValue.toLowerCase().replace(/\s+/g, '');
+            if (normalizedStatus === "مفتوح" || normalizedStatus === "open" || normalizedStatus === "مفتوحة" || normalizedStatus === "نشط" || normalizedStatus === "active") {
+                statusClass = 'open';
+                statusValue = 'نشط';
+            } else if (normalizedStatus === "مغلق" || normalizedStatus === "closed" || normalizedStatus === "مغلقة") {
+                statusClass = 'closed';
+                statusValue = 'مغلق';
+            } else if (normalizedStatus === "مغلقللصلاة" || normalizedStatus === "prayer") {
+                statusClass = 'prayer';
+                statusValue = 'مغلق للصلاة';
+            } else if (statusValue === "مفتوح") {
+                statusClass = 'open';
+            } else if (statusValue === "مغلق") {
+                statusClass = 'closed';
+            } else if (statusValue === "مغلق للصلاة") {
+                statusClass = 'prayer';
+            } else {
+                statusClass = 'unknown';
+                statusValue = 'غير محدد';
+            }
 
-        const adCard = `
-            <div class="ad-card" data-place-id="${placeId || ''}">
-                ${imagesHtml ? `<div class="ad-images">${imagesHtml}</div>` : '<p>لا توجد صور</p>'}
-                ${videoHtml ? `<div class="ad-video">${videoHtml}</div>` : ''}
-                <div class="ad-details">
-                    <h3>${ad.title || ad['العنوان'] || ''}</h3>
-                    <p><strong>نوع الإعلان:</strong> ${ad.type || ad['نوع الاعلان'] || ''}</p>
-                    <p>${ad.description || ad['الوصف'] || ''}</p>
-                    <p><strong>تاريخ البداية:</strong> ${ad['تاريخ البداية'] || ad['بداية'] || ad['Start Date'] || ad['start_date'] || ad.startDate || ''}</p>
-                    <p><strong>تاريخ النهاية:</strong> ${ad['تاريخ النهاية'] || ad['نهاية'] || ad['End Date'] || ad['end_date'] || ad.endDate || ''}</p>
-                    ${ad.coupon || ad['كوبون خصم'] ? `<div class="coupon">كوبون الخصم: ${ad.coupon || ad['كوبون خصم']}</div>` : ''}
-                    ${ad.registrationStatus || ad['حالة التسجيل'] ? `<div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
-                        <p style="margin: 0; font-weight: 600; color: #1976d2;">
-                            <strong>حالة التسجيل:</strong> ${ad.registrationStatus || ad['حالة التسجيل']}
-                        </p>
-                    </div>` : ''}
-                    ${ad.packageStatus || ad['حالة الباقة'] ? `<div style="margin-top: 10px; padding: 10px; background: #f3e5f5; border-radius: 8px; border-left: 4px solid #9c27b0;">
-                        <p style="margin: 0; font-weight: 600; color: #7b1fa2;">
-                            <strong>حالة الباقة:</strong> ${ad.packageStatus || ad['حالة الباقة']}
-                        </p>
-                    </div>` : ''}
-                    ${ad.mall || ad['الموقع أو المول'] || ad.location || ad['الموقع'] || ad['location'] ? `<div class="text-xs text-indigo-700 font-semibold mt-1">الموقع أو المول: <span class='font-normal text-slate-700'>${ad.mall || ad['الموقع أو المول'] || ad.location || ad['الموقع'] || ad['location']}</span></div>` : ''}
-                    ${ad.address || ad['العنوان التفصيلي'] || ad['العنوان'] || ad['address'] ? `<div class="text-xs text-slate-700 font-semibold mt-1 mb-2">العنوان: <span class='font-normal text-slate-700'>${ad.address || ad['العنوان التفصيلي'] || ad['العنوان'] || ad['address']}</span></div>` : ''}
+            // الصور والفيديو
+            const allImages = Array.isArray(ad.images) ? ad.images.filter(img => img && img.trim() !== '') : [];
+            let videoUrl = '';
+            if (ad['رابط الفيديو'] && ad['رابط الفيديو'].trim() !== '') {
+                videoUrl = ad['رابط الفيديو'].trim();
+            } else if (ad.video && ad.video.trim() !== '') {
+                videoUrl = ad.video.trim();
+            }
+
+            const imagesHtml = allImages.map(img => `<img src="${img}" alt="صورة" style="max-width: 100%; height: auto;" loading="lazy" decoding="async">`).join('');
+            const videoHtml = videoUrl ? createVideoHtml(videoUrl) : '';
+
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = `
+                <div class="ad-card" data-place-id="${placeId || ''}">
+                    ${imagesHtml ? `<div class="ad-images">${imagesHtml}</div>` : '<p>لا توجد صور</p>'}
+                    ${videoHtml ? `<div class="ad-video">${videoHtml}</div>` : ''}
+                    <div class="ad-details">
+                        <h3>${ad.title || ad['العنوان'] || ''}</h3>
+                        <p><strong>نوع الإعلان:</strong> ${ad.type || ad['نوع الاعلان'] || ''}</p>
+                        <p>${ad.description || ad['الوصف'] || ''}</p>
+                        <p><strong>تاريخ البداية:</strong> ${ad['تاريخ البداية'] || ad['بداية'] || ad['Start Date'] || ad['start_date'] || ad.startDate || ''}</p>
+                        <p><strong>تاريخ النهاية:</strong> ${ad['تاريخ النهاية'] || ad['نهاية'] || ad['End Date'] || ad['end_date'] || ad.endDate || ''}</p>
+                        ${ad.coupon || ad['كوبون خصم'] ? `<div class="coupon">كوبون الخصم: ${ad.coupon || ad['كوبون خصم']}</div>` : ''}
+                        ${ad.registrationStatus || ad['حالة التسجيل'] ? `<div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+                            <p style="margin: 0; font-weight: 600; color: #1976d2;">
+                                <strong>حالة التسجيل:</strong> ${ad.registrationStatus || ad['حالة التسجيل']}
+                            </p>
+                        </div>` : ''}
+                        ${ad.packageStatus || ad['حالة الباقة'] ? `<div style="margin-top: 10px; padding: 10px; background: #f3e5f5; border-radius: 8px; border-left: 4px solid #9c27b0;">
+                            <p style="margin: 0; font-weight: 600; color: #7b1fa2;">
+                                <strong>حالة الباقة:</strong> ${ad.packageStatus || ad['حالة الباقة']}
+                            </p>
+                        </div>` : ''}
+                        ${ad.mall || ad['الموقع أو المول'] || ad.location || ad['الموقع'] || ad['location'] ? `<div class="text-xs text-indigo-700 font-semibold mt-1">الموقع أو المول: <span class='font-normal text-slate-700'>${ad.mall || ad['الموقع أو المول'] || ad.location || ad['الموقع'] || ad['location']}</span></div>` : ''}
+                        ${ad.address || ad['العنوان التفصيلي'] || ad['العنوان'] || ad['address'] ? `<div class="text-xs text-slate-700 font-semibold mt-1 mb-2">العنوان: <span class='font-normal text-slate-700'>${ad.address || ad['العنوان التفصيلي'] || ad['العنوان'] || ad['address']}</span></div>` : ''}
+                    </div>
                 </div>
-            </div>
-        `;
-        container.innerHTML += adCard;
-    });
+            `;
+            frag.appendChild(wrapper.firstElementChild);
+        }
+        container.appendChild(frag);
+        if (index < ads.length) requestAnimationFrame(renderBatch);
+    }
+
+    requestAnimationFrame(renderBatch);
 }
 
 // Initialize

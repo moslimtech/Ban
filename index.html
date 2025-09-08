@@ -38,16 +38,17 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     /* Azkar Marquee */
     @keyframes marquee {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
     }
     .azkar-marquee-container { overflow: hidden; }
     .azkar-marquee-content {
       display: inline-block;
       white-space: nowrap;
-      animation: marquee 120s linear infinite;
+      animation: marquee 40s linear infinite;
     }
     .azkar-marquee-container:hover .azkar-marquee-content { animation-play-state: paused; }
+    .azkar-seq { display: inline-block; padding-inline-end: 2rem; }
   </style>
 
   <!-- Structured Data -->
@@ -345,11 +346,12 @@
       return [...azkarMorning, ...azkarEvening];
     }
 
-    function buildAzkarTickerText(items) {
+    function buildAzkarTickerHtml(items) {
       const separator = '  •  ';
-      const joined = items.join(separator);
-      // كرر المحتوى عدة مرات لضمان الطول وتلاشي أي فراغ بين اللفات
-      return Array(6).fill(joined).join(separator);
+      const seq = items.join(separator);
+      // أنشئ نسختين متتاليتين لتصبح الحركة من 0% إلى -50% بلا فراغ
+      const doubled = `${seq}${separator}${seq}`;
+      return `<span class="azkar-seq">${doubled}</span>`;
     }
 
     if ('serviceWorker' in navigator) {
@@ -498,9 +500,15 @@
       stats.textContent = `${visible.length} نتيجة`;
 
       const frag = document.createDocumentFragment();
-      visible.forEach(p => {
-        const card = document.createElement('article');
-        card.className = 'bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition relative';
+      const batchSize = 24;
+      let index = 0;
+
+      function renderBatch() {
+        const end = Math.min(index + batchSize, visible.length);
+        for (; index < end; index++) {
+          const p = visible[index];
+          const card = document.createElement('article');
+          card.className = 'bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition relative';
 
         const imgSrc = p.image || p["image"] || p["رابط صورة شعار المكان"] || fallbackImg;
         const name = p.name || p["name"] || p["اسم المكان"] || '—';
@@ -527,7 +535,7 @@
           <span class="status-badge absolute top-3 left-3 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 backdrop-blur-sm"></span>
           <span class="package-badge absolute top-12 right-3 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 backdrop-blur-sm"></span>
           <div class="aspect-[16/10] bg-slate-100 overflow-hidden">
-            <img src="${imgSrc}" onerror="this.src='${fallbackImg}'" class="w-full h-full object-cover" alt="${name}">
+            <img src="${imgSrc}" onerror="this.src='${fallbackImg}'" class="w-full h-full object-cover" alt="${name}" loading="lazy" decoding="async" fetchpriority="low">
           </div>
           <div class="p-4">
             <h3 class="text-lg font-bold">${name}</h3>
@@ -575,7 +583,8 @@
 
         const badge = card.querySelector('.status-badge');
         const placeIdVal = p.id || p["ID المكان"] || '';
-        updateStatusBadge(badge, { placeId: placeIdVal, status: '' });
+        const placeStatusNow = p.status || p['الحالة'] || '';
+        updatePlaceStatusBadge(badge, placeStatusNow);
 
         const packageBadge = card.querySelector('.package-badge');
         updatePlaceStatusBadge(packageBadge, placeStatus);
@@ -584,11 +593,18 @@
           PLACE_CARDS_BY_ID.set(String(placeIdVal), card);
         }
 
-        frag.appendChild(card);
-      });
+          frag.appendChild(card);
+        }
 
-      cardsGrid.appendChild(frag);
-      resolveAllMallLabels();
+        cardsGrid.appendChild(frag);
+        resolveAllMallLabels();
+
+        if (index < visible.length) {
+          requestAnimationFrame(renderBatch);
+        }
+      }
+
+      requestAnimationFrame(renderBatch);
     }
 
     function applyFilters() {
@@ -681,8 +697,10 @@
           const key = String(placeIdVal);
           const existing = PLACE_CARDS_BY_ID.get(key);
           if (existing) {
+            // تحديث بادج الحالة مباشرة من البيانات بدون طلبات إضافية
             const statusTopBadge = existing.querySelector('.status-badge');
-            updateStatusBadge(statusTopBadge, { placeId: placeIdVal, status: '' });
+            const placeStatusNow = p.status || p['الحالة'] || '';
+            updatePlaceStatusBadge(statusTopBadge, placeStatusNow);
 
             const dailyVisits = p.dailyVisits || p["عدد الزيارات اليومية"] || 0;
             const totalVisits = p.totalVisits || p["عدد الزيارات الكلي"] || 0;
@@ -692,7 +710,6 @@
             if (totalElement) totalElement.textContent = `الإجمالي: ${totalVisits}`;
 
             const packageBadge = existing.querySelector('.package-badge');
-            const placeStatusNow = p.status || p['الحالة'] || '';
             updatePlaceStatusBadge(packageBadge, placeStatusNow);
 
             // إظهار/إخفاء البطاقة بناءً على الباقة وحالة التسجيل
@@ -739,7 +756,7 @@
                <span class="status-badge absolute top-3 left-3 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 backdrop-blur-sm"></span>
                <span class="package-badge absolute top-12 right-3 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 backdrop-blur-sm"></span>
                <div class="aspect-[16/10] bg-slate-100 overflow-hidden">
-                 <img src="${imgSrc}" onerror="this.src='${fallbackImg}'" class="w-full h-full object-cover" alt="${name}">
+                 <img src="${imgSrc}" onerror="this.src='${fallbackImg}'" class="w-full h-full object-cover" alt="${name}" loading="lazy" decoding="async" fetchpriority="low">
                </div>
                <div class="p-4">
                  <h3 class="text-lg font-bold">${name}</h3>
@@ -891,7 +908,7 @@
         const fallback = [...azkarMorning, ...azkarEvening];
         const feed = items.length ? items : fallback;
         azkarBar.parentElement.parentElement.classList.remove('hidden');
-        azkarBar.textContent = buildAzkarTickerText(feed);
+        azkarBar.innerHTML = buildAzkarTickerHtml(feed);
       }
       // Initial city for prayer API
       refreshAzkarBar();
