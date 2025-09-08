@@ -15,6 +15,8 @@
 <meta property="og:image" content="https://github.com/moslimtech/Ban/blob/f25e3f2590ea8d36c8fa688a677b4708ea3295d5/WhatsApp%20Image%202025-08-31%20at%2020.32.13_8048a3a3.jpg?raw=true">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ar_AR">
+<meta property="og:url" content="https://moslimtech.github.io/Ban/">
+<link rel="canonical" href="https://moslimtech.github.io/Ban/" />
 
   <!-- Tailwind & Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -88,6 +90,33 @@
     }
   }
   </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "منصة بان",
+    "url": "https://moslimtech.github.io/Ban/",
+    "logo": "https://moslimtech.github.io/Ban/logo.jpg",
+    "contactPoint": [{
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "telephone": "+201108857529",
+      "areaServed": "EG"
+    }]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "url": "https://moslimtech.github.io/Ban/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://moslimtech.github.io/Ban/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
 </head>
 <body class="bg-slate-50 text-slate-900">
   <!-- Header -->
@@ -106,6 +135,13 @@
       </a>
     </div>
   </header>
+
+  <!-- Page Loader -->
+  <div id="loader" class="loader" role="status" aria-live="polite" style="display: flex;">
+    <img src="WhatsApp Image 2025-08-31 at 20.32.13_8048a3a3.jpg" alt="شعار بان" style="width: 96px; height: 96px; display: block; margin: 0 auto 16px; border-radius: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); animation: pulseLogo 1.2s infinite cubic-bezier(.4,0,.6,1);">
+    <div>جاري التحميل...</div>
+    <span class="sr-only">جاري تحميل البيانات</span>
+  </div>
 
   <!-- Filters Bar -->
   <section class="border-b border-slate-200 bg-white">
@@ -147,7 +183,13 @@
   
   <!-- Content -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div id="stats" class="mb-4 text-sm text-slate-600"></div>
+    <div class="mb-4 flex items-center justify-between gap-3">
+      <div id="stats" class="text-sm text-slate-600"></div>
+      <button id="softRefreshBtn" class="inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 011-1h3a1 1 0 110 2H6.414l.293.293A7 7 0 1110 17a1 1 0 110-2 5 5 0 10-3.536-8.536L6 7.414V9a1 1 0 11-2 0V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+        تحديث البيانات
+      </button>
+    </div>
     <div id="cacheLoadingMsg" class="hidden"></div>
 
     <div id="cardsGrid" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
@@ -198,7 +240,7 @@
 
   <script>
     const API_BASE = "https://script.google.com/macros/s/AKfycbwB0VE5COC0e6NQNKrxQeNRu2Mtt_QuMbVoBrH7tE6Da3X3BP6UxK926bt9fDO0WPU5/exec";
-    const REFRESH_MS = 7000;
+    const REFRESH_MS = 60000; // 60 seconds
 
     let ALL_PLACES = [];
     let FILTERS = { cities: [], areas: [], activities: [] };
@@ -219,6 +261,8 @@
     const cacheLoadingMsg = document.getElementById('cacheLoadingMsg');
     const searchInput = document.getElementById('searchInput');
     const cardSkeletonTemplate = document.getElementById('cardSkeletonTemplate');
+    const pageLoader = document.getElementById('loader');
+    const softRefreshBtn = document.getElementById('softRefreshBtn');
 
     const fetchJSON = async (url) => {
       try {
@@ -724,6 +768,7 @@
       const data = await fetchJSON(`${API_BASE}?action=getPlaces`);
       ALL_PLACES = Array.isArray(data) ? data : (data.places || []);
       renderCards(ALL_PLACES);
+      if (pageLoader) pageLoader.style.display = 'none';
 
       try {
         localStorage.setItem('makank_places_cache', JSON.stringify(ALL_PLACES));
@@ -833,6 +878,11 @@
       } catch (e) {
         console.warn('incremental refresh failed', e);
       }
+    }
+
+    function softRefresh() {
+      // تحديث في الخلفية بدون إعادة بناء الشبكة بالكامل
+      refreshPlacesIncrementally();
     }
 
     // حفظ الحالة الحالية
@@ -967,6 +1017,12 @@
         azkarBar.parentElement.parentElement.classList.remove('hidden');
         azkarBar.innerHTML = buildAzkarTickerHtml(feed);
       }
+      // Apply search query from URL (?q=)
+      const params = new URLSearchParams(window.location.search);
+      const initialQ = params.get('q');
+      if (initialQ && searchInput) {
+        searchInput.value = initialQ;
+      }
       // Initial city for prayer API
       refreshAzkarBar();
       fetchPrayerTimesByCity(PRAYER_API_CITY, PRAYER_API_COUNTRY);
@@ -1017,6 +1073,9 @@
         console.error(e);
         cardsGrid.innerHTML = `<div class="col-span-full text-center text-red-600">حدث خطأ أثناء تحميل البيانات. تأكد من رابط الويب آب وصلاحيات الوصول.</div>`;
       }
+      // اربط زر التحديث الناعم وفعل التحديث الدوري بدون إعادة تحميل الصفحة
+      if (softRefreshBtn) softRefreshBtn.addEventListener('click', softRefresh);
+      setInterval(softRefresh, REFRESH_MS);
     })();
 
     // تحديث شامل للبيانات كل 30 ثانية بدون إعادة تحميل الصفحة
