@@ -575,11 +575,13 @@
       cardsGrid.innerHTML = '';
       PLACE_CARDS_BY_ID = new Map();
 
-      // اعرض فقط الأماكن التي باقتها مفعلة وحالة التسجيل مفتوح
+      // اعرض كل الأماكن بشكل افتراضي. إذا كانت هناك حقول حالة تُشير بوضوح للإيقاف، يتم الإخفاء.
       const visible = (list || []).filter(p => {
         const pkg = p.packageStatus || p["حالة الباقة"] || p.package || p["packageStatus"] || '';
         const registrationStatus = p.registrationStatus || p['حالة التسجيل'] || '';
-        return isPackageEnabled(pkg) && isRegistrationOpen(registrationStatus);
+        const pkgOk = pkg ? isPackageEnabled(pkg) : true;
+        const regOk = registrationStatus ? isRegistrationOpen(registrationStatus) : true;
+        return pkgOk && regOk;
       });
 
       if (!visible.length) {
@@ -697,6 +699,21 @@
       requestAnimationFrame(renderBatch);
     }
 
+    // عرض بطاقات افتراضية كبديل عند فشل الجلب أو عدم توفر بيانات
+    function renderPlaceholderCards(count = 12) {
+      const placeholders = Array.from({ length: count }).map((_, i) => ({
+        image: fallbackImg,
+        name: `—`,
+        activity: '',
+        city: '',
+        area: '',
+        description: '',
+        dailyVisits: 0,
+        totalVisits: 0,
+      }));
+      renderCards(placeholders);
+    }
+
     function applyFilters() {
       const selectedCityId = citySelect.value;
       const selectedAreaName = areaSelect.value;
@@ -784,7 +801,11 @@
     async function loadPlaces() {
       const data = await fetchJSON(`${API_BASE}?action=getPlaces`);
       ALL_PLACES = Array.isArray(data) ? data : (data.places || []);
-      renderCards(ALL_PLACES);
+      if (Array.isArray(ALL_PLACES) && ALL_PLACES.length > 0) {
+        renderCards(ALL_PLACES);
+      } else {
+        renderPlaceholderCards(12);
+      }
       if (pageLoader) pageLoader.style.display = 'none';
 
       try {
@@ -819,10 +840,12 @@
 
             // تمت إزالة شارة ثانية لتفادي التكرار
 
-            // إظهار/إخفاء البطاقة بناءً على الباقة وحالة التسجيل
+            // إظهار/إخفاء البطاقة بناءً على الباقة وحالة التسجيل (افتراضيًا تظهر إن لم تتوافر القيم)
             const pkgNow = p.packageStatus || p["حالة الباقة"] || p.package || p["packageStatus"] || '';
             const regNow = p.registrationStatus || p['حالة التسجيل'] || '';
-            if (isPackageEnabled(pkgNow) && isRegistrationOpen(regNow)) {
+            const pkgOk = pkgNow ? isPackageEnabled(pkgNow) : true;
+            const regOk = regNow ? isRegistrationOpen(regNow) : true;
+            if (pkgOk && regOk) {
               existing.classList.remove('hidden');
             } else {
               existing.classList.add('hidden');
@@ -834,11 +857,12 @@
               registrationTextEl.textContent = regStatus ? `حالة التسجيل: ${regStatus}` : '';
             }
           } else {
-            // قبل إنشاء كارت جديد: تجاهل الأماكن التي باقتها ليست مفعلة
+            // قبل إنشاء كارت جديد: اعرضه ما لم تُشير الحقول صراحةً إلى الإيقاف
             const newPackageStatus = p.packageStatus || p["حالة الباقة"] || p.package || p["packageStatus"] || '';
             const newRegStatus = p.registrationStatus || p['حالة التسجيل'] || '';
-            if (!isPackageEnabled(newPackageStatus) || !isRegistrationOpen(newRegStatus)) {
-              // تجاهل المكان (نخرج من callback للـ forEach)
+            const newPkgOk = newPackageStatus ? isPackageEnabled(newPackageStatus) : true;
+            const newRegOk = newRegStatus ? isRegistrationOpen(newRegStatus) : true;
+            if (!(newPkgOk && newRegOk)) {
               return;
             }
             // إنشاء كارت جديد وإلحاقه بدون إعادة بناء الشبكة
@@ -1024,6 +1048,8 @@
 
     // init
     (async function init() {
+      // اعرض سكيليتون فورًا عند فتح الصفحة لضمان ظهور الشبكة مباشرة
+      showSkeletons(12);
       // Init Azkar Ticker (morning/evening)
       const azkarBar = document.getElementById('azkarBar');
       function refreshAzkarBar() {
@@ -1104,7 +1130,7 @@
         if (cacheLoadingMsg) cacheLoadingMsg.classList.add('hidden');
       } catch (e) {
         console.error(e);
-        cardsGrid.innerHTML = `<div class="col-span-full text-center text-red-600">حدث خطأ أثناء تحميل البيانات. تأكد من رابط الويب آب وصلاحيات الوصول.</div>`;
+        renderPlaceholderCards(12);
       }
       // اربط زر التحديث الناعم وفعل التحديث الدوري بدون إعادة تحميل الصفحة
       if (softRefreshBtn) softRefreshBtn.addEventListener('click', softRefresh);
