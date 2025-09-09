@@ -210,10 +210,20 @@
     </div>
     <div id="cacheLoadingMsg" class="hidden"></div>
 
-    <div id="cardsGrid" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
+    <div id="cardsGrid" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <!-- Initial skeletons so the grid appears instantly before JS runs -->
+      <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative"><div class="aspect-[4/3] skeleton" style="height: 200px"></div><div class="p-4"><div class="h-5 w-2/3 skeleton rounded mb-2"></div><div class="h-3 w-1/2 skeleton rounded mb-3"></div><div class="flex gap-2"><div class="h-7 w-16 skeleton rounded"></div><div class="h-7 w-16 skeleton rounded"></div><div class="h-7 w-16 skeleton rounded"></div></div></div></article>
+      <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative"><div class="aspect-[4/3] skeleton" style="height: 200px"></div><div class="p-4"><div class="h-5 w-2/3 skeleton rounded mb-2"></div><div class="h-3 w-1/2 skeleton rounded mb-3"></div><div class="flex gap-2"><div class="h-7 w-16 skeleton rounded"></div><div class="h-7 w-16 skeleton rounded"></div><div class="h-7 w-16 skeleton rounded"></div></div></div></article>
+      <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative"><div class="aspect-[4/3] skeleton" style="height: 200px"></div><div class="p-4"><div class="h-5 w-2/3 skeleton rounded mb-2"></div><div class="h-3 w-1/2 skeleton rounded mb-3"></div><div class="flex gap-2"><div class="h-7 w-16 skeleton rounded"></div><div class="h-7 w-16 skeleton rounded"></div><div class="h-7 w-16 skeleton rounded"></div></div></div></article>
+      <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative"><div class="aspect-[4/3] skeleton" style="height: 200px"></div><div class="p-4"><div class="h-5 w-2/3 skeleton rounded mb-2"></div><div class="h-3 w-1/2 skeleton rounded mb-3"></div><div class="flex gap-2"><div class="h-7 w-16 skeleton rounded"></div><div class="h-7 w-16 skeleton rounded"></div><div class="h-7 w-16 skeleton rounded"></div></div></div></article>
+      <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative"><div class="aspect-[4/3] skeleton" style="height: 200px"></div><div class="p-4"><div class="h-5 w-2/3 skeleton rounded mb-2"></div><div class="h-3 w-1/2 skeleton rounded mb-3"></div><div class="flex gap-2"><div class="h-7 w-16 skeleton rounded"></div><div class="h-7 w-16 skeleton rounded"></div><div class="h-7 w-16 skeleton rounded"></div></div></div></article>
+      <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative"><div class="aspect-[4/3] skeleton" style="height: 200px"></div><div class="p-4"><div class="h-5 w-2/3 skeleton rounded mb-2"></div><div class="h-3 w-1/2 skeleton rounded mb-3"></div><div class="flex gap-2"><div class="h-7 w-16 skeleton rounded"></div><div class="h-7 w-16 skeleton rounded"></div><div class="h-7 w-16 skeleton rounded"></div></div></div></article>
+      <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative"><div class="aspect-[4/3] skeleton" style="height: 200px"></div><div class="p-4"><div class="h-5 w-2/3 skeleton rounded mb-2"></div><div class="h-3 w-1/2 skeleton rounded mb-3"></div><div class="flex gap-2"><div class="h-7 w-16 skeleton rounded"></div><div class="h-7 w-16 skeleton rounded"></div><div class="h-7 w-16 skeleton rounded"></div></div></div></article>
+      <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative"><div class="aspect-[4/3] skeleton" style="height: 200px"></div><div class="p-4"><div class="h-5 w-2/3 skeleton rounded mb-2"></div><div class="h-3 w-1/2 skeleton rounded mb-3"></div><div class="flex gap-2"><div class="h-7 w-16 skeleton rounded"></div><div class="h-7 w-16 skeleton rounded"></div><div class="h-7 w-16 skeleton rounded"></div></div></div></article>
+    </div>
     <template id="cardSkeletonTemplate">
       <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
-        <div class="aspect-[16/10] skeleton"></div>
+        <div class="aspect-[4/3] skeleton" style="height: 200px"></div>
         <div class="p-4">
           <div class="h-5 w-2/3 skeleton rounded mb-2"></div>
           <div class="h-3 w-1/2 skeleton rounded mb-3"></div>
@@ -230,6 +240,32 @@
       لا توجد نتائج مطابقة للفلاتر الحالية.
     </div>
   </main>
+
+  <!-- QR Share Section -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 md:p-6 flex flex-col md:flex-row items-center gap-6">
+      <div class="flex-1">
+        <h3 class="text-xl font-extrabold text-slate-900 mb-1">شارك بان مع أصحابك</h3>
+        <p class="text-slate-600 text-sm">امسح الـ QR لفتح الموقع فورًا، أو شاركه وخلّي غيرك يوصل لخدماته أسرع.</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <button id="qrShareBtn" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold">مشاركة</button>
+          <button id="qrCopyBtn" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-bold">نسخ الرابط</button>
+          <a id="qrDownloadBtn" href="WhatsApp Image 2025-09-01 at 16.51.42_aa333278.jpg" download class="px-3 py-1.5 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-sm font-bold">تحميل QR</a>
+        </div>
+        <div id="shareLinks" class="mt-2 flex flex-wrap gap-2 hidden">
+          <a id="shareWa" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-sm font-bold">واتساب</a>
+          <a id="shareTg" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-800 text-sm font-bold">تليجرام</a>
+          <a id="shareFb" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl bg-blue-100 hover:bg-blue-200 text-blue-800 text-sm font-bold">فيسبوك</a>
+          <a id="shareX" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-bold">X</a>
+        </div>
+      </div>
+      <div class="w-full md:w-auto">
+        <div class="bg-white rounded-3xl border border-slate-200 shadow p-3">
+          <img src="WhatsApp Image 2025-09-01 at 16.51.42_aa333278.jpg" alt="QR بان" class="w-48 h-48 object-contain"/>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Footer -->
   <footer class="border-t border-slate-200 bg-white"> 
@@ -1246,6 +1282,42 @@
         if (e.key === 'Enter') e.preventDefault();
       });
     });
+
+    // QR actions
+    (function(){
+      const siteUrl = window.location.origin + window.location.pathname;
+      const copyBtn = document.getElementById('qrCopyBtn');
+      const shareBtn = document.getElementById('qrShareBtn');
+      const qrSrc = 'WhatsApp Image 2025-09-01 at 16.51.42_aa333278.jpg';
+      const shareLinks = document.getElementById('shareLinks');
+      const wa = document.getElementById('shareWa');
+      const tg = document.getElementById('shareTg');
+      const fb = document.getElementById('shareFb');
+      const x = document.getElementById('shareX');
+
+      if (copyBtn && navigator.clipboard) {
+        copyBtn.addEventListener('click', async () => {
+          try { await navigator.clipboard.writeText(siteUrl); copyBtn.textContent = 'تم النسخ'; setTimeout(()=>copyBtn.textContent='نسخ الرابط',1500); } catch(e){}
+        });
+      }
+      if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+          if (navigator.share) {
+            try { await navigator.share({ title: 'منصة بان', text: 'بان – إعلانك يوصل أسرع', url: siteUrl }); } catch(e){}
+          } else {
+            // أظهر روابط المشاركة الجاهزة
+            if (shareLinks) shareLinks.classList.remove('hidden');
+            const text = encodeURIComponent('بان – إعلانك يوصل أسرع');
+            const url = encodeURIComponent(siteUrl);
+            if (wa) wa.href = `https://wa.me/?text=${text}%20${url}`;
+            if (tg) tg.href = `https://t.me/share/url?url=${url}&text=${text}`;
+            if (fb) fb.href = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+            if (x) x.href = `https://twitter.com/intent/tweet?url=${url}&text=${text}`;
+          }
+        });
+      }
+      // تمت إزالة زر الطباعة بناءً على طلبك
+    })();
   </script>
   <script>
     function togglePopover(el) {
