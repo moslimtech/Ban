@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <!-- الصفحة الرئيسية -->
   <url>
     <loc>https://moslimtech.github.io/Ban/</loc>
+    <lastmod>2025-09-10</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
+
+  <!-- صفحة الإعلانات -->
   <url>
     <loc>https://moslimtech.github.io/Ban/ads.html</loc>
+    <lastmod>2025-09-10</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
+
 </urlset>
