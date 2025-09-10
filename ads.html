@@ -45,11 +45,11 @@
             overflow-x: auto;
         }
         .ad-images img { 
-            width: 120px; 
-            height: 120px; 
+            width: 160px; 
+            height: 160px; 
             object-fit: cover; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.12);
             transition: all 0.3s ease;
             border: 2px solid #f8f9fa;
             flex-shrink: 0;
@@ -393,9 +393,9 @@
 <template id="adSkeleton">
   <div class="ad-card">
     <div class="ad-images" style="gap:8px">
-      <div class="skeleton" style="width:120px;height:120px;border-radius:8px"></div>
-      <div class="skeleton" style="width:120px;height:120px;border-radius:8px"></div>
-      <div class="skeleton" style="width:120px;height:120px;border-radius:8px"></div>
+      <div class="skeleton" style="width:160px;height:160px;border-radius:10px"></div>
+      <div class="skeleton" style="width:160px;height:160px;border-radius:10px"></div>
+      <div class="skeleton" style="width:160px;height:160px;border-radius:10px"></div>
     </div>
     <div class="ad-video">
       <div class="skeleton" style="width:100%;max-width:400px;aspect-ratio:16/9;border-radius:8px"></div>
@@ -430,6 +430,20 @@
 </div>
 
 <script>
+// Helpers
+function getPlaceId() {
+    const params = new URLSearchParams(window.location.search);
+    let pid = params.get('placeId') || '';
+    if (!pid && window.location.hash) {
+        const hash = window.location.hash.replace(/^#/, '');
+        const hashParams = new URLSearchParams(hash);
+        pid = hashParams.get('placeId') || '';
+    }
+    if (!pid) {
+        try { pid = localStorage.getItem('last_place_id') || ''; } catch(e) {}
+    }
+    return pid;
+}
 const API_URL = "https://script.google.com/macros/s/AKfycbwB0VE5COC0e6NQNKrxQeNRu2Mtt_QuMbVoBrH7tE6Da3X3BP6UxK926bt9fDO0WPU5/exec";
 
 // Lightbox functionality
@@ -672,8 +686,7 @@ function createVideoHtml(videoUrl) {
 
 async function fetchAds() {
     const startTs = Date.now();
-    const urlParams = new URLSearchParams(window.location.search);
-    const placeId = urlParams.get('placeId') || '';
+    const placeId = getPlaceId();
 
    // تسجيل الزيارة عند فتح الصفحة
 if (placeId) {
@@ -711,18 +724,14 @@ if (placeId) {
             try { displayAds(JSON.parse(cached)); } catch(e) {}
         }
 
-        const res = await fetch(`${API_URL}?action=getAdsByPlaceId&placeId=${placeId}`, { cache: "no-store" });
+        const res = await fetch(`${API_URL}?action=getAdsByPlaceId&placeId=${placeId}&_ts=${Date.now()}`, { cache: "no-store" });
         const data = await res.json();
         displayAds(data);
         try { localStorage.setItem(cacheKey, JSON.stringify(data)); localStorage.setItem(cacheTsKey, String(Date.now())); } catch(e) {}
-        const elapsed = Date.now() - startTs;
-        const remaining = Math.max(0, 1000 - elapsed);
-        setTimeout(() => { hideLoader(); firstLoadDone = true; }, remaining);
+        // سيتم إخفاء اللودر مباشرة بعد أول دفعة عرض داخل displayAds
     } catch (error) {
         console.error("حدث خطأ في جلب البيانات:", error);
-        const elapsed = Date.now() - startTs;
-        const remaining = Math.max(0, 1000 - elapsed);
-        setTimeout(() => hideLoader(), remaining);
+        hideLoader();
     }
 }
 
@@ -737,10 +746,10 @@ function displayAds(ads) {
     }
     document.getElementById('placeNameHeader').textContent = placeName || '';
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const placeId = urlParams.get('placeId') || '';
+    const placeId = getPlaceId();
+    if (placeId) { try { localStorage.setItem('last_place_id', placeId); } catch(e) {} }
 
-    const batchSize = 20;
+    const batchSize = 12;
     let index = 0;
 
     function renderBatch() {
@@ -844,10 +853,19 @@ function displayAds(ads) {
             frag.appendChild(wrapper.firstElementChild);
         }
         container.appendChild(frag);
+        if (!firstLoadDone) { hideLoader(); firstLoadDone = true; }
         if (index < ads.length) requestAnimationFrame(renderBatch);
     }
 
     requestAnimationFrame(renderBatch);
+
+    // إذا لم توجد بيانات، احتفظ باللودر وحاول مرة أخرى بعد مهلة قصيرة
+    if (!Array.isArray(ads) || ads.length === 0) {
+        if (!window._adsRetryScheduled) {
+            window._adsRetryScheduled = true;
+            setTimeout(() => { showLoader(); fetchAds(); }, 1500);
+        }
+    }
 }
 
 // Skeleton helpers
