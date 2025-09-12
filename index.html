@@ -664,7 +664,7 @@
         const mallAttr = String(mall || '').replace(/"/g, '&quot;');
 
         card.innerHTML = `
-          <span class="status-badge absolute top-3 left-3 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 backdrop-blur-sm"></span>
+          <span class="status-badge absolute top-3 right-3 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 backdrop-blur-sm bg-black/20"></span>
           <div class="aspect-[4/3] bg-white overflow-hidden">
             <img src="${imgSrc}" onerror="this.src='${fallbackImg}'" class="w-full h-full object-contain p-3" alt="${name}" loading="lazy" decoding="async" fetchpriority="low">
           </div>
@@ -926,7 +926,7 @@
              const placeStatus = p.status || p['الحالة'] || '';
  
              card.innerHTML = `
-               <span class="status-badge absolute top-3 left-3 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 backdrop-blur-sm"></span>
+               <span class="status-badge absolute top-3 right-3 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-10 backdrop-blur-sm bg-black/20"></span>
                <div class="aspect-[4/3] bg-white overflow-hidden">
                  <img src="${imgSrc}" onerror="this.src='${fallbackImg}'" class="w-full h-full object-contain p-3" alt="${name}" loading="lazy" decoding="async" fetchpriority="low">
                </div>
