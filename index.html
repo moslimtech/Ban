@@ -1088,7 +1088,7 @@
     // init
     (async function init() {
       // اعرض سكيليتون فورًا عند فتح الصفحة لضمان ظهور الشبكة مباشرة
-      showSkeletons(4);
+      showSkeletons(2);
       // Init Azkar Ticker (morning/evening)
       const azkarBar = document.getElementById('azkarBar');
       function refreshAzkarBar() {
@@ -1158,14 +1158,18 @@
             // تم إلغاء رسالة "تحميل بيانات أحدث"
           } else {
             // لا يوجد كاش صالح: اعرض سكيليتون فورًا حتى تصل البيانات
-            showSkeletons(4);
+            showSkeletons(2);
           }
         }
         // تم إلغاء رسالة "تحميل بيانات أحدث"
         // حمّل بيانات جديدة دائماً من السيرفر
-          const filtersPromise = loadFilters().then(() => { try { updateControlLocking(); } catch(e){} });
+          // اعرض الكروت بمجرد وصول الأماكن، ولا تنتظر الفلاتر
           const placesPromise = loadPlaces();
-          await Promise.all([filtersPromise, placesPromise]);
+          // حمّل الفلاتر في الخلفية
+          loadFilters()
+            .then(() => { try { updateControlLocking(); } catch(e){} })
+            .catch(() => {});
+          await placesPromise;
         if (cacheLoadingMsg) cacheLoadingMsg.classList.add('hidden');
       } catch (e) {
         console.error(e);
