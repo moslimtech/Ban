@@ -688,26 +688,15 @@ async function fetchAds() {
     const startTs = Date.now();
     const placeId = getPlaceId();
 
-   // تسجيل الزيارة عند فتح الصفحة
+   // تسجيل الزيارة عند فتح الصفحة (باستخدام GET لتجنب CORS)
 if (placeId) {
     try {
-        const visitData = {
-            action: 'recordVisit', // الإجراء الذي سينفذه السكريبت
-            placeId: placeId,
-            type: 'place',
-            source: 'ads_page'
-        };
-
-        await fetch(API_URL, { 
-            method: 'POST', // تغيير الطريقة إلى POST
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(visitData)
-        });
-        console.log('تم تسجيل الزيارة للمكان:', placeId);
+        const visitUrl = `${API_URL}?action=recordVisit&placeId=${encodeURIComponent(placeId)}&type=place&source=ads_page`;
+        // طلب خفيف بدون انتظار الاستجابة لتقليل مشاكل CORS
+        fetch(visitUrl, { method: 'GET', mode: 'no-cors', keepalive: true }).catch(() => {});
+        console.log('تم محاولة تسجيل الزيارة للمكان:', placeId);
     } catch (e) {
-        console.warn('فشل في تسجيل الزيارة:', e);
+        console.warn('فشل في محاولة تسجيل الزيارة:', e);
     }
 }
 
@@ -883,7 +872,12 @@ function showSkeletons(count = 6) {
 function clearSkeletons() {
   const container = document.getElementById('adsContainer');
   if (!container) return;
-  container.querySelectorAll('.ad-card').forEach(el => el.remove());
+  // احذف فقط البطاقات التي تحتوي على عناصر skeleton حتى لا نحذف الإعلانات الحقيقية
+  container.querySelectorAll('.ad-card').forEach(el => {
+    if (el.querySelector('.skeleton')) {
+      el.remove();
+    }
+  });
 }
 
 // Initialize
