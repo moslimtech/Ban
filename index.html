@@ -560,13 +560,54 @@
       }
     }
 
+    // فلترة الحالة: تجاهل أسماء الملفات/الروابط وأعد فقط القيم الصحيحة
+    function normalizeStatus(val) {
+      if (val == null) return '';
+      const raw = String(val).trim();
+      if (!raw) return '';
+      const lower = raw.toLowerCase();
+      // تجاهل إن كان يبدو كاسم ملف/رابط
+      const looksLikeFileOrUrl = /https?:\/\//i.test(raw)
+        || /[\/]\w+/.test(raw)
+        || /\.(jpg|jpeg|png|gif|webp|svg|mp4|mov|avi|mkv|webm|heic|heif)(\?.*)?$/i.test(raw)
+        || /^img[_\-\s]?\d+/i.test(raw)
+        || /\.(zip|pdf|docx?|xlsx?)$/i.test(raw);
+      if (looksLikeFileOrUrl) return '';
+
+      // خرائط القيم المسموح بها
+      const map = {
+        'مفتوح': 'مفتوح',
+        'open': 'مفتوح',
+        'نشط': 'مفتوح',
+        'active': 'مفتوح',
+        'on': 'مفتوح',
+        'enabled': 'مفتوح',
+        'مغلق': 'مغلق',
+        'closed': 'مغلق',
+        'off': 'مغلق',
+        'disabled': 'مغلق',
+        'مغلق للصلاة': 'مغلق للصلاة',
+        'prayer': 'مغلق للصلاة'
+      };
+      const key = lower.replace(/\s+/g, '');
+      if (map[lower]) return map[lower];
+      if (map[key]) return map[key];
+      // لو أرقام أو true/false
+      if (['true','1','yes','y'].includes(lower)) return 'مفتوح';
+      if (['false','0','no','n'].includes(lower)) return 'مغلق';
+      return '';
+    }
+
     function updatePlaceStatusBadge(el, placeStatus) {
       if (!el) return;
-      if (!placeStatus || String(placeStatus).trim() === '') {
+      const normalized = normalizeStatus(placeStatus);
+      if (!normalized) {
+        // إذا لا توجد حالة جديدة ولكن الشارة تحتوي نص سابق، لا تُخفيها
+        if (el.textContent && el.textContent.trim() !== '') return;
         el.classList.add('hidden');
         return;
       }
-      const status = String(placeStatus).trim();
+      const status = normalized;
       el.innerHTML = getStatusIcon(status) + status;
       el.classList.remove('hidden', 'bg-emerald-500', 'bg-rose-500', 'bg-amber-500', 'bg-slate-500');
       switch (status) {
@@ -579,15 +620,13 @@
 
     async function updateStatusBadge(el, { placeId, status }) {
       if (!el) return;
-      let finalStatus = (status || '').toString().trim();
+      let finalStatus = normalizeStatus(status);
       if (!finalStatus && placeId) {
         try {
           const ads = await fetchJSON(`${API_BASE}?action=getAdsByPlaceId&placeId=${encodeURIComponent(placeId)}&_=${Date.now()}`);
           if (Array.isArray(ads) && ads.length) {
-            const candidate = ads[0]['الحالة'] || ads[0].status || '';
-            if (candidate && String(candidate).trim() !== '') {
-              finalStatus = String(candidate).trim();
-            }
+            const candidate = normalizeStatus(ads[0]['الحالة'] || ads[0].status || '');
+            if (candidate) finalStatus = candidate;
           }
         } catch (e) {
           console.warn('updateStatusBadge fetch failed', e);
@@ -715,7 +754,12 @@
         const badge = card.querySelector('.status-badge');
         const placeIdVal = p.id || p["ID المكان"] || '';
         const placeStatusNow = p.status || p['الحالة'] || '';
-        updatePlaceStatusBadge(badge, placeStatusNow);
+        const lastStatus = placeIdVal ? (LAST_AD_STATUS_BY_PLACE.get(String(placeIdVal)) || '') : '';
+        const effectiveStatus = (placeStatusNow && String(placeStatusNow).trim() !== '') ? placeStatusNow : lastStatus;
+        updatePlaceStatusBadge(badge, effectiveStatus);
+        if (placeIdVal && effectiveStatus && String(effectiveStatus).trim() !== '') {
+          try { LAST_AD_STATUS_BY_PLACE.set(String(placeIdVal), String(effectiveStatus).trim()); } catch(e){}
+        }
 
         const packageBadge = card.querySelector('.package-badge');
         updatePlaceStatusBadge(packageBadge, placeStatus);
@@ -820,7 +864,7 @@
       let areas = FILTERS.areas;
       if (selectedCityName) {
         areas = areas.filter(a => {
-          const nameCandidates = [a.cityName, a.city, a['المدينة']].filter(Boolean);
+          const nameCandidates = [a.cityName, a.city, ['المدينة']].filter(Boolean);
           if (nameCandidates.some(n => String(n).trim() === String(selectedCityName).trim())) return true;
           const possibleId = a.cityId ?? a.city_id ?? a.cityID ?? a['cityId'];
           if (possibleId != null) {
@@ -868,9 +912,12 @@
             // تحديث بادج الحالة مباشرة من البيانات بدون طلبات إضافية
             const statusTopBadge = existing.querySelector('.status-badge');
             const placeStatusNow = p.status || p['الحالة'] || '';
-            // لا تُخفي الشارة إذا لم تصل حالة جديدة
-            if (placeStatusNow && String(placeStatusNow).trim() !== '') {
-              updatePlaceStatusBadge(statusTopBadge, placeStatusNow);
+            const existingPlaceId = key;
+            const lastStatus = LAST_AD_STATUS_BY_PLACE.get(existingPlaceId) || '';
+            const nextStatus = (placeStatusNow && String(placeStatusNow).trim() !== '') ? placeStatusNow : lastStatus;
+            if (nextStatus && String(nextStatus).trim() !== '') {
+              updatePlaceStatusBadge(statusTopBadge, nextStatus);
+              try { LAST_AD_STATUS_BY_PLACE.set(existingPlaceId, String(nextStatus).trim()); } catch(e){}
             }
 
             const dailyVisits = p.dailyVisits || p["عدد الزيارات اليومية"] || 0;
