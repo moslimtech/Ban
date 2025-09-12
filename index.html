@@ -868,7 +868,10 @@
             // تحديث بادج الحالة مباشرة من البيانات بدون طلبات إضافية
             const statusTopBadge = existing.querySelector('.status-badge');
             const placeStatusNow = p.status || p['الحالة'] || '';
-            updatePlaceStatusBadge(statusTopBadge, placeStatusNow);
+            // لا تُخفي الشارة إذا لم تصل حالة جديدة
+            if (placeStatusNow && String(placeStatusNow).trim() !== '') {
+              updatePlaceStatusBadge(statusTopBadge, placeStatusNow);
+            }
 
             const dailyVisits = p.dailyVisits || p["عدد الزيارات اليومية"] || 0;
             const totalVisits = p.totalVisits || p["عدد الزيارات الكلي"] || 0;
