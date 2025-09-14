@@ -100,20 +100,38 @@
             position: absolute; 
             top: 15px; 
             right: 15px; 
-            padding: 8px 16px; 
+            padding: 10px 20px; 
             color: white; 
             border-radius: 25px; 
-            font-size: 13px; 
-            font-weight: 700; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-size: 14px; 
+            font-weight: 800; 
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
             z-index: 10;
             backdrop-filter: blur(10px);
-            border: 2px solid rgba(255,255,255,0.2);
+            border: 3px solid rgba(255,255,255,0.4);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            min-width: 80px;
+            text-align: center;
         }
-        .open { background: linear-gradient(135deg, #28a745, #20c997); }
-        .closed { background: linear-gradient(135deg, #dc3545, #e74c3c); }
-        .prayer { background: linear-gradient(135deg, #fd7e14, #ffc107); }
-        .unknown { background: linear-gradient(135deg, #6c757d, #495057); }
+        .open { 
+            background: linear-gradient(135deg, #10b981, #059669); 
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        .closed { 
+            background: linear-gradient(135deg, #ef4444, #dc2626); 
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+        .prayer { 
+            background: linear-gradient(135deg, #f59e0b, #d97706); 
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
+        .unknown { 
+            background: linear-gradient(135deg, #6b7280, #4b5563); 
+            box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+        }
+        .hidden {
+            display: none !important;
+        }
         
         .status-icon {
             display: inline-block;
@@ -796,8 +814,9 @@ function displayAds(ads) {
             } else if (statusValue === "مغلق للصلاة") {
                 statusClass = 'prayer';
             } else {
-                statusClass = 'unknown';
-                statusValue = 'غير محدد';
+                // إخفاء الشارة تماماً إذا لم تكن هناك حالة واضحة
+                statusClass = 'hidden';
+                statusValue = '';
             }
 
             // الصور والفيديو
@@ -815,6 +834,7 @@ function displayAds(ads) {
             const wrapper = document.createElement('div');
             wrapper.innerHTML = `
                 <div class="ad-card" data-place-id="${placeId || ''}">
+                    ${statusClass !== 'hidden' ? `<div class="status-badge ${statusClass}">${statusValue}</div>` : ''}
                     ${imagesHtml ? `<div class="ad-images">${imagesHtml}</div>` : '<p>لا توجد صور</p>'}
                     ${videoHtml ? `<div class="ad-video">${videoHtml}</div>` : ''}
                     <div class="ad-details">
