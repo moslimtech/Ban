@@ -167,7 +167,7 @@
   <!-- Filters Bar -->
   <section class="border-b border-slate-200 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-      <div class="grid md:grid-cols-5 sm:grid-cols-2 grid-cols-1 gap-3">
+      <div class="grid md:grid-cols-6 sm:grid-cols-2 grid-cols-1 gap-3">
         <div class="col-span-1">
           <label class="block text-sm font-semibold mb-1">المدينة</label>
           <select id="citySelect" class="w-full rounded-2xl border-slate-300 focus:ring-2 focus:ring-indigo-500">
@@ -184,6 +184,16 @@
           <label class="block text-sm font-semibold mb-1">نوع النشاط</label>
           <select id="activitySelect" class="w-full rounded-2xl border-slate-300 focus:ring-2 focus:ring-indigo-500">
             <option value="">الكل</option>
+          </select>
+        </div>
+        <div class="col-span-1">
+          <label class="block text-sm font-semibold mb-1">عدد الزيارات</label>
+          <select id="visitsSelect" class="w-full rounded-2xl border-slate-300 focus:ring-2 focus:ring-indigo-500">
+            <option value="">الكل</option>
+            <option value="high">الأكثر زيارة (100+)</option>
+            <option value="medium">متوسط (50-99)</option>
+            <option value="low">قليل (1-49)</option>
+            <option value="zero">بدون زيارات</option>
           </select>
         </div>
         <div class="md:col-span-2 col-span-1">
@@ -312,6 +322,7 @@
     const citySelect = document.getElementById('citySelect');
     const areaSelect = document.getElementById('areaSelect');
     const activitySelect = document.getElementById('activitySelect');
+    const visitsSelect = document.getElementById('visitsSelect');
     const cardsGrid = document.getElementById('cardsGrid');
     const emptyState = document.getElementById('emptyState');
     const stats = document.getElementById('stats');
@@ -357,6 +368,15 @@
     };
 
     const normalize = (s) => (s || '').toString().toLowerCase().trim();
+
+    // دالة لتحديد فئة الزيارات
+    function getVisitsCategory(totalVisits) {
+      const visits = parseInt(totalVisits) || 0;
+      if (visits >= 100) return 'high';
+      if (visits >= 50) return 'medium';
+      if (visits >= 1) return 'low';
+      return 'zero';
+    }
 
     // إضافة: helper لتحديد ما إذا كانت الباقة مفعلة
     function isPackageEnabled(val) {
@@ -537,7 +557,7 @@
 
     function updateControlLocking() {
       try {
-        [citySelect, areaSelect, activitySelect].forEach(el => {
+        [citySelect, areaSelect, activitySelect, visitsSelect].forEach(el => {
           if (!el) return;
           el.disabled = false;
           el.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -555,6 +575,8 @@
           return `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2z"/></svg>`;
         case 'مغلق للصلاة':
           return `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6z"/></svg>`;
+        case 'تحت التجهيز':
+          return `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>`;
         default:
           return `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0z"/></svg>`;
       }
@@ -587,7 +609,11 @@
         'off': 'مغلق',
         'disabled': 'مغلق',
         'مغلق للصلاة': 'مغلق للصلاة',
-        'prayer': 'مغلق للصلاة'
+        'prayer': 'مغلق للصلاة',
+        'تحت التجهيز': 'تحت التجهيز',
+        'preparation': 'تحت التجهيز',
+        'preparing': 'تحت التجهيز',
+        'under_preparation': 'تحت التجهيز'
       };
       const key = lower.replace(/\s+/g, '');
       if (map[lower]) return map[lower];
@@ -604,16 +630,26 @@
       if (!normalized) {
         // إذا لا توجد حالة جديدة ولكن الشارة تحتوي نص سابق، لا تُخفيها
         if (el.textContent && el.textContent.trim() !== '') return;
+        // إخفاء الشارة فقط إذا لم تكن هناك حالة سابقة محفوظة
+        const placeId = el.closest('[data-place-id]')?.getAttribute('data-place-id');
+        if (placeId && LAST_AD_STATUS_BY_PLACE.has(String(placeId))) {
+          const lastStatus = LAST_AD_STATUS_BY_PLACE.get(String(placeId));
+          if (lastStatus && String(lastStatus).trim() !== '') {
+            updatePlaceStatusBadge(el, lastStatus);
+            return;
+          }
+        }
         el.classList.add('hidden');
         return;
       }
       const status = normalized;
       el.innerHTML = getStatusIcon(status) + status;
-      el.classList.remove('hidden', 'bg-emerald-500', 'bg-rose-500', 'bg-amber-500', 'bg-slate-500');
+      el.classList.remove('hidden', 'bg-emerald-500', 'bg-rose-500', 'bg-amber-500', 'bg-slate-500', 'bg-blue-500');
       switch (status) {
         case 'مفتوح': el.classList.add('bg-gradient-to-r', 'from-emerald-500', 'to-green-600'); break;
         case 'مغلق': el.classList.add('bg-gradient-to-r', 'from-red-500', 'to-rose-600'); break;
         case 'مغلق للصلاة': el.classList.add('bg-gradient-to-r', 'from-amber-500', 'to-orange-600'); break;
+        case 'تحت التجهيز': el.classList.add('bg-gradient-to-r', 'from-blue-500', 'to-indigo-600'); break;
         default: el.classList.add('bg-gradient-to-r', 'from-slate-500', 'to-gray-600');
       }
     }
@@ -637,11 +673,12 @@
         return;
       }
       el.innerHTML = getStatusIcon(finalStatus) + finalStatus;
-      el.classList.remove('hidden', 'bg-emerald-500', 'bg-rose-500', 'bg-amber-500', 'bg-slate-500');
+      el.classList.remove('hidden', 'bg-emerald-500', 'bg-rose-500', 'bg-amber-500', 'bg-slate-500', 'bg-blue-500');
       switch (finalStatus) {
         case 'مفتوح': el.classList.add('bg-gradient-to-r', 'from-emerald-500', 'to-green-600'); break;
         case 'مغلق': el.classList.add('bg-gradient-to-r', 'from-red-500', 'to-rose-600'); break;
         case 'مغلق للصلاة': el.classList.add('bg-gradient-to-r', 'from-amber-500', 'to-orange-600'); break;
+        case 'تحت التجهيز': el.classList.add('bg-gradient-to-r', 'from-blue-500', 'to-indigo-600'); break;
         default: el.classList.add('bg-gradient-to-r', 'from-slate-500', 'to-gray-600');
       }
       try {
@@ -680,6 +717,10 @@
           const p = visible[index];
           const card = document.createElement('article');
           card.className = 'bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition relative';
+          const cardPlaceId = p.id || p["ID المكان"] || '';
+          if (cardPlaceId) {
+            card.setAttribute('data-place-id', cardPlaceId);
+          }
 
         const imgSrc = p.image || p["image"] || p["رابط صورة شعار المكان"] || fallbackImg;
         const name = p.name || p["name"] || p["اسم المكان"] || '—';
@@ -801,6 +842,7 @@
       const selectedCityId = citySelect.value;
       const selectedAreaName = areaSelect.value;
       const selectedActivity = activitySelect.value;
+      const selectedVisits = visitsSelect.value;
       const q = (searchInput && searchInput.value || '').toString().trim().toLowerCase();
 
       updateControlLocking();
@@ -813,13 +855,15 @@
         const desc = p.description || p["description"] || p["وصف مختصر"] || '';
         const address = p.address || p["العنوان التفصيلي"] || '';
         const mall = p.mall || p["الموقع او المول"] || '';
+        const totalVisits = p.totalVisits || p["عدد الزيارات الكلي"] || 0;
 
         const byCity = selectedCityId ? (city === selectedCityId) : true;
         const byArea = selectedAreaName ? (area === selectedAreaName) : true;
         const byAct  = selectedActivity ? (activity === selectedActivity) : true;
+        const byVisits = selectedVisits ? (getVisitsCategory(totalVisits) === selectedVisits) : true;
         const byQuery = !q || [name, activity, city, area, desc, address, mall].some(v => String(v).toLowerCase().includes(q));
 
-        return byCity && byArea && byAct && byQuery;
+        return byCity && byArea && byAct && byVisits && byQuery;
       });
 
       filtered.sort((a, b) => {
@@ -915,9 +959,16 @@
             const existingPlaceId = key;
             const lastStatus = LAST_AD_STATUS_BY_PLACE.get(existingPlaceId) || '';
             const nextStatus = (placeStatusNow && String(placeStatusNow).trim() !== '') ? placeStatusNow : lastStatus;
-            if (nextStatus && String(nextStatus).trim() !== '') {
-              updatePlaceStatusBadge(statusTopBadge, nextStatus);
-              try { LAST_AD_STATUS_BY_PLACE.set(existingPlaceId, String(nextStatus).trim()); } catch(e){}
+            
+            // تأكد من وجود الشارة أولاً
+            if (statusTopBadge) {
+              if (nextStatus && String(nextStatus).trim() !== '') {
+                updatePlaceStatusBadge(statusTopBadge, nextStatus);
+                try { LAST_AD_STATUS_BY_PLACE.set(existingPlaceId, String(nextStatus).trim()); } catch(e){}
+              } else if (lastStatus && String(lastStatus).trim() !== '') {
+                // إذا لم تكن هناك حالة جديدة، احتفظ بالحالة السابقة
+                updatePlaceStatusBadge(statusTopBadge, lastStatus);
+              }
             }
 
             const dailyVisits = p.dailyVisits || p["عدد الزيارات اليومية"] || 0;
@@ -954,9 +1005,13 @@
             if (!(newPkgOk && newRegOk)) {
               return;
             }
-            // إنشاء كارت جديد وإلحاقه بدون إعادة بناء الشبكة
+             // إنشاء كارت جديد وإلحاقه بدون إعادة بناء الشبكة
              const card = document.createElement('article');
              card.className = 'bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition relative';
+             const newCardPlaceId = p.id || p["ID المكان"] || '';
+             if (newCardPlaceId) {
+               card.setAttribute('data-place-id', newCardPlaceId);
+             }
  
              const imgSrc = p.image || p["image"] || p["رابط صورة شعار المكان"] || fallbackImg;
              const name = p.name || p["name"] || p["اسم المكان"] || '—';
@@ -1020,7 +1075,8 @@
       FILTER_STATE = {
         city: citySelect ? citySelect.value : '',
         area: areaSelect ? areaSelect.value : '',
-        activity: activitySelect ? activitySelect.value : ''
+        activity: activitySelect ? activitySelect.value : '',
+        visits: visitsSelect ? visitsSelect.value : ''
       };
       SCROLL_POSITION = (typeof window !== 'undefined') ? window.scrollY : 0;
       try {
@@ -1061,6 +1117,9 @@
         if (FILTER_STATE.activity && activitySelect) {
           activitySelect.value = FILTER_STATE.activity;
         }
+        if (FILTER_STATE.visits && visitsSelect) {
+          visitsSelect.value = FILTER_STATE.visits;
+        }
         applyFilters();
         // استعادة موقع التمرير بعد قليل لإعطاء الوقت لبناء الكروت
         setTimeout(() => {
@@ -1097,6 +1156,7 @@
     citySelect.addEventListener('change', handleCityChange);
     areaSelect.addEventListener('change', applyFilters);
     activitySelect.addEventListener('change', applyFilters);
+    visitsSelect.addEventListener('change', applyFilters);
     if (searchInput) {
       searchInput.addEventListener('input', () => {
         clearTimeout(searchInput._t);
@@ -1120,6 +1180,7 @@
     citySelect.addEventListener('change', saveStateOnFilterChange);
     areaSelect.addEventListener('change', saveStateOnFilterChange);
     activitySelect.addEventListener('change', saveStateOnFilterChange);
+    visitsSelect.addEventListener('change', saveStateOnFilterChange);
     if (searchInput) {
       searchInput.addEventListener('input', () => {
         clearTimeout(searchInput._t2);
@@ -1296,9 +1357,15 @@
         // شارات الحالة (تُحدّث عن طريق الوظائف القائمة)
         const statusBadge = card.querySelector('.status-badge');
         const placeIdVal = p.id || p["ID المكان"] || '';
-        // طلب أحدث حالة إعلانات للمكان (إجبار جلب)
-        updateStatusBadge(statusBadge, { placeId: placeIdVal, status: '' });
-        // تمت إزالة شارة ثانية لتفادي التكرار
+        const placeStatusNow = p.status || p['الحالة'] || '';
+        
+        // تحديث الشارة مباشرة من البيانات المحلية أولاً
+        if (statusBadge && placeStatusNow && String(placeStatusNow).trim() !== '') {
+          updatePlaceStatusBadge(statusBadge, placeStatusNow);
+        } else if (statusBadge) {
+          // إذا لم تكن هناك حالة محلية، جرب جلبها من الإعلانات
+          updateStatusBadge(statusBadge, { placeId: placeIdVal, status: '' });
+        }
 
         // روابط (تحديث hrefs إن احتجت)
         const phoneLink = card.querySelector('a[href^="tel:"]');
@@ -1324,17 +1391,33 @@
       }
     }
 
+    // دالة لضمان عدم اختفاء الشارات
+    function ensureStatusBadgesVisible() {
+      PLACE_CARDS_BY_ID.forEach((card, placeId) => {
+        const statusBadge = card.querySelector('.status-badge');
+        if (statusBadge && statusBadge.classList.contains('hidden')) {
+          const lastStatus = LAST_AD_STATUS_BY_PLACE.get(placeId);
+          if (lastStatus && String(lastStatus).trim() !== '') {
+            updatePlaceStatusBadge(statusBadge, lastStatus);
+          }
+        }
+      });
+    }
+
     // بدء التحديث الشامل بعد 2 دقيقة من التحميل الأول
     setTimeout(() => {
       setInterval(refreshAllData, 120000); // 120000ms = 2 minutes
     }, 120000);
+
+    // فحص دوري لضمان عدم اختفاء الشارات
+    setInterval(ensureStatusBadgesVisible, 30000); // كل 30 ثانية
   </script>
   <script>
     // منع أي submit أو ريفرش للصفحة في الفلاتر
     document.querySelectorAll('form').forEach(f => {
       f.addEventListener('submit', e => e.preventDefault());
     });
-    [citySelect, areaSelect, activitySelect].forEach(el => {
+    [citySelect, areaSelect, activitySelect, visitsSelect].forEach(el => {
       el.addEventListener('keydown', e => {
         if (e.key === 'Enter') e.preventDefault();
       });

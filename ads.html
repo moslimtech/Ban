@@ -125,6 +125,10 @@
             background: linear-gradient(135deg, #f59e0b, #d97706); 
             box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
         }
+        .preparation { 
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
         .unknown { 
             background: linear-gradient(135deg, #6b7280, #4b5563); 
             box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
@@ -611,6 +615,10 @@ function getStatusIcon(status) {
             return `<svg class="status-icon" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
             </svg>`;
+        case 'تحت التجهيز':
+            return `<svg class="status-icon" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+            </svg>`;
         default:
             return `<svg class="status-icon" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
@@ -807,12 +815,17 @@ function displayAds(ads) {
             } else if (normalizedStatus === "مغلقللصلاة" || normalizedStatus === "prayer") {
                 statusClass = 'prayer';
                 statusValue = 'مغلق للصلاة';
+            } else if (normalizedStatus === "تحتالتجهيز" || normalizedStatus === "preparation" || normalizedStatus === "preparing") {
+                statusClass = 'preparation';
+                statusValue = 'تحت التجهيز';
             } else if (statusValue === "مفتوح") {
                 statusClass = 'open';
             } else if (statusValue === "مغلق") {
                 statusClass = 'closed';
             } else if (statusValue === "مغلق للصلاة") {
                 statusClass = 'prayer';
+            } else if (statusValue === "تحت التجهيز") {
+                statusClass = 'preparation';
             } else {
                 // إخفاء الشارة تماماً إذا لم تكن هناك حالة واضحة
                 statusClass = 'hidden';
