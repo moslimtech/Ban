@@ -1,11 +1,24 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <link rel="manifest" href="/Ban/manifest.json">
-  <meta name="theme-color" content="#2196f3">
+  
 
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <script>
+    const userLang = navigator.language || navigator.userLanguage;
+    const manifest = document.createElement('link');
+    manifest.rel = 'manifest';
+    
+    if (userLang.startsWith('ar')) {
+      manifest.href = '/Ban/manifest-ar.json';
+    } else {
+      manifest.href = '/Ban/manifest-en.json';
+    }
+  
+    document.head.appendChild(manifest);
+  </script>
   
 <title>منصة بان للإعلانات | Muslim Tech</title>
 <meta name="description" content="منصة بان للإعلانات من Muslim Tech - منصة ذكية لعرض وحجز الإعلانات بسهولة داخل مصر. تطوير: م/ أحمد نجيب و م/ إبراهيم مبروك.">
