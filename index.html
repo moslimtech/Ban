@@ -3,6 +3,25 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <script>
+    const userLang = navigator.language || navigator.userLanguage;
+    const manifest = document.createElement('link');
+    manifest.rel = 'manifest';
+  
+    if (userLang.startsWith('ar')) {
+      manifest.href = '/Ban/manifest-ar.json?v=1';
+    } else {
+      manifest.href = '/Ban/manifest-en.json?v=1';
+    }
+  
+    document.head.appendChild(manifest);
+  </script>
+
+
+
+  
+
   
 <title>منصة بان للإعلانات | Muslim Tech</title>
 <meta name="description" content="منصة بان للإعلانات من Muslim Tech - منصة ذكية لعرض وحجز الإعلانات بسهولة داخل مصر. تطوير: م/ أحمد نجيب و م/ إبراهيم مبروك.">
@@ -1611,5 +1630,14 @@
       });
     }
   </script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/Ban/service-worker.js")
+        .then(() => console.log("Service Worker Registered"))
+        .catch(err => console.log("SW registration failed: ", err));
+    }
+  </script>
+
+
 </body>
 </html>
