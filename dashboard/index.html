@@ -9,19 +9,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-    <script>
+   <script>
       const userLang = navigator.language || navigator.userLanguage;
       const manifest = document.createElement('link');
       manifest.rel = 'manifest';
-      
+    
       if (userLang.startsWith('ar')) {
-        manifest.href = '/Ban/manifest-ar.json';
+        manifest.href = '/Ban/manifest-ar.json?v=1';
       } else {
-        manifest.href = '/Ban/manifest-en.json';
+        manifest.href = '/Ban/manifest-en.json?v=1';
       }
     
       document.head.appendChild(manifest);
     </script>
+
 
 
 
@@ -1466,4 +1467,3 @@
 </body>
 </html>
 
-دا الكود الموجود حاليا
