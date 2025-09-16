@@ -1,0 +1,21 @@
+{
+  "name": "Ban Platform",
+  "short_name": "Ban",
+  "start_url": "/Ban/",
+  "scope": "/Ban/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2196f3",
+  "icons": [
+    {
+      "src": "/Ban/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/Ban/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
