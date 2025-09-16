@@ -1437,6 +1437,14 @@
 
     </script>
     <script src="dashboard.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/Ban/service-worker.js")
+          .then(() => console.log("Service Worker Registered"))
+          .catch(err => console.log("SW registration failed: ", err));
+          }
+    </script>
+
 </body>
 </html>
 
