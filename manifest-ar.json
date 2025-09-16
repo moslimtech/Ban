@@ -1,7 +1,7 @@
+// manifest-ar.json
 {
-  "name": "Ban Platform",
-  "short_name": "Ban",
-  "description": "منصة للإعلانات ولوحة تحكم للمعلنين",
+  "name": "منصة بان",
+  "short_name": "بان",
   "start_url": "/Ban/",
   "scope": "/Ban/",
   "display": "standalone",
