@@ -397,6 +397,48 @@
           0%, 100% { transform: scale(1); }
           50% { transform: scale(1.15); }
         }
+        .active-ads { color: #4f46e5 !important; }
+        .active-login { color: #059669 !important; }
+        /* Mobile bottom bar */
+        .mobile-bottom-bar {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 999;
+            background: #ffffff;
+            border-top: 1px solid #e9ecef;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
+            display: none;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .mobile-bottom-bar .inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .mobile-bottom-bar a {
+            flex: 1;
+            text-decoration: none;
+            color: #334155;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-weight: 700;
+            font-size: 12px;
+        }
+        .mobile-bottom-bar a:hover { color: #0ea5e9; }
+        .mobile-bottom-bar svg { width: 24px; height: 24px; }
+        @media (max-width: 640px) {
+            body { padding-bottom: 80px; }
+            .mobile-bottom-bar { display: block; }
+        }
     </style>
 </head>
 <body>
@@ -1015,6 +1057,61 @@ if (testPlaceId) {
         testAdData(testPlaceId);
     }, 2000);
 }
+</script>
+
+<!-- Mobile Bottom Bar (phones only) -->
+<nav aria-label="شريط تنقل سفلي" class="mobile-bottom-bar">
+  <div class="inner">
+    <a href="https://moslimtech.github.io/Ban/" id="mb-ads">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M3 10a1 1 0 011-1h2.382l3.724-3.724A2 2 0 0112.172 4H13a1 1 0 011 1v14a1 1 0 01-1 1h-.828a2 2 0 01-1.414-.586L6.382 15H4a1 1 0 01-1-1v-4z"/>
+        <path d="M16 8a1 1 0 011-1h1a3 3 0 013 3v4a3 3 0 01-3 3h-1a1 1 0 01-1-1V8z"/>
+      </svg>
+      <span>الإعلانات العامة</span>
+    </a>
+    <a href="https://moslimtech.github.io/Ban/dashboard/" id="mb-login" target="_blank" rel="noopener">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 12a5 5 0 100-10 5 5 0 000 10z"/>
+        <path fill-rule="evenodd" d="M.458 20.042A11.955 11.955 0 0112 14c4.632 0 8.625 2.63 10.542 6.042A1 1 0 0121.66 22H2.34a1 1 0 01-1.882-1.958z" clip-rule="evenodd"/>
+      </svg>
+      <span>دخول</span>
+    </a>
+  </div>
+  <div style="height: env(safe-area-inset-bottom);"></div>
+  
+</nav>
+
+<script>
+  // Ensure mobile bottom bar remains and active state reapplies on back/forward
+  window.addEventListener('pageshow', function(){
+    try {
+      var adsLink = document.getElementById('mb-ads');
+      if (adsLink) { adsLink.classList.add('active-ads'); }
+    } catch(e) {}
+  });
+  // Tap feedback and avoid reloading if already on same URL
+  (function(){
+    try{
+      var links = document.querySelectorAll('.mobile-bottom-bar a');
+      links.forEach(function(a){
+        a.addEventListener('click', function(e){
+          var href = a.getAttribute('href') || '';
+          var same = href.replace(/\/?$/, '/') === location.href.replace(/\/?$/, '/');
+          a.style.filter = 'brightness(0.9)';
+          setTimeout(function(){ a.style.filter = ''; }, 150);
+          if (same) { e.preventDefault(); }
+        }, { passive: false });
+      });
+    }catch(e){}
+  })();
+</script>
+<script>
+  (function(){
+    try {
+      var adsLink = document.getElementById('mb-ads');
+      if (adsLink) { adsLink.classList.add('active-ads'); }
+    } catch(e) {}
+  })();
 </script>
 
 </body>
