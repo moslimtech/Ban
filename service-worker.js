@@ -1,4 +1,4 @@
-const CACHE_NAME = "ban-cache-v7";
+const CACHE_NAME = "ban-cache-v8";
 const urlsToCache = [
   "/Ban/",
   "/Ban/index.html",
