@@ -421,62 +421,49 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.95);
+            background-color: rgba(0, 0, 0, 0.9);
             z-index: 1000;
             justify-content: center;
             align-items: center;
             opacity: 0;
             transition: opacity 0.3s ease;
-            backdrop-filter: blur(5px);
         }
         .lightbox.active {
             display: flex;
             opacity: 1;
         }
         .lightbox-content {
-            max-width: 95%;
-            max-height: 95%;
+            max-width: 90%;
+            max-height: 90%;
             position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
         .lightbox-img {
             max-width: 100%;
-            max-height: 90vh;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            object-fit: contain;
-            cursor: zoom-in;
-            transition: transform 0.3s ease;
-        }
-        .lightbox-img:hover {
-            transform: scale(1.02);
+            max-height: 80vh;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
         .lightbox-close {
             position: absolute;
             top: 20px;
             right: 20px;
-            width: 50px;
-            height: 50px;
+            width: 44px;
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #ffffff;
-            font-size: 32px;
+            font-size: 28px;
             font-weight: bold;
             cursor: pointer;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.5);
             border-radius: 50%;
             user-select: none;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: background-color 0.2s ease, transform 0.1s ease;
         }
         .lightbox-close:hover {
-            background: rgba(255, 0, 0, 0.8);
-            transform: scale(1.1);
-            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(0, 0, 0, 0.7);
+            transform: scale(1.05);
         }
         .lightbox-nav {
             position: absolute;
@@ -488,42 +475,33 @@
         }
         .lightbox-prev, .lightbox-next {
             color: white;
-            font-size: 36px;
+            font-size: 40px;
             font-weight: bold;
             cursor: pointer;
             padding: 20px;
             user-select: none;
-            background: rgba(0, 0, 0, 0.6);
+            background-color: rgba(0, 0, 0, 0.3);
             border-radius: 50%;
-            margin: 0 30px;
-            width: 60px;
-            height: 60px;
+            margin: 0 20px;
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
         }
         .lightbox-prev:hover, .lightbox-next:hover {
-            background: rgba(0, 123, 255, 0.8);
-            transform: scale(1.1);
-            border-color: rgba(255, 255, 255, 0.4);
+            background-color: rgba(0, 0, 0, 0.5);
         }
         .lightbox-counter {
             position: absolute;
-            bottom: -50px;
+            bottom: -40px;
             left: 50%;
             transform: translateX(-50%);
             color: white;
             font-size: 16px;
-            font-weight: 600;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 8px 20px;
-            border-radius: 25px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 15px;
+            border-radius: 20px;
         }
         @keyframes pulseLogo {
           0%, 100% { transform: scale(1); }
@@ -700,7 +678,7 @@
             <div class="label">اليوم</div>
         </div>
         <button id="darkModeToggle" class="dark-mode-toggle" aria-label="تبديل الوضع الليلي">
-            <span class="sun-icon">☀️</span>
+            <span class="sun-icon">☀</span>
             <span class="moon-icon">🌙</span>
         </button>
     </div>
@@ -769,70 +747,6 @@ function getPlaceId() {
 }
 const API_URL = "https://script.google.com/macros/s/AKfycbwB0VE5COC0e6NQNKrxQeNRu2Mtt_QuMbVoBrH7tE6Da3X3BP6UxK926bt9fDO0WPU5/exec";
 
-// دالة للتحقق من وجود إعلانات نشطة
-function hasActiveAds(ads) {
-    if (!Array.isArray(ads) || ads.length === 0) {
-        return false;
-    }
-    
-    return ads.some(ad => {
-        // البحث في حقل status (الذي يأتي من الخادم)
-        let statusValue = ad.status || ad['الحالة'] || '';
-        statusValue = statusValue ? statusValue.trim() : '';
-        
-        // إظهار الإعلان فقط إذا كانت الحالة "نشط"
-        return statusValue === "نشط";
-    });
-}
-
-// دالة تحويل روابط Google Drive إلى روابط مباشرة للصور
-function convertGoogleDriveUrl(url) {
-    if (!url || typeof url !== 'string') return url;
-    
-    // إذا كان الرابط من Google Drive
-    if (url.includes('drive.google.com/file/d/')) {
-        // استخراج ID الملف من الرابط
-        const match = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
-        if (match && match[1]) {
-            const fileId = match[1];
-            // جرب عدة طرق لروابط Google Drive
-            return `https://lh3.googleusercontent.com/d/${fileId}`;
-        }
-    }
-    
-    // إذا كان الرابط من i.ibb.co (ImgBB) فهو جاهز
-    if (url.includes('i.ibb.co')) {
-        return url;
-    }
-    
-    // إذا كان الرابط من ibb.co، نحوله إلى i.ibb.co
-    if (url.includes('ibb.co/') && !url.includes('i.ibb.co')) {
-        return url.replace('ibb.co/', 'i.ibb.co/');
-    }
-    
-    return url;
-}
-
-// دالة إعادة التوجيه إلى الصفحة الرئيسية
-function redirectToHome() {
-    // إظهار رسالة للمستخدم
-    document.body.innerHTML = `
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: var(--bg-primary); color: var(--text-primary); text-align: center; padding: 20px;">
-            <div style="font-size: 48px; margin-bottom: 20px;">📢</div>
-            <h1 style="color: var(--text-primary); margin-bottom: 15px; font-size: 2em;">لا توجد إعلانات نشطة حالياً</h1>
-            <p style="color: var(--text-secondary); margin-bottom: 30px; font-size: 1.1em;">جميع الإعلانات المعروضة هي إعلانات نشطة فقط. تحقق مرة أخرى لاحقاً للاطلاع على إعلانات جديدة.</p>
-            <button onclick="window.location.href='index.html'" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50px; padding: 15px 30px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3); transition: all 0.3s ease;">
-                العودة إلى الصفحة الرئيسية
-            </button>
-        </div>
-    `;
-    
-    // إعادة التوجيه التلقائي بعد 5 ثوانٍ
-    setTimeout(() => {
-        window.location.href = 'index.html';
-    }, 5000);
-}
-
 // متغيرات عداد الزوار
 let totalVisitors = 0;
 let todayVisitors = 0;
@@ -843,7 +757,7 @@ let todayVisitorsElement = null;
 async function recordWebsiteVisit() {
     try {
         const today = new Date().toISOString().split('T')[0];
-        const sessionKey = `visited_${today}`;
+        const sessionKey = visited_${today};
         
         if (sessionStorage.getItem(sessionKey)) {
             return;
@@ -855,7 +769,7 @@ async function recordWebsiteVisit() {
         
         while (attempts < maxAttempts) {
             try {
-                const response = await fetch(`${API_URL}?action=recordWebsiteVisit&date=${today}&timestamp=${Date.now()}`, {
+                const response = await fetch(${API_URL}?action=recordWebsiteVisit&date=${today}&timestamp=${Date.now()}, {
                     method: 'GET',
                     mode: 'cors',
                     cache: 'no-cache'
@@ -867,7 +781,7 @@ async function recordWebsiteVisit() {
                     break;
                 }
             } catch (error) {
-                console.warn(`محاولة ${attempts + 1} فشلت:`, error);
+                console.warn(محاولة ${attempts + 1} فشلت:, error);
                 attempts++;
                 if (attempts < maxAttempts) {
                     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -893,7 +807,7 @@ async function fetchVisitorStats() {
         
         while (attempts < maxAttempts && !success) {
             try {
-                const response = await fetch(`${API_URL}?action=getVisitorStats&_=${Date.now()}`, {
+                const response = await fetch(${API_URL}?action=getVisitorStats&_=${Date.now()}, {
                     method: 'GET',
                     mode: 'cors',
                     cache: 'no-cache',
@@ -928,7 +842,7 @@ async function fetchVisitorStats() {
                     break;
                 }
             } catch (error) {
-                console.warn(`محاولة جلب الإحصائيات ${attempts + 1} فشلت:`, error);
+                console.warn(محاولة جلب الإحصائيات ${attempts + 1} فشلت:, error);
                 attempts++;
                 if (attempts < maxAttempts) {
                     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -1008,27 +922,6 @@ function loadCachedStats() {
 let currentImageIndex = 0;
 let imagesArray = [];
 
-// دالة فتح Lightbox للصورة
-function openLightbox(imageSrc, totalImages, imageIndex) {
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
-    const lightboxCounter = document.getElementById('lightbox-counter');
-    
-    if (!lightbox || !lightboxImg || !lightboxCounter) return;
-    
-    // تعيين الصورة الحالية
-    currentImageIndex = imageIndex;
-    imagesArray = Array.from(document.querySelectorAll('.ad-images img')).map(img => img.src);
-    
-    // عرض الصورة
-    lightboxImg.src = imageSrc;
-    lightboxCounter.textContent = `${currentImageIndex + 1} / ${totalImages}`;
-    
-    // إظهار Lightbox
-    lightbox.classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-
 function initLightbox() {
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
@@ -1094,7 +987,7 @@ function initLightbox() {
     
     function updateLightboxImage() {
         lightboxImg.src = imagesArray[currentImageIndex];
-        lightboxCounter.textContent = `${currentImageIndex + 1} / ${imagesArray.length}`;
+        lightboxCounter.textContent = ${currentImageIndex + 1} / ${imagesArray.length};
     }
 }
 
@@ -1102,14 +995,14 @@ function initLightbox() {
 function testAdData(placeId) {
     console.log('=== TESTING AD DATA FOR PLACE ID:', placeId, '===');
     
-    fetch(`${API_URL}?action=getAdsByPlaceId&placeId=${placeId}`, { cache: "no-store" })
+    fetch(${API_URL}?action=getAdsByPlaceId&placeId=${placeId}, { cache: "no-store" })
         .then(res => res.json())
         .then(data => {
             console.log('Raw API response:', data);
             
             if (Array.isArray(data) && data.length > 0) {
                 data.forEach((ad, index) => {
-                    console.log(`--- Ad ${index + 1} ---`);
+                    console.log(--- Ad ${index + 1} ---);
                     console.log('All ad properties:', Object.keys(ad));
                     console.log('ad.status:', ad.status);
                     console.log('ad["الحالة"]:', ad['الحالة']);
@@ -1120,7 +1013,7 @@ function testAdData(placeId) {
                     Object.keys(ad).forEach(key => {
                         const value = ad[key];
                         if (typeof value === 'string' && (value === 'مفتوح' || value === 'مغلق' || value === 'مغلق للصلاة')) {
-                            console.log(`Found status in property "${key}":`, value);
+                            console.log(Found status in property "${key}":, value);
                         }
                     });
                 });
@@ -1204,7 +1097,7 @@ function createVideoHtml(videoUrl) {
                 videoId = u.searchParams.get('v') || '';
             }
             if (videoId) {
-                const embed = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+                const embed = https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1;
                 return `<iframe src="${embed}"
                                 frameborder="0"
                                 loading="lazy"
@@ -1227,7 +1120,7 @@ function createVideoHtml(videoUrl) {
             } else if (host === 'player.vimeo.com' && u.pathname.startsWith('/video/')) {
                 id = u.pathname.split('/video/')[1].split('/')[0] || '';
             }
-            const embed = id ? `https://player.vimeo.com/video/${id}` : url;
+            const embed = id ? https://player.vimeo.com/video/${id} : url;
             return `<iframe src="${embed}"
                             frameborder="0"
                             loading="lazy"
@@ -1264,7 +1157,7 @@ function createVideoHtml(videoUrl) {
     }
 
     // غير ذلك، جرّب video
-    return `<video src="${url}" controls playsinline preload="metadata"></video>`;
+    return <video src="${url}" controls playsinline preload="metadata"></video>;
 }
 
 async function fetchAds() {
@@ -1274,7 +1167,7 @@ async function fetchAds() {
    // تسجيل الزيارة عند فتح الصفحة (باستخدام GET لتجنب CORS)
 if (placeId) {
     try {
-        const visitUrl = `${API_URL}?action=recordVisit&placeId=${encodeURIComponent(placeId)}&type=place&source=ads_page`;
+        const visitUrl = ${API_URL}?action=recordVisit&placeId=${encodeURIComponent(placeId)}&type=place&source=ads_page;
         // طلب خفيف بدون انتظار الاستجابة لتقليل مشاكل CORS
         fetch(visitUrl, { method: 'GET', mode: 'no-cors', keepalive: true }).catch(() => {});
         console.log('تم محاولة تسجيل الزيارة للمكان:', placeId);
@@ -1285,38 +1178,25 @@ if (placeId) {
 
     try {
         if (!firstLoadDone) showLoader();
-        
-        // جلب البيانات الجديدة من الخادم مباشرة
-        const res = await fetch(`${API_URL}?action=getAdsByPlaceId&placeId=${placeId}&_ts=${Date.now()}`, { cache: "no-store" });
-        const data = await res.json();
-        
-        // التحقق من وجود إعلانات نشطة
-        if (hasActiveAds(data)) {
-            displayAds(data);
-            // حفظ البيانات في الكاش بعد التأكد من وجود إعلانات نشطة
-            try { 
-                const cacheKey = `ads_cache_${placeId}`;
-                const cacheTsKey = `${cacheKey}_ts`;
-                localStorage.setItem(cacheKey, JSON.stringify(data)); 
-                localStorage.setItem(cacheTsKey, String(Date.now())); 
-            } catch(e) {}
-        } else {
-            // مسح الكاش المحلي لضمان جلب البيانات الجديدة في المرة القادمة
-            try {
-                const cacheKey = `ads_cache_${placeId}`;
-                const cacheTsKey = `${cacheKey}_ts`;
-                localStorage.removeItem(cacheKey);
-                localStorage.removeItem(cacheTsKey);
-            } catch(e) {}
-            redirectToHome();
-            return;
+        // عرض فوري من الكاش المحلي إن وجد
+        const cacheKey = ads_cache_${placeId};
+        const cacheTsKey = ${cacheKey}_ts;
+        const cached = localStorage.getItem(cacheKey);
+        const cachedTs = parseInt(localStorage.getItem(cacheTsKey) || '0');
+        const now = Date.now();
+        const maxAge = 5 * 60 * 1000; // 5 دقائق
+        if (cached && now - cachedTs < maxAge) {
+            try { displayAds(JSON.parse(cached)); } catch(e) {}
         }
+
+        const res = await fetch(${API_URL}?action=getAdsByPlaceId&placeId=${placeId}&_ts=${Date.now()}, { cache: "no-store" });
+        const data = await res.json();
+        displayAds(data);
+        try { localStorage.setItem(cacheKey, JSON.stringify(data)); localStorage.setItem(cacheTsKey, String(Date.now())); } catch(e) {}
         // سيتم إخفاء اللودر مباشرة بعد أول دفعة عرض داخل displayAds
     } catch (error) {
         console.error("حدث خطأ في جلب البيانات:", error);
         hideLoader();
-        // في حالة الخطأ، أعد التوجيه إلى الصفحة الرئيسية
-        redirectToHome();
     }
 }
 
@@ -1324,20 +1204,10 @@ function displayAds(ads) {
     const container = document.getElementById("adsContainer");
     container.innerHTML = "";
     
-    // فلترة الإعلانات - إظهار الإعلانات النشطة فقط
-    const activeAds = ads.filter(ad => {
-        // البحث في حقل status (الذي يأتي من الخادم)
-        let statusValue = ad.status || ad['الحالة'] || '';
-        statusValue = statusValue ? statusValue.trim() : '';
-        
-        // إظهار الإعلان فقط إذا كانت الحالة "نشط"
-        return statusValue === "نشط";
-    });
-    
-    // استخراج اسم المكان من أول إعلان نشط
+    // استخراج اسم المكان من أول إعلان
     let placeName = '';
-    if (Array.isArray(activeAds) && activeAds.length > 0) {
-        placeName = activeAds[0].placeName || activeAds[0]['اسم المكان'] || activeAds[0]['name'] || '';
+    if (Array.isArray(ads) && ads.length > 0) {
+        placeName = ads[0].placeName || ads[0]['اسم المكان'] || ads[0]['name'] || '';
     }
     document.getElementById('placeNameHeader').textContent = placeName || '';
 
@@ -1349,9 +1219,9 @@ function displayAds(ads) {
 
     function renderBatch() {
         const frag = document.createDocumentFragment();
-        const end = Math.min(index + batchSize, activeAds.length);
+        const end = Math.min(index + batchSize, ads.length);
         for (; index < end; index++) {
-            const ad = activeAds[index];
+            const ad = ads[index];
             let statusClass = '';
             const isUrlLike = (v) => typeof v === 'string' && /(https?:\/\/|\.mp4|\.mov|\.avi|youtube\.com|youtu\.be)/i.test(v);
             let statusValue = ad['الحالة'] || ad['حالة الاعلان'] || ad.status || ad['حالة المكان'] || ad['state'] || '';
@@ -1421,51 +1291,22 @@ function displayAds(ads) {
                 videoUrl = ad.video.trim();
             }
 
-            // تحويل روابط الصور إلى روابط مباشرة
-            const convertedImages = allImages.map(img => convertGoogleDriveUrl(img));
-            const imagesHtml = convertedImages.map((img, index) => {
-                // إنشاء رابط بديل لـ Google Drive
-                const originalUrl = allImages[index];
-                const fallbackUrl = originalUrl.includes('drive.google.com') ? 
-                    `https://drive.google.com/uc?export=view&id=${originalUrl.match(/\/file\/d\/([a-zA-Z0-9-_]+)/)?.[1] || ''}` : 
-                    img;
-                
-                return `
-                    <div style="position: relative; width: 160px; height: 160px; border-radius: 10px; overflow: hidden; background: #f5f5f5; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;" 
-                         onclick="openLightbox('${img}', ${convertedImages.length}, ${index})"
-                         onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.2)'"
-                         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
-                        <img src="${img}" 
-                             alt="صورة ${index + 1}" 
-                             style="width: 100%; height: 100%; object-fit: cover;" 
-                             loading="lazy" 
-                             decoding="async"
-                             onerror="this.src='${fallbackUrl}'; this.onerror=function(){this.parentElement.innerHTML='<div style=\\'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #999;\\'><svg width=\\'24\\' height=\\'24\\' viewBox=\\'0 0 24 24\\' fill=\\'currentColor\\'><path d=\\'M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z\\'/></svg><span style=\\'font-size: 12px; margin-top: 4px;\\'>خطأ في التحميل</span></div>';}"
-                             onload="this.style.opacity='1'"
-                             style="opacity: 0; transition: opacity 0.3s ease;">
-                        <div style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; opacity: 0; transition: opacity 0.2s ease;" 
-                             onmouseover="this.style.opacity='1'" 
-                             onmouseout="this.style.opacity='0'">
-                            🔍
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            const imagesHtml = allImages.map(img => <img src="${img}" alt="صورة" style="max-width: 100%; height: auto;" loading="lazy" decoding="async">).join('');
             const videoHtml = videoUrl ? createVideoHtml(videoUrl) : '';
 
             const wrapper = document.createElement('div');
             wrapper.innerHTML = `
                 <div class="ad-card" data-place-id="${placeId || ''}">
-                    ${statusClass !== 'hidden' ? `<div class="status-badge ${statusClass}">${statusValue}</div>` : ''}
-                    ${imagesHtml ? `<div class="ad-images">${imagesHtml}</div>` : '<p>لا توجد صور</p>'}
-                    ${videoHtml ? `<div class="ad-video">${videoHtml}</div>` : ''}
+                    ${statusClass !== 'hidden' ? <div class="status-badge ${statusClass}">${statusValue}</div> : ''}
+                    ${imagesHtml ? <div class="ad-images">${imagesHtml}</div> : '<p>لا توجد صور</p>'}
+                    ${videoHtml ? <div class="ad-video">${videoHtml}</div> : ''}
                     <div class="ad-details">
                         <h3>${ad.title || ad['العنوان'] || ''}</h3>
                         <p><strong>نوع الإعلان:</strong> ${ad.type || ad['نوع الاعلان'] || ''}</p>
                         <p>${ad.description || ad['الوصف'] || ''}</p>
                         <p><strong>تاريخ البداية:</strong> ${ad['تاريخ البداية'] || ad['بداية'] || ad['Start Date'] || ad['start_date'] || ad.startDate || ''}</p>
                         <p><strong>تاريخ النهاية:</strong> ${ad['تاريخ النهاية'] || ad['نهاية'] || ad['End Date'] || ad['end_date'] || ad.endDate || ''}</p>
-                        ${ad.coupon || ad['كوبون خصم'] ? `<div class="coupon">كوبون الخصم: ${ad.coupon || ad['كوبون خصم']}</div>` : ''}
+                        ${ad.coupon || ad['كوبون خصم'] ? <div class="coupon">كوبون الخصم: ${ad.coupon || ad['كوبون خصم']}</div> : ''}
                         ${ad.registrationStatus || ad['حالة التسجيل'] ? `<div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
                             <p style="margin: 0; font-weight: 600; color: #1976d2;">
                                 <strong>حالة التسجيل:</strong> ${ad.registrationStatus || ad['حالة التسجيل']}
@@ -1476,8 +1317,8 @@ function displayAds(ads) {
                                 <strong>حالة الباقة:</strong> ${ad.packageStatus || ad['حالة الباقة']}
                             </p>
                         </div>` : ''}
-                        ${ad.mall || ad['الموقع أو المول'] || ad.location || ad['الموقع'] || ad['location'] ? `<div class="text-xs text-indigo-700 font-semibold mt-1">الموقع أو المول: <span class='font-normal text-slate-700'>${ad.mall || ad['الموقع أو المول'] || ad.location || ad['الموقع'] || ad['location']}</span></div>` : ''}
-                        ${ad.address || ad['العنوان التفصيلي'] || ad['العنوان'] || ad['address'] ? `<div class="text-xs text-slate-700 font-semibold mt-1 mb-2">العنوان: <span class='font-normal text-slate-700'>${ad.address || ad['العنوان التفصيلي'] || ad['العنوان'] || ad['address']}</span></div>` : ''}
+                        ${ad.mall || ad['الموقع أو المول'] || ad.location || ad['الموقع'] || ad['location'] ? <div class="text-xs text-indigo-700 font-semibold mt-1">الموقع أو المول: <span class='font-normal text-slate-700'>${ad.mall || ad['الموقع أو المول'] || ad.location || ad['الموقع'] || ad['location']}</span></div> : ''}
+                        ${ad.address || ad['العنوان التفصيلي'] || ad['العنوان'] || ad['address'] ? <div class="text-xs text-slate-700 font-semibold mt-1 mb-2">العنوان: <span class='font-normal text-slate-700'>${ad.address || ad['العنوان التفصيلي'] || ad['العنوان'] || ad['address']}</span></div> : ''}
                     </div>
                 </div>
             `;
@@ -1485,25 +1326,16 @@ function displayAds(ads) {
         }
         container.appendChild(frag);
         if (!firstLoadDone) { hideLoader(); firstLoadDone = true; }
-        if (index < activeAds.length) requestAnimationFrame(renderBatch);
+        if (index < ads.length) requestAnimationFrame(renderBatch);
     }
 
     requestAnimationFrame(renderBatch);
 
     // إذا لم توجد بيانات، احتفظ باللودر وحاول مرة أخرى بعد مهلة قصيرة
-    if (!Array.isArray(activeAds) || activeAds.length === 0) {
+    if (!Array.isArray(ads) || ads.length === 0) {
         if (!window._adsRetryScheduled) {
             window._adsRetryScheduled = true;
             setTimeout(() => { showLoader(); fetchAds(); }, 1500);
-        } else {
-            // عرض رسالة عدم وجود إعلانات نشطة
-            container.innerHTML = `
-                <div style="text-align: center; padding: 40px 20px; color: var(--text-secondary);">
-                    <div style="font-size: 48px; margin-bottom: 20px;">📢</div>
-                    <h3 style="color: var(--text-primary); margin-bottom: 15px;">لا توجد إعلانات نشطة حالياً</h3>
-                    <p>جميع الإعلانات المعروضة هي إعلانات نشطة فقط. تحقق مرة أخرى لاحقاً للاطلاع على إعلانات جديدة.</p>
-                </div>
-            `;
         }
     }
 }
