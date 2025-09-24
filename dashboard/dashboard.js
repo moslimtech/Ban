@@ -1679,33 +1679,61 @@ function startPackageCountdown(endDate) {
 }
 
 /* ========== Helpers for dates ========== */
-function parseDateISO(d) {
-  if (!d) return null;
+/**
+ * دالة محسّنة لتحليل التواريخ من تنسيقات مختلفة
+ */
+function parseDateISO(input) {
+  if (!input) return null;
+  
   try {
-    if (d instanceof Date) {
-      return isNaN(d.getTime()) ? null : d;
+    // إذا كان بالفعل كائن Date
+    if (input instanceof Date) {
+      return isNaN(input.getTime()) ? null : input;
     }
-    const s = String(d).trim();
+
+    const s = String(input).trim();
     if (!s) return null;
-    
-    // محاولة تحليل تنسيق YYYY-MM-DD
-    const parts = s.split('-');
-    if (parts.length === 3) {
-      const y = Number(parts[0]), m = Number(parts[1]) - 1, day = Number(parts[2]);
-      if (isNaN(y) || isNaN(m) || isNaN(day)) return null;
-      const dt = new Date(y, m, day);
-      if (isNaN(dt.getTime())) return null;
-      // تحديد الساعة على نهاية اليوم (23:59:59) للعدّاد
-      dt.setHours(23,59,59,999);
-      return dt;
+
+    console.log('parseDateISO input:', s); // للتشخيص
+
+    // 1️⃣ تنسيق ISO كامل (مثل: 2025-10-20T21:00:00.000Z)
+    const isoFullPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?$/;
+    if (isoFullPattern.test(s)) {
+      console.log('Matched ISO full format');
+      const date = new Date(s);
+      if (isNaN(date.getTime())) return null;
+      // ضبط الوقت على نهاية اليوم المحلي للعدّاد
+      date.setHours(23, 59, 59, 999);
+      console.log('Parsed ISO date:', date.toISOString());
+      return date;
     }
-    
-    // محاولة تحليل تنسيقات أخرى
-    const dt2 = new Date(s);
-    if (isNaN(dt2.getTime())) return null;
-    return dt2;
+
+    // 2️⃣ تنسيق YYYY-MM-DD فقط
+    const ymdPattern = /^\d{4}-\d{2}-\d{2}$/;
+    if (ymdPattern.test(s)) {
+      console.log('Matched YYYY-MM-DD format');
+      const [year, month, day] = s.split('-').map(Number);
+      if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
+      const date = new Date(year, month - 1, day);
+      if (isNaN(date.getTime())) return null;
+      date.setHours(23, 59, 59, 999);
+      console.log('Parsed YYYY-MM-DD date:', date.toISOString());
+      return date;
+    }
+
+    // 3️⃣ أي تنسيق آخر يدعمه المتصفح
+    console.log('Trying generic Date parsing');
+    const fallbackDate = new Date(s);
+    if (!isNaN(fallbackDate.getTime())) {
+      fallbackDate.setHours(23, 59, 59, 999);
+      console.log('Parsed generic date:', fallbackDate.toISOString());
+      return fallbackDate;
+    }
+
+    console.warn('Failed to parse date:', s);
+    return null;
   } catch (e) {
-    console.warn('parseDateISO error:', e, 'for input:', d);
+    console.error('parseDateISO error:', e, 'for input:', input);
     return null;
   }
 }
