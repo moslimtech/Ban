@@ -1,13 +1,13 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbwB0VE5COC0e6NQNKrxQeNRu2Mtt_QuMbVoBrH7tE6Da3X3BP6UxK926bt9fDO0WPU5/exec';
 
 
-// أضف Service Worker registration هنا
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(reg => console.log('Service Worker registered'))
-      .catch(err => console.warn('SW registration failed:', err));
-  });
+// // أضف Service Worker registration هنا
+// if ('serviceWorker' in navigator) {
+//   window.addEventListener('load', () => {
+//     navigator.serviceWorker.register('/service-worker.js')
+//       .then(reg => console.log('Service Worker registered'))
+//       .catch(err => console.warn('SW registration failed:', err));
+//   });
 
 let currentTab = 'places';
 let uploadedImages = [];
