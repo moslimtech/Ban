@@ -33,14 +33,21 @@ self.addEventListener("activate", (event) => {
 
 // جلب البيانات مع الكاش الديناميكي + صفحة أوفلاين
 self.addEventListener("fetch", (event) => {
+  // تجاهل طلبات POST لتجنب خطأ Cache
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
         // لو الطلب نجح → خزنه في الكاش وارجعه
-        const responseClone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseClone);
-        });
+        if (response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+        }
         return response;
       })
       .catch(() => {
