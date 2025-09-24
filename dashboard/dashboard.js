@@ -19,15 +19,15 @@ const AUTO_REFRESH_INTERVAL = 600000; // 30 ثانية
 
 
 
-// // أضف Service Worker registration هنا
-/* ==== تسجيل Service Worker ==== */
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('Ban/service-worker.js')  // من مجلد dashboard إلى الجذر
-      .then(reg => console.log('Service Worker registered', reg))
-      .catch(err => console.warn('SW registration failed:', err));
-  });
+// // // أضف Service Worker registration هنا
+// /* ==== تسجيل Service Worker ==== */
+// if ('serviceWorker' in navigator) {
+//   window.addEventListener('load', () => {
+//     navigator.serviceWorker
+//       .register('Ban/service-worker.js')  // من مجلد dashboard إلى الجذر
+//       .then(reg => console.log('Service Worker registered', reg))
+//       .catch(err => console.warn('SW registration failed:', err));
+//   });
 
 
 /* ========== Theme ========== */
