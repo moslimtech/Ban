@@ -22,7 +22,7 @@ const AUTO_REFRESH_INTERVAL = 600000; // 30 ثانية
 // // أضف Service Worker registration هنا
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('../service-worker.js')
+    navigator.serviceWorker.register('./service-worker.js')
       .then(reg => console.log('Service Worker registered'))
       .catch(err => console.warn('SW registration failed:', err));
   });
