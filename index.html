@@ -2048,9 +2048,8 @@
       const url = 'https://moslimtech.github.io/Ban/metools';
       if (!btn) return;
       btn.addEventListener('click', function(){
-        // window.open مع noopener لفتح آمن
-        const newWin = window.open(url, '_blank');
-        try { if (newWin) newWin.opener = null; } catch(e){}
+        // افتح الرابط في نفس الصفحة
+        window.location.href = url;
       });
       // دعم لوحة المفاتيح (Enter/Space)
       btn.addEventListener('keydown', function(e){
