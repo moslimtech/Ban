@@ -4,14 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>فاتورة / عرض أسعار</title>
-  <!-- html2canvas & jsPDF (CDN) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-
   <style>
-    /* للطباعة: نظهر فقط معاينة المستند داخل صفحة الطباعة */
     @media print {
       body * { visibility: hidden; }
       #docPreview, #docPreview * { visibility: visible; }
@@ -20,8 +16,6 @@
       .hide-if-empty { display: none !important; }
       .export-hide-if-empty { display: none !important; }
     }
-
-    /* علامة مائية */
     .watermark {
       position: absolute;
       top: 70%;
@@ -33,23 +27,13 @@
       pointer-events: none;
       z-index: 0;
     }
-
-    /* نمنع تحديد النص (اختياري) داخل watermark */
     .watermark::selection { background: transparent; }
-
-    /* إخفاء أزرار الحذف عند التصدير */
     .remove-row-btn.export-hide { display: none !important; }
-    
-    /* إخفاء العناصر الفارغة عند التصدير */
     .export-hide-if-empty { display: none !important; }
-
-    /* تحسين ظهور contenteditable عندما يكون فارغاً */
     [contenteditable]:empty:before {
       content: attr(data-placeholder);
-      color: #9CA3AF; /* gray-400 */
+      color: #9CA3AF;
     }
-
-    /* بسيطة: جعل inputs داخل الجدول تبدو متجانسة */
     table input[type="text"], table input[type="number"] {
       outline: none;
       border: none;
@@ -62,11 +46,7 @@
       -webkit-appearance: none;
       margin: 0;
     }
-
-    /* تصميم حقل التاريخ المدمج */
-    #datetimeContainer {
-      position: relative;
-    }
+    #datetimeContainer { position: relative; }
     #datetimeInput {
       width: 100%;
       padding: 0.5rem;
@@ -76,79 +56,32 @@
       text-align: right;
       font-size: 0.875rem;
     }
-
-    /* تحسينات للموبايل */
     @media (max-width: 767px) {
-      /* تصغير حجم النص على الموبايل */
-      #docPreview {
-        font-size: 0.875rem;
-      }
-      
-      /* تحسين عرض الجدول على الموبايل */
-      #itemsTable {
-        font-size: 0.75rem;
-      }
-      
-      #itemsTable th, #itemsTable td {
-        padding: 0.25rem !important;
-      }
-      
-      /* تحسين حجم المدخلات */
-      table input[type="text"], table input[type="number"] {
-        font-size: 0.75rem;
-        min-height: 1.5rem;
-      }
-      
-      /* تحسين حجم النصوص */
-      #docTitle {
-        font-size: 1.25rem !important;
-      }
-      
-      #placeTitle {
-        font-size: 1rem !important;
-      }
-      
-      /* تحسين spacing */
-      #docPreview {
-        padding: 1rem !important;
-      }
-      
-      /* علامة مائية أصغر للموبايل */
-      .watermark {
-        font-size: 40px;
-      }
+      #docPreview { font-size: 0.875rem; }
+      #itemsTable { font-size: 0.75rem; }
+      #itemsTable th, #itemsTable td { padding: 0.25rem !important; }
+      table input[type="text"], table input[type="number"] { font-size: 0.75rem; min-height: 1.5rem; }
+      #docTitle { font-size: 1.25rem !important; }
+      #placeTitle { font-size: 1rem !important; }
+      #docPreview { padding: 1rem !important; }
+      .watermark { font-size: 40px; }
     }
-
-    /* تحسينات إضافية للشاشات الصغيرة جداً */
     @media (max-width: 480px) {
-      #docPreview {
-        font-size: 0.8rem;
-      }
-      
-      #itemsTable {
-        font-size: 0.7rem;
-      }
-      
-      #docTitle {
-        font-size: 1.1rem !important;
-      }
-      
-      .watermark {
-        font-size: 30px;
-      }
+      #docPreview { font-size: 0.8rem; }
+      #itemsTable { font-size: 0.7rem; }
+      #docTitle { font-size: 1.1rem !important; }
+      .watermark { font-size: 30px; }
     }
   </style>
 </head>
 <body class="bg-gray-100 p-2 md:p-4">
 
   <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-3 md:p-6 relative">
-    <!-- رأس الصفحة: اختيار نوع المستند + شعار فقط -->
     <div class="mb-4 md:mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
       <div class="flex gap-2 md:gap-3 justify-center md:justify-start">
         <button type="button" onclick="setDocType('فاتورة')" class="px-3 py-2 md:px-4 md:py-2 bg-blue-600 text-white rounded-lg text-sm md:text-base">فاتورة</button>
         <button type="button" onclick="setDocType('عرض سعر')" class="px-3 py-2 md:px-4 md:py-2 bg-green-600 text-white rounded-lg text-sm md:text-base">عرض سعر</button>
       </div>
-
       <div class="flex-1 md:flex md:justify-end">
         <label class="block">
           <span class="sr-only">رفع شعار المكان</span>
@@ -157,7 +90,6 @@
       </div>
     </div>
 
-    <!-- معاينة المستند -->
     <div id="docPreview" class="relative border rounded-lg p-3 md:p-6 mt-2 bg-white">
       <div class="watermark" id="watermark"></div>
 
@@ -166,7 +98,6 @@
         <h1 id="docTitle" class="text-xl md:text-2xl font-bold text-center flex-1">فاتورة</h1>
       </div>
 
-      <!-- اسم المكان -->
       <h2 class="text-lg md:text-xl font-bold text-center mb-2">
         <span id="placeTitle"
              contenteditable="true"
@@ -174,7 +105,6 @@
              oninput="updatePreview()"></span>
       </h2>
 
-      <!-- رقم المكان -->
       <p id="placeNumberContainer" class="text-center text-gray-600 mb-3 md:mb-2">
         <span id="placeNumberText"
              contenteditable="true"
@@ -182,9 +112,7 @@
              oninput="updatePreview()"></span>
       </p>
 
-      <!-- معلومات العميل والتاريخ - تخطيط محسن للموبايل -->
       <div class="space-y-2 md:space-y-0 md:grid md:grid-cols-3 md:gap-2 md:items-center mb-3 md:mb-4">
-        <!-- اسم العميل -->
         <div id="customerContainer" class="md:col-span-2">
           <p class="flex flex-wrap items-center gap-1">
             <strong class="shrink-0">اسم العميل:</strong>
@@ -196,19 +124,18 @@
           </p>
         </div>
 
-        <!-- التاريخ -->
         <div id="datetimeContainer" class="flex flex-col">
-          <small class="text-gray-500 text-right mb-1">التاريخ</small>
+          <small class="text-gray-500 text-right mb-1">التاريخ والوقت</small>
           <input 
-            type="date" 
+            type="datetime-local" 
             id="datetimeInput"
             class="text-right text-sm md:text-base"
             oninput="updatePreview()"
+            placeholder="YYYY-MM-DD HH:MM"
           >
         </div>
       </div>
 
-      <!-- جدول الأصناف -->
       <div class="overflow-x-auto mb-3 md:mb-4">
         <table id="itemsTable" class="w-full text-center border table-fixed min-w-full">
           <thead>
@@ -218,8 +145,12 @@
         </table>
       </div>
 
-      <!-- إجمالي / ملاحظات -->
-      <div id="totalSection" class="text-right font-bold text-lg md:text-xl">الإجمالي: <span id="total">0</span> ج.م</div>
+      <div id="totalSection" class="text-right font-bold text-lg md:text-xl">
+        <!-- سيتم تعبئتهم بواسطة JS -->
+        الإجمالي قبل الخصم: <span id="totalBefore">0</span> ج.م<br/>
+        إجمالي الخصومات: <span id="totalDiscounts">0</span> ج.م<br/>
+        الإجمالي بعد الخصم: <span id="totalAfter">0</span> ج.م
+      </div>
 
       <div id="notesSection" class="mt-3 md:mt-4 hidden">
         <div id="generalNotes"
@@ -230,7 +161,6 @@
       </div>
     </div>
 
-    <!-- أزرار التحكم -->
     <div class="flex flex-wrap justify-center gap-2 md:gap-4 mt-4 md:mt-6">
       <button type="button" onclick="addRow()" class="px-3 py-2 md:px-4 md:py-2 bg-blue-500 text-white rounded-lg text-sm md:text-base">📝 إضافة صنف</button>
       <button type="button" onclick="downloadPDF()" class="px-3 py-2 md:px-4 md:py-2 bg-red-600 text-white rounded-lg text-sm md:text-base">📥 تحميل PDF</button>
@@ -239,340 +169,319 @@
     </div>
   </div>
 
-  <!-- Bottom navigation (mobile) -->
   <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur z-40 shadow-lg border-t border-gray-200">
     <div class="max-w-4xl mx-auto flex justify-around items-center p-2">
-      <!-- الأزرار كما في الكود الأصلي -->
-      …
+      <button type="button" data-href="https://moslimtech.github.io/Ban/" class="nav-link flex flex-col items-center text-center text-xs text-gray-700 hover:text-indigo-600" data-name="home" aria-label="الإعلانات العامة">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v7h14v-7h2v9H3v-9zm3-8h12v6H6V5zm2 2v2h8V7H8z"/></svg>
+        <span class="block">الإعلانات</span>
+      </button>
+      <button type="button" data-href="https://wa.me/01558905023" class="nav-link flex flex-col items-center text-center text-xs text-gray-700 hover:text-indigo-600" data-name="contact" aria-label="اتصل بنا">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.52 3.48A11.94 11.94 0 0012.01 0C5.39 0 .01 5.37.01 11.99c0 2.11.55 4.16 1.6 5.98L0 24l6.2-1.62a11.96 11.96 0 005.8 1.49h.01c6.62 0 12-5.38 12-12 0-3.2-1.25-6.21-3.49-8.39zM12 22.05h-.01a9.97 9.97 0 01-5.08-1.39l-.36-.21-3.68.96.98-3.59-.24-.37A9.95 9.95 0 012.03 12C2.03 6.49 6.49 2.03 12 2.03c2.66 0 5.17 1.04 7.06 2.93a9.93 9.93 0 012.93 7.04c0 5.51-4.47 10.05-9.99 10.05z"/></svg>
+        <span class="block">اتصل بنا</span>
+      </button>
+      <button type="button" data-href="https://moslimtech.github.io/Ban/dashboard/" class="nav-link flex flex-col items-center text-center text-xs text-gray-700 hover:text-indigo-600" data-name="dashboard" aria-label="دخول">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        <span class="block">دخول</span>
+      </button>
     </div>
   </nav>
-  
-  <!-- Top nav (desktop) -->
-  <nav class="hidden md:flex fixed top-0 left-0 right-0 bg-white/95 backdrop-blur z-40 shadow-sm border-b border-gray-200">
-    <div class="max-w-4xl mx-auto flex justify-between items-center p-3">
-      <!-- الأزرار كما في الكود الأصلي -->
-      …
-    </div>
-  </nav>
-  
-  <!-- Responsive spacing -->
-  <style>
-    @media (max-width: 767px) { 
-      body { padding-bottom: 72px !important; }
+
+<script>
+  const { jsPDF } = window.jspdf;
+  let docType = "فاتورة";
+  let logoData = null;
+
+  function setDocType(type) {
+    docType = type;
+    document.getElementById("docTitle").textContent = type;
+    buildTable();
+    toggleSections();
+    updatePreview();
+  }
+
+  function buildTable() {
+    const head = document.getElementById("tableHead");
+    head.innerHTML = "";
+    if (docType === "فاتورة") {
+      head.innerHTML = `
+        <th class="p-1 md:p-2 border text-xs md:text-sm">الصنف</th>
+        <th class="p-1 md:p-2 border w-20 md:w-28 text-xs md:text-sm">الكمية</th>
+        <th class="p-1 md:p-2 border w-24 md:w-32 text-xs md:text-sm">سعر الوحدة</th>
+        <th class="p-1 md:p-2 border w-24 md:w-32 text-xs md:text-sm">الإجمالي</th>
+        <th class="p-1 md:p-2 border w-24 md:w-28 text-xs md:text-sm">الخصم (ج)</th>
+        <th class="p-1 md:p-2 border w-28 md:w-36 text-xs md:text-sm">الإجمالي بعد الخصم</th>
+        <th class="remove-row-btn w-8">X</th>
+      `;
+    } else {
+      head.innerHTML = `
+        <th class="p-1 md:p-2 border text-xs md:text-sm">الصنف</th>
+        <th class="p-1 md:p-2 border text-xs md:text-sm">الوحدة</th>
+        <th class="p-1 md:p-2 border w-16 md:w-28 text-xs md:text-sm">السعر</th>
+        <th class="p-1 md:p-2 border text-xs md:text-sm">ملاحظات</th>
+        <th class="remove-row-btn w-8">X</th>
+      `;
     }
-    @media (min-width: 768px) { 
-      body { padding-top: 64px !important; }
+    document.getElementById("items").innerHTML = "";
+    addRow();
+    updateTotal();
+  }
+
+  function toggleSections() {
+    document.getElementById("totalSection").style.display = (docType === "فاتورة") ? "block" : "none";
+    document.getElementById("notesSection").style.display = (docType === "عرض سعر") ? "block" : "none";
+  }
+
+  document.getElementById("placeLogo").addEventListener("change", e => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        logoData = ev.target.result;
+        document.getElementById("logoPreview").src = logoData;
+        document.getElementById("logoPreview").classList.remove("hidden");
+      };
+      reader.readAsDataURL(file);
+    } else {
+      logoData = null;
+      document.getElementById("logoPreview").src = '';
+      document.getElementById("logoPreview").classList.add("hidden");
     }
-    .nav-active { color: #4f46e5 !important; }
-    .nav-active svg { color: #4f46e5 !important; }
-  </style>
-  
-  <!-- Navigation script -->
-  <script>
-    (function(){
-      const links = document.querySelectorAll('.nav-link, .nav-link-desktop');
-      const path = window.location.pathname;
-      links.forEach(el => {
-        try {
-          const href = el.getAttribute('href') || el.dataset.href;
-          if (!href) return;
-          if (el.dataset && el.dataset.href) {
-            el.addEventListener('click', () => { window.location.href = el.dataset.href; });
-            el.style.cursor = 'pointer';
-            el.setAttribute('role', 'button');
-          }
-          if (href.includes('wa.me')) {
-            el.classList.remove('nav-active');
-            return;
-          }
-          if (href.includes('/Ban/dashboard') || href.includes('/dashboard')) {
-            if (path.includes('dashboard')) el.classList.add('nav-active');
-          } else if (href.includes('/Ban/') || href.includes('/Ban')) {
-            if (path.includes('/Ban') && !path.includes('dashboard')) el.classList.add('nav-active');
-          }
-        } catch(e){ console.error(e); }
-      });
-    })();
-  </script>
-  
-  <!-- Main application script -->
-  <script>
-    const { jsPDF } = window.jspdf;
-    let docType = "فاتورة";
-    let logoData = null;
+  });
 
-    function setDocType(type) {
-      docType = type;
-      document.getElementById("docTitle").textContent = type;
-      buildTable();
-      toggleSections();
-      updatePreview();
+  window.addEventListener('load', () => {
+    const now = new Date();
+    const isoDate = now.toISOString().slice(0, 16);
+    const datetimeEl = document.getElementById('datetimeInput');
+    if (!datetimeEl.value) datetimeEl.value = isoDate;
+    buildTable();
+    toggleSections();
+    updatePreview();
+  });
+
+  function addRow() {
+    let row = '';
+    if (docType === 'فاتورة') {
+      row = `
+        <tr class="align-middle">
+          <td class="border p-1 md:p-2"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="اسم الصنف" oninput="updatePreview()"></td>
+          <td class="border p-1 md:p-2"><input type="number" value="1" min="0" step="1" class="w-full text-center text-xs md:text-sm qty" oninput="updateTotal()"></td>
+          <td class="border p-1 md:p-2"><input type="number" value="0" min="0" step="0.01" class="w-full text-center text-xs md:text-sm price" oninput="updateTotal()"></td>
+          <td class="border p-1 md:p-2 total text-xs md:text-sm">0</td>
+          <td class="border p-1 md:p-2"><input type="number" value="0" min="0" step="0.01" class="w-full text-center text-xs md:text-sm row-discount" oninput="updateTotal()"></td>
+          <td class="border p-1 md:p-2 net text-xs md:text-sm">0</td>
+          <td class="remove-row-btn p-1"><button type="button" onclick="this.closest('tr').remove(); updateTotal()" class="text-red-500 text-xs">X</button></td>
+        </tr>
+      `;
+    } else {
+      row = `
+        <tr class="align-middle">
+          <td class="border p-1 md:p-2"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="اسم الصنف" oninput="updatePreview()"></td>
+          <td class="border p-1 md:p-2"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="الوحدة" oninput="updatePreview()"></td>
+          <td class="border p-1 md:p-2"><input type="number" value="0" class="w-full text-center text-xs md:text-sm" oninput="updatePreview()"></td>
+          <td class="border p-1 md:p-2"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="ملاحظات" oninput="updatePreview()"></td>
+          <td class="remove-row-btn p-1"><button type="button" onclick="this.closest('tr').remove(); updatePreview()" class="text-red-500 text-xs">X</button></td>
+        </tr>
+      `;
     }
+    document.getElementById('items').insertAdjacentHTML('beforeend', row);
+    updateTotal();
+    updatePreview();
+    const last = document.querySelector('#items tr:last-child input');
+    if (last) last.focus();
+  }
 
-    function buildTable() {
-      const head = document.getElementById("tableHead");
-      head.innerHTML = "";
-      if (docType === "فاتورة") {
-        head.innerHTML = `
-          <th class="p-1 md:p-2 border text-xs md:text-sm">الصنف</th>
-          <th class="p-1 md:p-2 border w-16 md:w-28 text-xs md:text-sm">الكمية</th>
-          <th class="p-1 md:p-2 border w-16 md:w-28 text-xs md:text-sm">السعر</th>
-          <th class="p-1 md:p-2 border text-xs md:text-sm">الإجمالي</th>
-          <th class="remove-row-btn w-8">X</th>
-        `;
-      } else {
-        head.innerHTML = `
-          <th class="p-1 md:p-2 border text-xs md:text-sm">الصنف</th>
-          <th class="p-1 md:p-2 border text-xs md:text-sm">الوحدة</th>
-          <th class="p-1 md:p-2 border w-16 md:w-28 text-xs md:text-sm">السعر</th>
-          <th class="p-1 md:p-2 border text-xs md:text-sm">ملاحظات</th>
-          <th class="remove-row-btn w-8">X</th>
-        `;
-      }
-      document.getElementById("items").innerHTML = "";
-      addRow();
-      updateTotal();
-    }
+  function updateTotal() {
+    let totalBefore = 0;
+    let totalDiscounts = 0;
+    let totalAfter = 0;
 
-    function toggleSections() {
-      document.getElementById("totalSection").style.display = (docType === "فاتورة") ? "block" : "none";
-      document.getElementById("notesSection").style.display = (docType === "عرض سعر") ? "block" : "none";
-    }
-
-    document.getElementById("placeLogo").addEventListener("change", e => {
-      const file = e.target.files;
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = ev => {
-          logoData = ev.target.result;
-          document.getElementById("logoPreview").src = logoData;
-          document.getElementById("logoPreview").classList.remove("hidden");
-        };
-        reader.readAsDataURL(file);
-      } else {
-        logoData = null;
-        document.getElementById("logoPreview").src = '';
-        document.getElementById("logoPreview").classList.add("hidden");
-      }
-    });
-
-    window.addEventListener('load', () => {
-      // نعطي حقل التاريخ قيمة اليوم (YYYY-MM-DD) دون الوقت
-      const today = new Date().toISOString().slice(0, 10);
-      const datetimeEl = document.getElementById('datetimeInput');
-      if (!datetimeEl.value) {
-        datetimeEl.value = today;
-      }
-
-      buildTable();
-      toggleSections();
-      updatePreview();
-    });
-
-    function addRow() {
-      let row = '';
+    document.querySelectorAll('#items tr').forEach(tr => {
       if (docType === 'فاتورة') {
-        row = `
-          <tr class="align-middle">
-            <td class="border p-1 md:p-2"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="اسم الصنف" oninput="updatePreview()"></td>
-            <td class="border p-1 md:p-2"><input type="number" value="1" min="1" class="w-full text-center text-xs md:text-sm" oninput="updateTotal()"></td>
-            <td class="border p-1 md:p-2"><input type="number" value="0" min="0" class="w-full text-center text-xs md:text-sm" oninput="updateTotal()"></td>
-            <td class="border p-1 md:p-2 total text-xs md:text-sm">0</td>
-            <td class="remove-row-btn p-1"><button type="button" onclick="this.closest('tr').remove(); updateTotal()" class="text-red-500 text-xs">X</button></td>
-          </tr>
-        `;
-      } else {
-        row = `
-          <tr class="align-middle">
-            <td class="border p-1 md:p-2"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="اسم الصنف" oninput="updatePreview()"></td>
-            <td class="border p-1 md:p-2"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="الوحدة" oninput="updatePreview()"></td>
-            <td class="border p-1 md:p-2"><input type="number" value="0" class="w-full text-center text-xs md:text-sm" oninput="updatePreview()"></td>
-            <td class="border p-1 md:p-2"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="ملاحظات" oninput="updatePreview()"></td>
-            <td class="remove-row-btn p-1"><button type="button" onclick="this.closest('tr').remove(); updatePreview()" class="text-red-500 text-xs">X</button></td>
-          </tr>
-        `;
+        const qtyEl = tr.querySelector('.qty');
+        const priceEl = tr.querySelector('.price');
+        const discountEl = tr.querySelector('.row-discount');
+        const totalCell = tr.querySelector('.total');
+        const netCell = tr.querySelector('.net');
+
+        const qty = parseFloat(qtyEl?.value || 0) || 0;
+        const price = parseFloat(priceEl?.value || 0) || 0;
+        let rowSum = +(qty * price);
+        rowSum = Number.isFinite(rowSum) ? +rowSum.toFixed(2) : 0;
+
+        let discount = parseFloat(discountEl?.value || 0) || 0;
+        if (discount > rowSum) discount = rowSum; // لا نجعل الخصم أكبر من إجمالي الصف
+
+        const net = +(rowSum - discount);
+        totalCell.textContent = Number.isInteger(rowSum) ? rowSum : rowSum.toFixed(2);
+        netCell.textContent = Number.isInteger(net) ? net : net.toFixed(2);
+
+        totalBefore += rowSum;
+        totalDiscounts += discount;
+        totalAfter += net;
       }
-      document.getElementById('items').insertAdjacentHTML('beforeend', row);
-      updateTotal();
-      updatePreview();
-      const last = document.querySelector('#items tr:last-child input');
-      if (last) last.focus();
+    });
+
+    const fmt = v => (Number.isInteger(v) ? v : v.toFixed(2));
+    document.getElementById('totalBefore').textContent = fmt(totalBefore);
+    document.getElementById('totalDiscounts').textContent = fmt(totalDiscounts);
+    document.getElementById('totalAfter').textContent = fmt(totalAfter);
+
+    updatePreview();
+  }
+
+  function updatePreview() {
+    const placeName = document.getElementById('placeTitle').textContent.trim();
+    const placeNumber = document.getElementById('placeNumberText').textContent.trim();
+    const customer = document.getElementById('customerText').textContent.trim();
+    const datetime = document.getElementById('datetimeInput').value;
+
+    if (logoData) {
+      document.getElementById('logoPreview').src = logoData;
+      document.getElementById('logoPreview').classList.remove('hidden');
+    } else {
+      document.getElementById('logoPreview').src = '';
+      document.getElementById('logoPreview').classList.add('hidden');
     }
 
-    function updateTotal() {
-      let total = 0;
-      document.querySelectorAll('#items tr').forEach(tr => {
-        if (docType === 'فاتورة') {
-          const qtyEl = tr.querySelector('td:nth-child(2) input');
-          const priceEl = tr.querySelector('td:nth-child(3) input');
-          const qty = parseFloat(qtyEl?.value || 0) || 0;
-          const price = parseFloat(priceEl?.value || 0) || 0;
-          const sum = +(qty * price).toFixed(2);
-          const totalCell = tr.querySelector('.total');
-          if (totalCell) totalCell.textContent = sum;
-          total += sum;
+    document.getElementById('watermark').textContent = placeName || '';
+
+    // لا نعطي قيم افتراضية للشعار أو رقم التليفون (مطابق لطلبك)
+  }
+
+  function hideEmptyElements() {
+    const placeName = document.getElementById('placeTitle').textContent.trim();
+    if (!placeName) {
+      document.getElementById('placeTitle').parentElement.classList.add('export-hide-if-empty');
+    } else {
+      document.getElementById('placeTitle').parentElement.classList.remove('export-hide-if-empty');
+    }
+
+    const placeNumber = document.getElementById('placeNumberText').textContent.trim();
+    if (!placeNumber) {
+      document.getElementById('placeNumberContainer').classList.add('export-hide-if-empty');
+    } else {
+      document.getElementById('placeNumberContainer').classList.remove('export-hide-if-empty');
+    }
+
+    const customer = document.getElementById('customerText').textContent.trim();
+    if (!customer || customer === '-') {
+      document.getElementById('customerContainer').classList.add('export-hide-if-empty');
+    } else {
+      document.getElementById('customerContainer').classList.remove('export-hide-if-empty');
+    }
+
+    const datetime = document.getElementById('datetimeInput').value;
+    if (!datetime) {
+      document.getElementById('datetimeContainer').classList.add('export-hide-if-empty');
+    } else {
+      document.getElementById('datetimeContainer').classList.remove('export-hide-if-empty');
+    }
+
+    if (docType === 'عرض سعر') {
+      const notes = document.getElementById('generalNotes').textContent.trim();
+      if (!notes) {
+        document.getElementById('notesSection').classList.add('export-hide-if-empty');
+      } else {
+        document.getElementById('notesSection').classList.remove('export-hide-if-empty');
+      }
+    }
+  }
+
+  function showAllElements() {
+    document.querySelectorAll('.export-hide-if-empty').forEach(el => {
+      el.classList.remove('export-hide-if-empty');
+    });
+  }
+
+  function downloadPDF() {
+    const docElement = document.getElementById('docPreview');
+    docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.add('export-hide'));
+    hideEmptyElements();
+
+    html2canvas(docElement, { scale: 2 }).then(canvas => {
+      docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.remove('export-hide'));
+      showAllElements();
+
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const imgProps = pdf.getImageProperties(imgData);
+      let pdfWidth = pageWidth - 20;
+      let pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      if (pdfHeight > pageHeight - 20) {
+        pdfHeight = pageHeight - 20;
+        pdfWidth = (imgProps.width * pdfHeight) / imgProps.height;
+      }
+      const x = (pageWidth - pdfWidth) / 2;
+      pdf.addImage(imgData, 'JPEG', x, 10, pdfWidth, pdfHeight, '', 'FAST');
+      pdf.save((docType || 'document') + '.pdf');
+    }).catch(err => {
+      docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.remove('export-hide'));
+      showAllElements();
+      alert('حدث خطأ أثناء إنشاء PDF: ' + err.message);
+    });
+  }
+
+  async function shareDoc() {
+    const docElement = document.getElementById('docPreview');
+    docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.add('export-hide'));
+    hideEmptyElements();
+    
+    try {
+      const canvas = await html2canvas(docElement, { scale: 2 });
+      docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.remove('export-hide'));
+      showAllElements();
+      
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const imgProps = pdf.getImageProperties(imgData);
+      let pdfWidth = pageWidth - 20;
+      let pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      if (pdfHeight > pageHeight - 20) {
+        pdfHeight = pageHeight - 20;
+        pdfWidth = (imgProps.width * pdfHeight) / imgProps.height;
+      }
+      const x = (pageWidth - pdfWidth) / 2;
+      pdf.addImage(imgData, 'JPEG', x, 10, pdfWidth, pdfHeight, '', 'FAST');
+
+      const blob = pdf.output('blob');
+      const file = new File([blob], (docType || 'document') + '.pdf', { type: 'application/pdf' });
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: docType, text: 'إليك نسخة من ' + docType });
+        } catch (err) {
+          alert('تم إلغاء المشاركة.');
         }
-      });
-      document.getElementById('total').textContent = Number.isInteger(total) ? total : total.toFixed(2);
-      updatePreview();
-    }
-
-    function updatePreview() {
-      const placeName = document.getElementById('placeTitle').textContent.trim();
-      const placeNumber = document.getElementById('placeNumberText').textContent.trim();
-      const customer = document.getElementById('customerText').textContent.trim();
-      const datetime = document.getElementById('datetimeInput').value;
-
-      if (logoData) {
-        document.getElementById('logoPreview').src = logoData;
-        document.getElementById('logoPreview').classList.remove('hidden');
       } else {
-        document.getElementById('logoPreview').src = '';
-        document.getElementById('logoPreview').classList.add('hidden');
-      }
-
-      document.getElementById('watermark').textContent = placeName || '';
-
-      if (docType === 'عرض سعر') {
-        const notes = document.getElementById('generalNotes').textContent.trim();
-      }
-    }
-
-    function hideEmptyElements() {
-      const placeName = document.getElementById('placeTitle').textContent.trim();
-      if (!placeName) {
-        document.getElementById('placeTitle').parentElement.classList.add('export-hide-if-empty');
-      } else {
-        document.getElementById('placeTitle').parentElement.classList.remove('export-hide-if-empty');
-      }
-
-      const placeNumber = document.getElementById('placeNumberText').textContent.trim();
-      if (!placeNumber) {
-        document.getElementById('placeNumberContainer').classList.add('export-hide-if-empty');
-      } else {
-        document.getElementById('placeNumberContainer').classList.remove('export-hide-if-empty');
-      }
-
-      const customer = document.getElementById('customerText').textContent.trim();
-      if (!customer || customer === '-') {
-        document.getElementById('customerContainer').classList.add('export-hide-if-empty');
-      } else {
-        document.getElementById('customerContainer').classList.remove('export-hide-if-empty');
-      }
-
-      const datetime = document.getElementById('datetimeInput').value;
-      if (!datetime) {
-        document.getElementById('datetimeContainer').classList.add('export-hide-if-empty');
-      } else {
-        document.getElementById('datetimeContainer').classList.remove('export-hide-if-empty');
-      }
-
-      if (docType === 'عرض سعر') {
-        const notes = document.getElementById('generalNotes').textContent.trim();
-        if (!notes) {
-          document.getElementById('notesSection').classList.add('export-hide-if-empty');
-        } else {
-          document.getElementById('notesSection').classList.remove('export-hide-if-empty');
-        }
-      }
-    }
-
-    function showAllElements() {
-      document.querySelectorAll('.export-hide-if-empty').forEach(el => {
-        el.classList.remove('export-hide-if-empty');
-      });
-    }
-
-    function downloadPDF() {
-      const docElement = document.getElementById('docPreview');
-      docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.add('export-hide'));
-      hideEmptyElements();
-
-      html2canvas(docElement, { scale: 2 }).then(canvas => {
-        docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.remove('export-hide'));
-        showAllElements();
-
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pageWidth = 210;
-        const pageHeight = 297;
-        const imgProps = pdf.getImageProperties(imgData);
-        let pdfWidth = pageWidth - 20;
-        let pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        if (pdfHeight > pageHeight - 20) {
-          pdfHeight = pageHeight - 20;
-          pdfWidth = (imgProps.width * pdfHeight) / imgProps.height;
-        }
-        const x = (pageWidth - pdfWidth) / 2;
-        pdf.addImage(imgData, 'JPEG', x, 10, pdfWidth, pdfHeight, '', 'FAST');
         pdf.save((docType || 'document') + '.pdf');
-      }).catch(err => {
-        docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.remove('export-hide'));
-        showAllElements();
-        alert('حدث خطأ أثناء إنشاء PDF: ' + err.message);
-      });
-    }
-
-    async function shareDoc() {
-      const docElement = document.getElementById('docPreview');
-      docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.add('export-hide'));
-      hideEmptyElements();
-      
-      try {
-        const canvas = await html2canvas(docElement, { scale: 2 });
-        docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.remove('export-hide'));
-        showAllElements();
-        
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pageWidth = 210;
-        const pageHeight = 297;
-        const imgProps = pdf.getImageProperties(imgData);
-        let pdfWidth = pageWidth - 20;
-        let pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        if (pdfHeight > pageHeight - 20) {
-          pdfHeight = pageHeight - 20;
-          pdfWidth = (imgProps.width * pdfHeight) / imgProps.height;
-        }
-        const x = (pageWidth - pdfWidth) / 2;
-        pdf.addImage(imgData, 'JPEG', x, 10, pdfWidth, pdfHeight, '', 'FAST');
-
-        const blob = pdf.output('blob');
-        const file = new File([blob], (docType || 'document') + '.pdf', { type: 'application/pdf' });
-
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({ files: [file], title: docType, text: 'إليك نسخة من ' + docType });
-          } catch (err) {
-            alert('تم إلغاء المشاركة.');
-          }
-        } else {
-          pdf.save((docType || 'document') + '.pdf');
-          alert('المشاركة غير مدعومة على هذا الجهاز — تم تنزيل الملف بدلاً من المشاركة.');
-        }
-      } catch (err) {
-        docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.remove('export-hide'));
-        showAllElements();
-        alert('حدث خطأ أثناء المشاركة: ' + err.message);
+        alert('المشاركة غير مدعومة على هذا الجهاز — تم تنزيل الملف بدلاً من المشاركة.');
       }
+    } catch (err) {
+      docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.remove('export-hide'));
+      showAllElements();
+      alert('حدث خطأ أثناء المشاركة: ' + err.message);
     }
+  }
 
-    function printDoc() {
-      hideEmptyElements();
-      document.querySelectorAll('.export-hide-if-empty').forEach(el => {
-        el.classList.add('hide-if-empty');
+  function printDoc() {
+    hideEmptyElements();
+    document.querySelectorAll('.export-hide-if-empty').forEach(el => {
+      el.classList.add('hide-if-empty');
+    });
+    
+    window.print();
+    
+    setTimeout(() => {
+      showAllElements();
+      document.querySelectorAll('.hide-if-empty').forEach(el => {
+        el.classList.remove('hide-if-empty');
       });
-      
-      window.print();
-      
-      setTimeout(() => {
-        showAllElements();
-        document.querySelectorAll('.hide-if-empty').forEach(el => {
-          el.classList.remove('hide-if-empty');
-        });
-      }, 1000);
-    }
-
-  </script>
+    }, 1000);
+  }
+</script>
 </body>
 </html>
