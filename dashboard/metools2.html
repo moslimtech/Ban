@@ -4,61 +4,114 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>فاتورة / عرض أسعار</title>
+<!-- html2canvas & jsPDF (CDN) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
+
 <style>
-  @media print {
-    body * { visibility: hidden; }
-    #docPreview, #docPreview * { visibility: visible; }
-    #docPreview { position: absolute; top: 0; right: 0; left: 0; }
-    .remove-row-btn { display: none !important; }
-    .hide-if-empty { display: none !important; }
-  }
-  .watermark {
-    position: absolute;
-    top: 70%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-30deg);
-    font-size: 60px;
-    color: rgba(200,200,200,0.18);
-    pointer-events: none;
-    z-index: 0;
-  }
-  [contenteditable]:empty:before {
-    content: attr(data-placeholder);
-    color: #9CA3AF;
-  }
-  table input[type="text"], table input[type="number"] {
-    outline: none;
-    border: none;
-    background: transparent;
-    width: 100%;
-    padding: 0.25rem;
-  }
-  table input[type="number"]::-webkit-inner-spin-button,
-  table input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
+/* للطباعة */
+@media print {
+  body * { visibility: hidden; }
+  #docPreview, #docPreview * { visibility: visible; }
+  #docPreview { position: absolute; top: 0; right: 0; left: 0; }
+  .remove-row-btn { display: none !important; }
+  .hide-if-empty { display: none !important; }
+  .export-hide-if-empty { display: none !important; }
+}
+
+/* علامة مائية */
+.watermark {
+  position: absolute;
+  top: 70%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  font-size: 60px;
+  color: rgba(200,200,200,0.18);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 0;
+}
+.watermark::selection { background: transparent; }
+
+.remove-row-btn.export-hide { display: none !important; }
+.export-hide-if-empty { display: none !important; }
+
+[contenteditable]:empty:before {
+  content: attr(data-placeholder);
+  color: #9CA3AF;
+}
+
+table input[type="text"], table input[type="number"] {
+  outline: none;
+  border: none;
+  background: transparent;
+  width: 100%;
+  padding: 0.25rem;
+}
+table input[type="number"]::-webkit-outer-spin-button,
+table input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+#datetimeContainer { position: relative; }
+#datetimeInput {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 0.375rem;
+  direction: ltr;
+  text-align: right;
+  font-size: 0.875rem;
+}
+
+/* تحسينات الموبايل */
+@media (max-width: 767px) {
+  #docPreview { font-size: 0.875rem; }
+  #itemsTable { font-size: 0.75rem; }
+  #itemsTable th, #itemsTable td { padding: 0.25rem !important; }
+  table input[type="text"], table input[type="number"] { font-size: 0.75rem; min-height: 1.5rem; }
+  #docTitle { font-size: 1.25rem !important; }
+  #placeTitle { font-size: 1rem !important; }
+  #docPreview { padding: 1rem !important; }
+  .watermark { font-size: 40px; }
+}
+
+@media (max-width: 480px) {
+  #docPreview { font-size: 0.8rem; }
+  #itemsTable { font-size: 0.7rem; }
+  #docTitle { font-size: 1.1rem !important; }
+  .watermark { font-size: 30px; }
+}
+
+/* Navigation */
+.nav-active { color: #4f46e5 !important; }
+.nav-active svg { color: #4f46e5 !important; }
+.nav-link, .nav-link-desktop { cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; }
 </style>
 </head>
 <body class="bg-gray-100 p-2 md:p-4">
+
 <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-3 md:p-6 relative">
   <!-- رأس الصفحة -->
   <div class="mb-4 md:mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
     <div class="flex gap-2 md:gap-3 justify-center md:justify-start">
-      <button type="button" onclick="setDocType('فاتورة')" class="px-3 py-2 bg-blue-600 text-white rounded-lg">فاتورة</button>
-      <button type="button" onclick="setDocType('عرض سعر')" class="px-3 py-2 bg-green-600 text-white rounded-lg">عرض سعر</button>
+      <button type="button" id="invoiceBtn" class="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm md:text-base">فاتورة</button>
+      <button type="button" id="quoteBtn" class="px-3 py-2 bg-green-600 text-white rounded-lg text-sm md:text-base">عرض سعر</button>
     </div>
     <div class="flex-1 md:flex md:justify-end">
-      <input id="placeLogo" type="file" accept="image/*" class="border rounded-lg p-2 w-full md:w-auto text-sm">
+      <label class="block">
+        <span class="sr-only">رفع شعار المكان</span>
+        <input id="placeLogo" type="file" accept="image/*" class="border rounded-lg p-2 w-full md:w-auto text-sm">
+      </label>
     </div>
   </div>
 
+  <!-- معاينة المستند -->
   <div id="docPreview" class="relative border rounded-lg p-3 md:p-6 mt-2 bg-white">
     <div class="watermark" id="watermark"></div>
-
     <div class="flex justify-between items-center mb-3 md:mb-4">
       <img id="logoPreview" class="h-12 md:h-20 hidden" alt="شعار" />
       <h1 id="docTitle" class="text-xl md:text-2xl font-bold text-center flex-1">فاتورة</h1>
@@ -67,6 +120,7 @@
     <h2 class="text-lg md:text-xl font-bold text-center mb-2">
       <span id="placeTitle" contenteditable="true" data-placeholder="اسم المكان" oninput="updatePreview()"></span>
     </h2>
+
     <p id="placeNumberContainer" class="text-center text-gray-600 mb-3 md:mb-2">
       <span id="placeNumberText" contenteditable="true" data-placeholder="رقم المكان (اختياري)" oninput="updatePreview()"></span>
     </p>
@@ -94,126 +148,63 @@
     </div>
 
     <div id="totalSection" class="text-right font-bold text-lg md:text-xl">الإجمالي: <span id="total">0</span> ج.م</div>
+
     <div id="notesSection" class="mt-3 md:mt-4 hidden">
       <div id="generalNotes" class="w-full border rounded-lg p-2 min-h-[60px] text-sm md:text-base" contenteditable="true" data-placeholder="ملاحظات عامة..." oninput="updatePreview()"></div>
     </div>
   </div>
 
+  <!-- أزرار التحكم -->
   <div class="flex flex-wrap justify-center gap-2 md:gap-4 mt-4 md:mt-6">
-    <button type="button" onclick="addRow()" class="px-3 py-2 bg-blue-500 text-white rounded-lg">📝 إضافة صنف</button>
-    <button type="button" onclick="downloadPDF()" class="px-3 py-2 bg-red-600 text-white rounded-lg">📥 تحميل PDF</button>
-    <button type="button" onclick="printDoc()" class="px-3 py-2 bg-gray-700 text-white rounded-lg">🖨️ طباعة</button>
-    <button type="button" onclick="shareDoc()" class="px-3 py-2 bg-green-600 text-white rounded-lg">⚡ مشاركة</button>
+    <button type="button" id="addRowBtn" class="px-3 py-2 bg-blue-500 text-white rounded-lg text-sm md:text-base">📝 إضافة صنف</button>
+    <button type="button" id="downloadPDFBtn" class="px-3 py-2 bg-red-600 text-white rounded-lg text-sm md:text-base">📥 تحميل PDF</button>
+    <button type="button" id="printDocBtn" class="px-3 py-2 bg-gray-700 text-white rounded-lg text-sm md:text-base">🖨️ طباعة</button>
+    <button type="button" id="shareDocBtn" class="px-3 py-2 bg-green-600 text-white rounded-lg text-sm md:text-base">⚡ مشاركة</button>
   </div>
 </div>
 
+<!-- Scripts -->
 <script>
 const { jsPDF } = window.jspdf;
 let docType = "فاتورة";
 let logoData = null;
 
-function setDocType(type) {
+// Buttons
+document.getElementById('invoiceBtn').addEventListener('click', () => setDocType('فاتورة'));
+document.getElementById('quoteBtn').addEventListener('click', () => setDocType('عرض سعر'));
+document.getElementById('addRowBtn').addEventListener('click', addRow);
+document.getElementById('downloadPDFBtn').addEventListener('click', downloadPDF);
+document.getElementById('printDocBtn').addEventListener('click', printDoc);
+document.getElementById('shareDocBtn').addEventListener('click', shareDoc);
+
+// Logo upload
+document.getElementById("placeLogo").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = ev => { logoData = ev.target.result; document.getElementById("logoPreview").src = logoData; document.getElementById("logoPreview").classList.remove("hidden"); };
+    reader.readAsDataURL(file);
+  } else { logoData = null; document.getElementById("logoPreview").classList.add("hidden"); }
+});
+
+window.addEventListener('load', () => { 
+  const now = new Date();
+  const isoDate = now.toISOString().slice(0,16);
+  if(!document.getElementById('datetimeInput').value) document.getElementById('datetimeInput').value = isoDate;
+  setDocType(docType);
+});
+
+// Functions
+function setDocType(type){
   docType = type;
   document.getElementById("docTitle").textContent = type;
   buildTable();
   toggleSections();
   updatePreview();
 }
-
-function buildTable() {
-  const head = document.getElementById("tableHead");
-  head.innerHTML = "";
-  if (docType === "فاتورة") {
-    head.innerHTML = `
-      <th class="p-1 border">الصنف</th>
-      <th class="p-1 border w-16">الكمية</th>
-      <th class="p-1 border w-16">السعر</th>
-      <th class="p-1 border">الإجمالي</th>
-      <th class="remove-row-btn w-8">X</th>
-    `;
-  } else {
-    head.innerHTML = `
-      <th class="p-1 border">الصنف</th>
-      <th class="p-1 border">الوحدة</th>
-      <th class="p-1 border w-16">السعر</th>
-      <th class="p-1 border">ملاحظات</th>
-      <th class="remove-row-btn w-8">X</th>
-    `;
-  }
-  document.getElementById("items").innerHTML = "";
-  addRow();
-}
-
-function toggleSections() {
-  document.getElementById("totalSection").style.display = docType === "فاتورة" ? "block" : "none";
-  document.getElementById("notesSection").style.display = docType === "عرض سعر" ? "block" : "none";
-}
-
-document.getElementById("placeLogo").addEventListener("change", e => {
-  const file = e.target.files[0];
-  if(file) {
-    const reader = new FileReader();
-    reader.onload = ev => { logoData = ev.target.result; document.getElementById("logoPreview").src = logoData; document.getElementById("logoPreview").classList.remove("hidden"); };
-    reader.readAsDataURL(file);
-  } else {
-    logoData = null;
-    document.getElementById("logoPreview").src = '';
-    document.getElementById("logoPreview").classList.add("hidden");
-  }
-});
-
-window.addEventListener('load', () => {
-  const now = new Date().toISOString().slice(0,16);
-  document.getElementById('datetimeInput').value = now;
-  buildTable();
-  toggleSections();
-  updatePreview();
-});
-
-function addRow() {
-  let row = '';
-  if(docType === 'فاتورة') {
-    row = `
-      <tr>
-        <td class="border p-1"><input type="text" placeholder="اسم الصنف" oninput="updatePreview()"></td>
-        <td class="border p-1"><input type="number" value="1" min="1" oninput="updateTotal()"></td>
-        <td class="border p-1"><input type="number" value="0" min="0" oninput="updateTotal()"></td>
-        <td class="border p-1 total">0</td>
-        <td class="remove-row-btn p-1"><button onclick="this.closest('tr').remove(); updateTotal()" class="text-red-500">X</button></td>
-      </tr>`;
-  } else {
-    row = `
-      <tr>
-        <td class="border p-1"><input type="text" placeholder="اسم الصنف" oninput="updatePreview()"></td>
-        <td class="border p-1"><input type="text" placeholder="الوحدة" oninput="updatePreview()"></td>
-        <td class="border p-1"><input type="number" value="0" oninput="updatePreview()"></td>
-        <td class="border p-1"><input type="text" placeholder="ملاحظات" oninput="updatePreview()"></td>
-        <td class="remove-row-btn p-1"><button onclick="this.closest('tr').remove(); updatePreview()" class="text-red-500">X</button></td>
-      </tr>`;
-  }
-  document.getElementById('items').insertAdjacentHTML('beforeend', row);
-  updateTotal();
-}
-
-function updateTotal() {
-  let total = 0;
-  if(docType === 'فاتورة') {
-    document.querySelectorAll('#items tr').forEach(tr => {
-      const qty = parseFloat(tr.children[1].querySelector('input').value) || 0;
-      const price = parseFloat(tr.children[2].querySelector('input').value) || 0;
-      const sum = +(qty * price).toFixed(2);
-      tr.querySelector('.total').textContent = sum;
-      total += sum;
-    });
-    document.getElementById('total').textContent = Number.isInteger(total)? total : total.toFixed(2);
-  }
-}
-
-function updatePreview() {
-  const placeName = document.getElementById('placeTitle').textContent.trim();
-  const watermark = document.getElementById('watermark');
-  watermark.textContent = placeName;
-}
-</script>
-</body>
-</html>
+function buildTable(){
+  const head = document.getElementById("tableHead"); head.innerHTML = "";
+  if(docType==="فاتورة"){ 
+    head.innerHTML = `<th class="p-1 border text-xs md:text-sm">الصنف</th>
+                      <th class="p-1 border w-16 md:w-28 text-xs md:text-sm">الكمية</th>
+                      <th class="p-1 border w-16 md:w-28 text-xs md:text-sm">
