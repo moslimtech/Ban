@@ -270,6 +270,12 @@
     }
     .azkar-marquee-container:hover .azkar-marquee-content { animation-play-state: paused; }
     .azkar-seq { display: inline-block; padding-inline-end: 2rem; }
+  /* Filter tabs (horizontal, scrollable) */
+  .filter-tabs-wrap { background: transparent; border-bottom: 1px solid var(--border-primary); position: sticky; top: 48px; z-index: 15; }
+  .filter-tabs { display:flex; gap:8px; overflow:auto; padding:10px 12px; scrollbar-width:none; -webkit-overflow-scrolling:touch }
+  .filter-tabs::-webkit-scrollbar{ display:none }
+  .filter-tab { flex:0 0 auto; background:var(--bg-secondary); color:var(--text-secondary); border:1px solid var(--border-primary); padding:8px 12px; border-radius:999px; cursor:pointer; white-space:nowrap; font-size:14px }
+  .filter-tab[aria-pressed="true"]{ background:var(--accent,#0ea5a4); color:#fff; border-color:transparent; box-shadow:0 6px 18px rgba(14,165,164,0.12) }
     /* Skeleton placeholders */
     .skeleton { position: relative; overflow: hidden; background: var(--bg-tertiary); }
     .skeleton::after {
@@ -466,6 +472,13 @@
   <div class="bg-white border-b border-slate-200 py-1.5 shadow-inner">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 azkar-marquee-container">
       <p id="azkarBar" class="text-xs text-slate-700 font-medium azkar-marquee-content"></p>
+    </div>
+  </div>
+
+  <!-- Filter Tabs: will be inserted under Azkar and control activitySelect -->
+  <div class="filter-tabs-wrap block" id="filterTabsWrap" aria-hidden="false">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="filter-tabs" id="filterTabs" role="tablist" aria-label="تبويبات التصنيفات"></div>
     </div>
   </div>
 
@@ -1774,6 +1787,55 @@
             .then(() => { try { updateControlLocking(); } catch(e){} })
             .catch(() => {});
           await placesPromise;
+          // --- Filter Tabs Integration ---
+          (function initFilterTabs(){
+            const categories = [
+              'سوبر ماركت','مطعم','صالون تجميل (حلاقة)(رجالي)','مركز رياضي','متجر ملابس','مكتبة','مكتبة إلكترونية','محل حلويات','محل إلكترونيات','محل أدوات منزلية','صيدلية','محل ألبسة رياضية','محل تجاري','ورشة صيانة','جيم','ورشة الوميتال','ورشة مواتير','محل خياطة','محل صيانة تليفونات','محل صيانة تليفونات وكمبيوتر','محل صيانة كمبيوتر','محل ستاير','ورشة نجاره','محل بويات','محل منظفات','محل تبريد وتكيف','توريدات عموميه','محل ادوات صحية','دعم تقني عن بعد','معلم (مدرس)','حجامة','محل عطارة','سباك','نجار','حداد','عامل بناء(بنا)','ورشة حدادة','منصة تعليمية','وسيلة مواصلا(تاكسي)','وسيلة مواصلات (تمناية)','وسيلة مواصلات (ميكروباص)','وسيلة مواصلات (سكوتر)','نقاش','استورجي','عامل محار (محار)','قناة تعليمية','عربية قهوة','سواق','تأجير وبيع معدات ثقيلة','محل بيع عدد يدوية ومحركات','مصنع ملابس','صالون تجميل(كوايفر)(حريمي)','شقة(للبيع)','شقة(للايجار)','قطعة(للبيع)','محل(للبيع)','محل(للايجار)','سيارة(للبيع)','سيارة(للايجار)','سيارات (ورديات)','دراي كلين(مكوجي)','مخبز(فرن)عيش','مدرب(كوتش)','خدمة منع الاعلانات','شركة امن','كهرباء','سيراميك','تاجر حديد'
+            ];
+            const wrap = document.getElementById('filterTabs');
+            if (!wrap) return;
+            // Add an 'الكل' tab
+            const allBtn = document.createElement('button');
+            allBtn.className = 'filter-tab';
+            allBtn.textContent = 'الكل';
+            allBtn.dataset.cat = '';
+            allBtn.setAttribute('aria-pressed','true');
+            wrap.appendChild(allBtn);
+            allBtn.addEventListener('click', ()=>{
+              // reset activity filter and apply
+              if (activitySelect) activitySelect.value = '';
+              applyFilters();
+              setActiveTabUI(allBtn);
+            });
+
+            categories.forEach(c=>{
+              const b = document.createElement('button');
+              b.className = 'filter-tab';
+              b.textContent = c;
+              b.dataset.cat = c;
+              b.setAttribute('aria-pressed','false');
+              b.addEventListener('click', ()=>{
+                if (activitySelect) activitySelect.value = c;
+                applyFilters();
+                setActiveTabUI(b);
+              });
+              wrap.appendChild(b);
+            });
+
+            function setActiveTabUI(el){
+              const tabs = wrap.querySelectorAll('.filter-tab');
+              tabs.forEach(t => t.setAttribute('aria-pressed', t === el ? 'true' : 'false'));
+              try{ el.scrollIntoView({inline:'center',behavior:'smooth'}); }catch(e){}
+            }
+
+            // When activitySelect changes (e.g. user uses dropdown), sync tab UI
+            if (activitySelect) activitySelect.addEventListener('change', ()=>{
+              const v = activitySelect.value || '';
+              const tabs = wrap.querySelectorAll('.filter-tab');
+              tabs.forEach(t => t.setAttribute('aria-pressed', (t.dataset.cat || '') === v ? 'true':'false'));
+            });
+          })();
+          // --- end filter tabs integration ---
         if (cacheLoadingMsg) cacheLoadingMsg.classList.add('hidden');
       } catch (e) {
         console.error(e);
