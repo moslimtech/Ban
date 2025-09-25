@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>فاتورة / عرض أسعار</title>
+  <!-- html2canvas & jsPDF (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* للطباعة والتصدير: نظهر فقط معاينة المستند */
+    @media print {
+      body * { visibility: hidden; }
+      #docPreview, #docPreview * { visibility: visible; }
+      #docPreview { position: absolute; top: 0; right: 0; left: 0; }
+      .remove-row-btn { display: none !important; }
+      .hide-if-empty { display: none !important; }
+      .export-hide-if-empty { display: none !important; }
+      
+      /* تأكيد محاذاة النص للطباعة */
+      #itemsTable td, #itemsTable th {
+        text-align: center !important;
+        vertical-align: middle !important;
+      }
+      
+      #dateTimeForExport {
+        display: block !important;
+        text-align: center !important;
+      }
+      
+      #datetimeDisplay {
+        display: none !important;
+      }
+    }
+
+    /* علامة مائية */
+    .watermark {
+      position: absolute;
+      top: 70%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-30deg);
+      font-size: 60px;
+      color: rgba(200,200,200,0.18);
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .watermark::selection { background: transparent; }
+
+    /* إخفاء أزرار الحذف عند التصدير */
+    .remove-row-btn.export-hide { display: none !important; }
+    .export-hide-if-empty { display: none !important; }
+
+    /* تحسين ظهور contenteditable عندما يكون فارغاً */
+    [contenteditable]:empty:before {
+      content: attr(data-placeholder);
+      color: #9CA3AF;
+    }
+
+    /* محاذاة النص في الجدول - تحسين للتصدير */
+    table input[type="text"], table input[type="number"] {
+      outline: none;
+      border: none;
+      background: transparent;
+      width: 100%;
+      padding: 0.5rem;
+      text-align: center;
+      vertical-align: middle;
+      line-height: 1.2;
+      display: block;
+      margin: 0 auto;
+    }
+    
+    /* تأكيد محاذاة خلايا الجدول */
+    #itemsTable {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    
+    #itemsTable td, #itemsTable th {
+      vertical-align: middle !important;
+      text-align: center !important;
+      border: 1px solid #d1d5db;
+      position: relative;
+    }
+    
+    /* محاذاة خاصة للإجمالي */
+    .total {
+      font-weight: bold;
+      text-align: center !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2rem;
+    }
+    
+    table input[type="number"]::-webkit-outer-spin-button,
+    table input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* عنصر مخفي للتاريخ المنسق للتصدير */
+    #dateTimeForExport {
+      display: none;
+      padding: 0.5rem;
+      text-align: center;
+      font-size: 0.875rem;
+    }
+
+    /* حقل التاريخ والوقت */
+    #datetimeInput {
+      display: none;
+    }
+    
+    #datetimeDisplay {
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 0.375rem;
+      background: white;
+      cursor: pointer;
+      min-height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 0.875rem;
+    }
+
+    /* تحسينات للموبايل */
+    @media (max-width: 767px) {
+      #docPreview {
+        font-size: 0.875rem;
+      }
+      
+      #itemsTable {
+        font-size: 0.75rem;
+      }
+      
+      #itemsTable th, #itemsTable td {
+        padding: 0.5rem !important;
+      }
+      
+      table input[type="text"], table input[type="number"] {
+        font-size: 0.75rem;
+        min-height: 2rem;
+        padding: 0.25rem;
+      }
+      
+      #docTitle {
+        font-size: 1.25rem !important;
+      }
+      
+      #placeTitle {
+        font-size: 1rem !important;
+      }
+      
+      #docPreview {
+        padding: 1rem !important;
+      }
+      
+      .watermark {
+        font-size: 40px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #docPreview {
+        font-size: 0.8rem;
+      }
+      
+      #itemsTable {
+        font-size: 0.7rem;
+      }
+      
+      #docTitle {
+        font-size: 1.1rem !important;
+      }
+      
+      .watermark {
+        font-size: 30px;
+      }
+    }
+
+    /* تحسينات خاصة للتصدير */
+    .export-mode #itemsTable td,
+    .export-mode #itemsTable th {
+      text-align: center !important;
+      vertical-align: middle !important;
+    }
+    
+    .export-mode table input[type="text"],
+    .export-mode table input[type="number"] {
+      text-align: center !important;
+    }
+    
+    .export-mode .total {
+      text-align: center !important;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 p-2 md:p-4">
+
+  <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-3 md:p-6 relative">
+    <!-- رأس الصفحة -->
+    <div class="mb-4 md:mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
+      <div class="flex gap-2 md:gap-3 justify-center md:justify-start">
+        <button type="button" onclick="setDocType('فاتورة')" class="px-3 py-2 md:px-4 md:py-2 bg-blue-600 text-white rounded-lg text-sm md:text-base">فاتورة</button>
+        <button type="button" onclick="setDocType('عرض سعر')" class="px-3 py-2 md:px-4 md:py-2 bg-green-600 text-white rounded-lg text-sm md:text-base">عرض سعر</button>
+      </div>
+
+      <div class="flex-1 md:flex md:justify-end">
+        <label class="block">
+          <span class="sr-only">رفع شعار المكان</span>
+          <input id="placeLogo" type="file" accept="image/*" class="border rounded-lg p-2 w-full md:w-auto text-sm">
+        </label>
+      </div>
+    </div>
+
+    <!-- معاينة المستند -->
+    <div id="docPreview" class="relative border rounded-lg p-3 md:p-6 mt-2 bg-white">
+      <div class="watermark" id="watermark"></div>
+
+      <div class="flex justify-between items-center mb-3 md:mb-4">
+        <img id="logoPreview" class="h-12 md:h-20 hidden" alt="شعار" />
+        <h1 id="docTitle" class="text-xl md:text-2xl font-bold text-center flex-1">فاتورة</h1>
+      </div>
+
+      <!-- اسم المكان -->
+      <h2 class="text-lg md:text-xl font-bold text-center mb-2">
+        <span id="placeTitle"
+             contenteditable="true"
+             data-placeholder="اسم المكان"
+             oninput="updatePreview()"></span>
+      </h2>
+
+      <!-- رقم المكان -->
+      <p id="placeNumberContainer" class="text-center text-gray-600 mb-3 md:mb-2">
+        <span id="placeNumberText"
+             contenteditable="true"
+             data-placeholder="رقم المكان (اختياري)"
+             oninput="updatePreview()"></span>
+      </p>
+
+      <!-- معلومات العميل والتاريخ والوقت -->
+      <div class="space-y-2 md:space-y-0 md:grid md:grid-cols-3 md:gap-2 md:items-center mb-3 md:mb-4">
+        <!-- اسم العميل -->
+        <div id="customerContainer" class="md:col-span-2">
+          <p class="flex flex-wrap items-center gap-1">
+            <strong class="shrink-0">اسم العميل:</strong>
+            <span id="customerText"
+                  contenteditable="true"
+                  data-placeholder="اسم العميل"
+                  class="flex-1 min-w-0"
+                  oninput="updatePreview()"></span>
+          </p>
+        </div>
+
+        <!-- التاريخ والوقت -->
+        <div id="datetimeContainer" class="flex flex-col">
+          <small class="text-gray-500 text-right mb-1">التاريخ والوقت</small>
+          <input 
+            type="datetime-local" 
+            id="datetimeInput"
+            oninput="updateDateTimeDisplay()"
+          >
+          <div id="datetimeDisplay" onclick="openDateTimePicker()">
+            <span id="dateTimeText">اضغط لاختيار التاريخ والوقت</span>
+          </div>
+          <!-- عنصر مخفي للتاريخ المنسق للتصدير -->
+          <div id="dateTimeForExport"></div>
+        </div>
+      </div>
+
+      <!-- جدول الأصناف -->
+      <div class="overflow-x-auto mb-3 md:mb-4">
+        <table id="itemsTable" class="w-full border min-w-full">
+          <thead>
+            <tr id="tableHead" class="bg-gray-50"></tr>
+          </thead>
+          <tbody id="items"></tbody>
+        </table>
+      </div>
+
+      <!-- إجمالي / ملاحظات -->
+      <div id="totalSection" class="text-right font-bold text-lg md:text-xl">الإجمالي: <span id="total">0</span> ج.م</div>
+
+      <div id="notesSection" class="mt-3 md:mt-4 hidden">
+        <div id="generalNotes"
+             class="w-full border rounded-lg p-2 min-h-[60px] text-sm md:text-base"
+             contenteditable="true"
+             data-placeholder="ملاحظات عامة..."
+             oninput="updatePreview()"></div>
+      </div>
+    </div>
+
+    <!-- أزرار التحكم -->
+    <div class="flex flex-wrap justify-center gap-2 md:gap-4 mt-4 md:mt-6">
+      <button type="button" onclick="addRow()" class="px-3 py-2 md:px-4 md:py-2 bg-blue-500 text-white rounded-lg text-sm md:text-base">📝 إضافة صنف</button>
+      <button type="button" onclick="downloadPDF()" class="px-3 py-2 md:px-4 md:py-2 bg-red-600 text-white rounded-lg text-sm md:text-base">📥 تحميل PDF</button>
+      <button type="button" onclick="printDoc()" class="px-3 py-2 md:px-4 md:py-2 bg-gray-700 text-white rounded-lg text-sm md:text-base">🖨️ طباعة</button>
+      <button type="button" onclick="shareDoc()" class="px-3 py-2 md:px-4 md:py-2 bg-green-600 text-white rounded-lg text-sm md:text-base">⚡ مشاركة</button>
+    </div>
+  </div>
+
+  <!-- Navigation (unchanged) -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur z-40 shadow-lg border-t border-gray-200">
+    <div class="max-w-4xl mx-auto flex justify-around items-center p-2">
+      <button type="button" data-href="https://moslimtech.github.io/Ban/" class="nav-link flex flex-col items-center text-center text-xs text-gray-700 hover:text-indigo-600" data-name="home">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v7h14v-7h2v9H3v-9zm3-8h12v6H6V5zm2 2v2h8V7H8z"/></svg>
+        <span class="block">الإعلانات</span>
+      </button>
+      <button type="button" data-href="https://wa.me/01558905023" class="nav-link flex flex-col items-center text-center text-xs text-gray-700 hover:text-indigo-600" data-name="contact">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.52 3.48A11.94 11.94 0 0012.01 0C5.39 0 .01 5.37.01 11.99c0 2.11.55 4.16 1.6 5.98L0 24l6.2-1.62a11.96 11.96 0 005.8 1.49h.01c6.62 0 12-5.38 12-12 0-3.2-1.25-6.21-3.49-8.39z"/></svg>
+        <span class="block">اتصل بنا</span>
+      </button>
+      <button type="button" data-href="https://moslimtech.github.io/Ban/dashboard/" class="nav-link flex flex-col items-center text-center text-xs text-gray-700 hover:text-indigo-600" data-name="dashboard">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        <span class="block">دخول</span>
+      </button>
+    </div>
+  </nav>
+  
+  <nav class="hidden md:flex fixed top-0 left-0 right-0 bg-white/95 backdrop-blur z-40 shadow-sm border-b border-gray-200">
+    <div class="max-w-4xl mx-auto flex justify-between items-center p-3">
+      <div class="flex items-center gap-6">
+        <button type="button" data-href="https://moslimtech.github.io/Ban/" class="nav-link-desktop flex items-center gap-2 text-gray-700 hover:text-indigo-600 font-semibold" data-name="home">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v7h14v-7h2v9H3v-9zm3-8h12v6H6V5zm2 2v2h8V7H8z"/></svg>
+          الإعلانات
+        </button>
+        <button type="button" data-href="https://moslimtech.github.io/Ban/dashboard/" class="nav-link-desktop flex items-center gap-2 text-gray-700 hover:text-indigo-600 font-semibold" data-name="dashboard">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          دخول
+        </button>
+      </div>
+      <div>
+        <button type="button" data-href="https://wa.me/01558905023" class="flex items-center gap-2 text-gray-700 hover:text-indigo-600 font-semibold" data-name="contact">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.52 3.48A11.94 11.94 0 0012.01 0C5.39 0 .01 5.37.01 11.99c0 2.11.55 4.16 1.6 5.98L0 24l6.2-1.62a11.96 11.96 0 005.8 1.49h.01c6.62 0 12-5.38 12-12 0-3.2-1.25-6.21-3.49-8.39z"/></svg>
+          اتصل بنا
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <style>
+    @media (max-width: 767px) { 
+      body { padding-bottom: 72px !important; }
+    }
+    @media (min-width: 768px) { 
+      body { padding-top: 64px !important; }
+    }
+    .nav-active { color: #4f46e5 !important; }
+    .nav-active svg { color: #4f46e5 !important; }
+  </style>
+
+  <script>
+    const { jsPDF } = window.jspdf;
+    let docType = "فاتورة";
+    let logoData = null;
+
+    // وظائف تنسيق التاريخ والوقت
+    function formatDateTime(datetime) {
+      if (!datetime) return '';
+      
+      const date = new Date(datetime);
+      const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+      const months = [
+        'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+        'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+      ];
+      
+      const dayName = days[date.getDay()];
+      const day = date.getDate();
+      const month = months[date.getMonth()];
+      const year = date.getFullYear();
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      
+      return `${dayName} ${day} ${month} ${year} - ${hours}:${minutes}`;
+    }
+
+    function updateDateTimeDisplay() {
+      const datetime = document.getElementById('datetimeInput').value;
+      const displayElement = document.getElementById('dateTimeText');
+      const exportElement = document.getElementById('dateTimeForExport');
+      
+      if (datetime) {
+        const formattedDate = formatDateTime(datetime);
+        displayElement.textContent = formattedDate;
+        exportElement.textContent = formattedDate;
+      } else {
+        displayElement.textContent = 'اضغط لاختيار التاريخ والوقت';
+        exportElement.textContent = '';
+      }
+      updatePreview();
+    }
+
+    function openDateTimePicker() {
+      document.getElementById('datetimeInput').showPicker();
+    }
+
+    function setDocType(type) {
+      docType = type;
+      document.getElementById("docTitle").textContent = type;
+      buildTable();
+      toggleSections();
+      updatePreview();
+    }
+
+    function buildTable() {
+      const head = document.getElementById("tableHead");
+      head.innerHTML = "";
+      if (docType === "فاتورة") {
+        head.innerHTML = `
+          <th class="p-2 border text-xs md:text-sm bg-gray-50" style="text-align: center;">الصنف</th>
+          <th class="p-2 border w-20 md:w-28 text-xs md:text-sm bg-gray-50" style="text-align: center;">الكمية</th>
+          <th class="p-2 border w-20 md:w-28 text-xs md:text-sm bg-gray-50" style="text-align: center;">السعر</th>
+          <th class="p-2 border text-xs md:text-sm bg-gray-50" style="text-align: center;">الإجمالي</th>
+          <th class="remove-row-btn w-8 bg-gray-50" style="text-align: center;">حذف</th>
+        `;
+      } else {
+        head.innerHTML = `
+          <th class="p-2 border text-xs md:text-sm bg-gray-50" style="text-align: center;">الصنف</th>
+          <th class="p-2 border text-xs md:text-sm bg-gray-50" style="text-align: center;">الوحدة</th>
+          <th class="p-2 border w-20 md:w-28 text-xs md:text-sm bg-gray-50" style="text-align: center;">السعر</th>
+          <th class="p-2 border text-xs md:text-sm bg-gray-50" style="text-align: center;">ملاحظات</th>
+          <th class="remove-row-btn w-8 bg-gray-50" style="text-align: center;">حذف</th>
+        `;
+      }
+      document.getElementById("items").innerHTML = "";
+      addRow();
+      updateTotal();
+    }
+
+    function toggleSections() {
+      document.getElementById("totalSection").style.display = (docType === "فاتورة") ? "block" : "none";
+      document.getElementById("notesSection").style.display = (docType === "عرض سعر") ? "block" : "none";
+    }
+
+    document.getElementById("placeLogo").addEventListener("change", e => {
+      const file = e.target.files;
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          logoData = ev.target.result;
+          document.getElementById("logoPreview").src = logoData;
+          document.getElementById("logoPreview").classList.remove("hidden");
+        };
+        reader.readAsDataURL(file);
+      } else {
+        logoData = null;
+        document.getElementById("logoPreview").src = '';
+        document.getElementById("logoPreview").classList.add("hidden");
+      }
+    });
+
+    window.addEventListener('load', () => {
+      const now = new Date();
+      const isoDate = now.toISOString().slice(0, 16);
+      
+      const datetimeEl = document.getElementById('datetimeInput');
+      if (!datetimeEl.value) {
+        datetimeEl.value = isoDate;
+      }
+      
+      updateDateTimeDisplay();
+      buildTable();
+      toggleSections();
+      updatePreview();
+    });
+
+    function addRow() {
+      let row = '';
+      if (docType === 'فاتورة') {
+        row = `
+          <tr class="align-middle">
+            <td class="border p-2" style="text-align: center;"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="اسم الصنف" oninput="updatePreview()" style="text-align: center;"></td>
+            <td class="border p-2" style="text-align: center;"><input type="number" value="1" min="1" class="w-full text-center text-xs md:text-sm" oninput="updateTotal()" style="text-align: center;"></td>
+            <td class="border p-2" style="text-align: center;"><input type="number" value="0" min="0" class="w-full text-center text-xs md:text-sm" oninput="updateTotal()" style="text-align: center;"></td>
+            <td class="border p-2 total text-xs md:text-sm font-bold" style="text-align: center;">0</td>
+            <td class="remove-row-btn p-2" style="text-align: center;"><button type="button" onclick="this.closest('tr').remove(); updateTotal()" class="text-red-500 hover:text-red-700 text-xs">✖</button></td>
+          </tr>
+        `;
+      } else {
+        row = `
+          <tr class="align-middle">
+            <td class="border p-2" style="text-align: center;"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="اسم الصنف" oninput="updatePreview()" style="text-align: center;"></td>
+            <td class="border p-2" style="text-align: center;"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="الوحدة" oninput="updatePreview()" style="text-align: center;"></td>
+            <td class="border p-2" style="text-align: center;"><input type="number" value="0" class="w-full text-center text-xs md:text-sm" oninput="updatePreview()" style="text-align: center;"></td>
+            <td class="border p-2" style="text-align: center;"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="ملاحظات" oninput="updatePreview()" style="text-align: center;"></td>
+            <td class="remove-row-btn p-2" style="text-align: center;"><button type="button" onclick="this.closest('tr').remove(); updatePreview()" class="text-red-500 hover:text-red-700 text-xs">✖</button></td>
+          </tr>
+        `;
+      }
+      document.getElementById('items').insertAdjacentHTML('beforeend', row);
+      updateTotal();
+      updatePreview();
+    }
+
+    function updateTotal() {
+      let total = 0;
+      document.querySelectorAll('#items tr').forEach(tr => {
+        if (docType === 'فاتورة') {
+          const qtyEl = tr.querySelector('td:nth-child(2) input');
+          const priceEl = tr.querySelector('td:nth-child(3) input');
+          const qty = parseFloat(qtyEl?.value || 0) || 0;
+          const price = parseFloat(priceEl?.value || 0) || 0;
+          const sum = +(qty * price).toFixed(2);
+          const totalCell = tr.querySelector('.total');
+          if (totalCell) totalCell.textContent = sum;
+          total += sum;
+        }
+      });
+      document.getElementById('total').textContent = Number.isInteger(total) ? total : total.toFixed(2);
+      updatePreview();
+    }
+
+    function updatePreview() {
+      const placeName = document.getElementById('placeTitle').textContent.trim();
+      document.getElementById('watermark').textContent = placeName || '';
+    }
+
+    function hideEmptyElements() {
+      const placeName = document.getElementById('placeTitle').textContent.trim();
+      if (!placeName) {
+        document.getElementById('placeTitle').parentElement.classList.add('export-hide-if-empty');
+      } else {
+        document.getElementById('placeTitle').parentElement.classList.remove('export-hide-if-empty');
+      }
+
+      const placeNumber = document.getElementById('placeNumberText').textContent.trim();
+      if (!placeNumber) {
+        document.getElementById('placeNumberContainer').classList.add('export-hide-if-empty');
+      } else {
+        document.getElementById('placeNumberContainer').classList.remove('export-hide-if-empty');
+      }
+
+      const customer = document.getElementById('customerText').textContent.trim();
+      if (!customer || customer === '-') {
+        document.getElementById('customerContainer').classList.add('export-hide-if-empty');
+      } else {
+        document.getElementById('customerContainer').classList.remove('export-hide-if-empty');
+      }
+
+      const datetime = document.getElementById('datetimeInput').value;
+      if (!datetime) {
+        document.getElementById('datetimeContainer').classList.add('export-hide-if-empty');
+      } else {
+        document.getElementById('datetimeContainer').classList.remove('export-hide-if-empty');
+      }
+
+      if (docType === 'عرض سعر') {
+        const notes = document.getElementById('generalNotes').textContent.trim();
+        if (!notes) {
+          document.getElementById('notesSection').classList.add('export-hide-if-empty');
+        } else {
+          document.getElementById('notesSection').classList.remove('export-hide-if-empty');
+        }
+      }
+    }
+
+    function showAllElements() {
+      document.querySelectorAll('.export-hide-if-empty').forEach(el => {
+        el.classList.remove('export-hide-if-empty');
+      });
+    }
+
+    // تحسين التصدير للـ PDF
+    function prepareForExport() {
+      const docElement = document.getElementById('docPreview');
+      
+      // إضافة كلاس التصدير
+      docElement.classList.add('export-mode');
+      
+      // إخفاء عناصر التحكم
+      docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.add('export-hide'));
+      
+      // إظهار التاريخ المنسق وإخفاء العنصر التفاعلي
+      document.getElementById('datetimeDisplay').style.display = 'none';
+      document.getElementById('dateTimeForExport').style.display = 'block';
+      
+      // إخفاء العناصر الفارغة
+      hideEmptyElements();
+      
+      // تطبيق محاذاة إضافية للجدول
+      const table = document.getElementById('itemsTable');
+      table.style.borderCollapse = 'collapse';
+      
+      // التأكد من محاذاة جميع الخلايا
+      table.querySelectorAll('td, th').forEach(cell => {
+        cell.style.textAlign = 'center';
+        cell.style.verticalAlign = 'middle';
+      });
+      
+      // التأكد من محاذاة المدخلات
+      table.querySelectorAll('input').forEach(input => {
+        input.style.textAlign = 'center';
+      });
+    }
+
+    function restoreAfterExport() {
+      const docElement = document.getElementById('docPreview');
+      
+      // إزالة كلاس التصدير
+      docElement.classList.remove('export-mode');
+      
+      // إظهار عناصر التحكم
+      docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.remove('export-hide'));
+      
+      // إعادة إظهار العنصر التفاعلي وإخفاء المنسق
+      document.getElementById('datetimeDisplay').style.display = 'flex';
+      document.getElementById('dateTimeForExport').style.display = 'none';
+      
+      // إظهار جميع العناصر
+      showAllElements();
+    }
+
+    function downloadPDF() {
+      prepareForExport();
+      
+      const docElement = document.getElementById('docPreview');
+      
+      html2canvas(docElement, { 
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        width: docElement.scrollWidth,
+        height: docElement.scrollHeight
+      }).then(canvas => {
+        restoreAfterExport();
+
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = 210;
+        const pageHeight = 297;
+        const imgProps = pdf.getImageProperties(imgData);
+        let pdfWidth = pageWidth - 20;
+        let pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        
+        if (pdfHeight > pageHeight - 20) {
+          pdfHeight = pageHeight - 20;
+          pdfWidth = (imgProps.width * pdfHeight) / imgProps.height;
+        }
+        
+        const x = (pageWidth - pdfWidth) / 2;
+        pdf.addImage(imgData, 'JPEG', x, 10, pdfWidth, pdfHeight, '', 'FAST');
+        pdf.save((docType || 'document') + '.pdf');
+      }).catch(err => {
+        restoreAfterExport();
+        alert('حدث خطأ أثناء إنشاء PDF: ' + err.message);
+      });
+    }
+
+    async function shareDoc() {
+      prepareForExport();
+      
+      const docElement = document.getElementById('docPreview');
+      
+      try {
+        const canvas = await html2canvas(docElement, { 
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          logging: false
+        });
+        
+        restoreAfterExport();
+        
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = 210;
+        const pageHeight = 297;
+        const imgProps = pdf.getImageProperties(imgData);
+        let pdfWidth = pageWidth - 20;
+        let pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        
+        if (pdfHeight > pageHeight - 20) {
+          pdfHeight = pageHeight - 20;
+          pdfWidth = (imgProps.width * pdfHeight) / imgProps.height;
+        }
+        
+        const x = (pageWidth - pdfWidth) / 2;
+        pdf.addImage(imgData, 'JPEG', x, 10, pdfWidth, pdfHeight, '', 'FAST');
+
+        const blob = pdf.output('blob');
+        const file = new File([blob], (docType || 'document') + '.pdf', { type: 'application/pdf' });
+
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({ files: [file], title: docType, text: 'إليك نسخة من ' + docType });
+          } catch (err) {
+            alert('تم إلغاء المشاركة.');
+          }
+        } else {
+          pdf.save((docType || 'document') + '.pdf');
+          alert('المشاركة غير مدعومة على هذا الجهاز — تم تنزيل الملف بدلاً من المشاركة.');
+        }
+      } catch (err) {
+        restoreAfterExport();
+        alert('حدث خطأ أثناء المشاركة: ' + err.message);
+      }
+    }
+
+    function printDoc() {
+      prepareForExport();
+      
+      document.querySelectorAll('.export-hide-if-empty').forEach(el => {
+        el.classList.add('hide-if-empty');
+      });
+      
+      window.print();
+      
+      setTimeout(() => {
+        restoreAfterExport();
+        document.querySelectorAll('.hide-if-empty').forEach(el => {
+          el.classList.remove('hide-if-empty');
+        });
+      }, 1000);
+    }
+
+    // Navigation handling
+    (function(){
+      const links = document.querySelectorAll('.nav-link, .nav-link-desktop');
+      const path = window.location.pathname;
+      links.forEach(el => {
+        try {
+          const href = el.getAttribute('href') || el.dataset.href;
+          if (!href) return;
+
+          if (el.dataset && el.dataset.href) {
+            el.addEventListener('click', () => { window.location.href = el.dataset.href; });
+            el.style.cursor = 'pointer';
+            el.setAttribute('role', 'button');
+          }
+
+          if (href.includes('wa.me')) {
+            el.classList.remove('nav-active');
+            return;
+          }
+          if (href.includes('/Ban/dashboard') || href.includes('/dashboard')) {
+            if (path.includes('dashboard')) el.classList.add('nav-active');
+          } else if (href.includes('/Ban/') || href.includes('/Ban')) {
+            if (path.includes('/Ban') && !path.includes('dashboard')) el.classList.add('nav-active');
+          }
+        } catch(e){ console.error(e); }
+      });
+    })();
+
+  </script>
+</body>
+</html>
