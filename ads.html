@@ -84,6 +84,8 @@
             flex-shrink: 0;
             cursor: pointer;
         }
+        .ad-images img { opacity: 0; transition: opacity 0.28s ease; }
+        .ad-images img.img-loaded { opacity: 1; }
         .ad-images img:hover { 
             transform: scale(1.05); 
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
@@ -682,6 +684,9 @@
             <span class="moon-icon">🌙</span>
         </button>
     </div>
+    <div style="display:flex;align-items:center;gap:8px">
+        <button id="refreshAdsBtn" class="back-btn" style="background:linear-gradient(135deg,#06b6d4,#0ea5e9);padding:8px 12px;border-radius:12px;">تحديث</button>
+    </div>
 </div>
 
 <div id="loader" class="loader" role="status" aria-live="polite">
@@ -690,6 +695,9 @@
 
 <h2>الإعلانات</h2>
 <div id="placeNameHeader" class="text-center text-2xl font-extrabold text-indigo-700 my-6"></div>
+
+<!-- debug panel removed -->
+
 <div class="ads-container" id="adsContainer"></div>
 <template id="adSkeleton">
   <div class="ad-card">
@@ -756,8 +764,8 @@ let todayVisitorsElement = null;
 // دالة تسجيل زيارة الموقع
 async function recordWebsiteVisit() {
     try {
-        const today = new Date().toISOString().split('T')[0];
-        const sessionKey = visited_${today};
+    const today = new Date().toISOString().split('T')[0];
+    const sessionKey = `visited_${today}`;
         
         if (sessionStorage.getItem(sessionKey)) {
             return;
@@ -769,7 +777,7 @@ async function recordWebsiteVisit() {
         
         while (attempts < maxAttempts) {
             try {
-                const response = await fetch(${API_URL}?action=recordWebsiteVisit&date=${today}&timestamp=${Date.now()}, {
+                const response = await fetch(`${API_URL}?action=recordWebsiteVisit&date=${today}&timestamp=${Date.now()}`, {
                     method: 'GET',
                     mode: 'cors',
                     cache: 'no-cache'
@@ -781,7 +789,7 @@ async function recordWebsiteVisit() {
                     break;
                 }
             } catch (error) {
-                console.warn(محاولة ${attempts + 1} فشلت:, error);
+                console.warn(`محاولة ${attempts + 1} فشلت:`, error);
                 attempts++;
                 if (attempts < maxAttempts) {
                     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -807,7 +815,7 @@ async function fetchVisitorStats() {
         
         while (attempts < maxAttempts && !success) {
             try {
-                const response = await fetch(${API_URL}?action=getVisitorStats&_=${Date.now()}, {
+                const response = await fetch(`${API_URL}?action=getVisitorStats&_=${Date.now()}`, {
                     method: 'GET',
                     mode: 'cors',
                     cache: 'no-cache',
@@ -842,7 +850,35 @@ async function fetchVisitorStats() {
                     break;
                 }
             } catch (error) {
-                console.warn(محاولة جلب الإحصائيات ${attempts + 1} فشلت:, error);
+                console.warn(`محاولة جلب الإحصائيات ${attempts + 1} فشلت:`, error);
+                // On first failure, try JSONP fallback (useful when CORS/preflight blocks the request)
+                if (attempts === 0) {
+                    try {
+                        const jsonpData = await fetchVisitorStatsJsonpFallback();
+                        if (jsonpData) {
+                            const data = jsonpData;
+                            if (data && typeof data.totalVisitors === 'number') {
+                                totalVisitors = data.totalVisitors;
+                            }
+                            if (data && typeof data.todayVisitors === 'number') {
+                                todayVisitors = data.todayVisitors;
+                            }
+                            try {
+                                localStorage.setItem('visitorStats', JSON.stringify({
+                                    totalVisitors,
+                                    todayVisitors,
+                                    timestamp: Date.now()
+                                }));
+                            } catch (e) {}
+                            updateVisitorDisplay();
+                            success = true;
+                            console.log('تم جلب الإحصائيات عن طريق JSONP بديل');
+                            break;
+                        }
+                    } catch (e) {
+                        console.warn('JSONP fallback failed:', e);
+                    }
+                }
                 attempts++;
                 if (attempts < maxAttempts) {
                     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -918,6 +954,39 @@ function loadCachedStats() {
     return false;
 }
 
+// JSONP fallback for Google Apps Script endpoints (used when CORS blocks fetch)
+function fetchVisitorStatsJsonpFallback(timeout = 5000) {
+    return new Promise((resolve, reject) => {
+        const callbackName = `__visitorStats_cb_${Date.now()}`;
+        // Attach callback
+        window[callbackName] = function(data) {
+            try { resolve(data); } finally { cleanup(); }
+        };
+
+        function cleanup() {
+            try { delete window[callbackName]; } catch (e) {}
+            if (script && script.parentNode) script.parentNode.removeChild(script);
+            clearTimeout(timer);
+        }
+
+        const script = document.createElement('script');
+        // Try calling the Apps Script with a callback parameter. Many GAS endpoints support JSONP if implemented.
+        const url = `${API_URL}?action=getVisitorStats&callback=${callbackName}&_=${Date.now()}`;
+        script.src = url;
+        script.async = true;
+        script.onerror = function() {
+            cleanup();
+            reject(new Error('JSONP script failed to load'));
+        };
+        document.head.appendChild(script);
+
+        const timer = setTimeout(() => {
+            cleanup();
+            reject(new Error('JSONP timeout'));
+        }, timeout);
+    });
+}
+
 // Lightbox functionality
 let currentImageIndex = 0;
 let imagesArray = [];
@@ -987,7 +1056,7 @@ function initLightbox() {
     
     function updateLightboxImage() {
         lightboxImg.src = imagesArray[currentImageIndex];
-        lightboxCounter.textContent = ${currentImageIndex + 1} / ${imagesArray.length};
+        lightboxCounter.textContent = `${currentImageIndex + 1} / ${imagesArray.length}`;
     }
 }
 
@@ -995,14 +1064,14 @@ function initLightbox() {
 function testAdData(placeId) {
     console.log('=== TESTING AD DATA FOR PLACE ID:', placeId, '===');
     
-    fetch(${API_URL}?action=getAdsByPlaceId&placeId=${placeId}, { cache: "no-store" })
+    fetch(`${API_URL}?action=getAdsByPlaceId&placeId=${encodeURIComponent(placeId)}`, { cache: "no-store" })
         .then(res => res.json())
         .then(data => {
             console.log('Raw API response:', data);
             
             if (Array.isArray(data) && data.length > 0) {
                 data.forEach((ad, index) => {
-                    console.log(--- Ad ${index + 1} ---);
+                    console.log(`--- Ad ${index + 1} ---`);
                     console.log('All ad properties:', Object.keys(ad));
                     console.log('ad.status:', ad.status);
                     console.log('ad["الحالة"]:', ad['الحالة']);
@@ -1013,7 +1082,7 @@ function testAdData(placeId) {
                     Object.keys(ad).forEach(key => {
                         const value = ad[key];
                         if (typeof value === 'string' && (value === 'مفتوح' || value === 'مغلق' || value === 'مغلق للصلاة')) {
-                            console.log(Found status in property "${key}":, value);
+                            console.log(`Found status in property "${key}":`, value);
                         }
                     });
                 });
@@ -1097,7 +1166,7 @@ function createVideoHtml(videoUrl) {
                 videoId = u.searchParams.get('v') || '';
             }
             if (videoId) {
-                const embed = https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1;
+                const embed = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
                 return `<iframe src="${embed}"
                                 frameborder="0"
                                 loading="lazy"
@@ -1120,7 +1189,7 @@ function createVideoHtml(videoUrl) {
             } else if (host === 'player.vimeo.com' && u.pathname.startsWith('/video/')) {
                 id = u.pathname.split('/video/')[1].split('/')[0] || '';
             }
-            const embed = id ? https://player.vimeo.com/video/${id} : url;
+            const embed = id ? `https://player.vimeo.com/video/${id}` : url;
             return `<iframe src="${embed}"
                             frameborder="0"
                             loading="lazy"
@@ -1157,8 +1226,39 @@ function createVideoHtml(videoUrl) {
     }
 
     // غير ذلك، جرّب video
-    return <video src="${url}" controls playsinline preload="metadata"></video>;
+    return `<video src="${url}" controls playsinline preload="metadata"></video>`;
 }
+
+// Try alternate Google Drive image URLs before falling back
+window.tryAlternateImage = function(img) {
+    try {
+        img._attempts = (img._attempts || 0) + 1;
+        if (img._attempts > 6) { console.error('Image failed after multiple attempts, falling back:', img.src); img.src = 'icons/icon-192.png'; return; }
+        const src = (img.dataset.originalSrc || img.src || '').toString();
+        // keep original source for diagnostics
+        if (!img.dataset.originalSrc) img.dataset.originalSrc = src;
+        // extract file id
+        let m = src.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || src.match(/[?&]id=([a-zA-Z0-9_-]+)/) || src.match(/uc\?export=view&id=([a-zA-Z0-9_-]+)/);
+        if (m && m[1]) {
+            const id = m[1];
+            const tries = [
+                `https://drive.google.com/uc?export=view&id=${id}`,
+                `https://drive.google.com/uc?export=download&id=${id}`,
+                `https://drive.googleusercontent.com/uc?export=download&id=${id}`,
+                `https://drive.googleusercontent.com/uc?id=${id}`,
+                `https://drive.google.com/thumbnail?id=${id}`,
+                `https://drive.google.com/uc?export=view&thumbnail=1&id=${id}`
+            ];
+            const next = tries[(img._attempts - 1) % tries.length];
+            console.warn(`tryAlternateImage: attempt #${img._attempts} for original src=${img.dataset.originalSrc}, trying ${next}`);
+            img.src = next;
+            return;
+        }
+        // if no drive id found, log and fall back
+        console.warn('tryAlternateImage: no drive id found for', src);
+        img.src = 'icons/icon-192.png';
+    } catch (e) { try { img.src = 'icons/icon-192.png'; } catch(_){} }
+};
 
 async function fetchAds() {
     const startTs = Date.now();
@@ -1167,7 +1267,7 @@ async function fetchAds() {
    // تسجيل الزيارة عند فتح الصفحة (باستخدام GET لتجنب CORS)
 if (placeId) {
     try {
-        const visitUrl = ${API_URL}?action=recordVisit&placeId=${encodeURIComponent(placeId)}&type=place&source=ads_page;
+    const visitUrl = `${API_URL}?action=recordVisit&placeId=${encodeURIComponent(placeId)}&type=place&source=ads_page`;
         // طلب خفيف بدون انتظار الاستجابة لتقليل مشاكل CORS
         fetch(visitUrl, { method: 'GET', mode: 'no-cors', keepalive: true }).catch(() => {});
         console.log('تم محاولة تسجيل الزيارة للمكان:', placeId);
@@ -1176,24 +1276,37 @@ if (placeId) {
     }
 }
 
+    // debug helper removed
+
     try {
         if (!firstLoadDone) showLoader();
         // عرض فوري من الكاش المحلي إن وجد
-        const cacheKey = ads_cache_${placeId};
-        const cacheTsKey = ${cacheKey}_ts;
+    const cacheKey = `ads_cache_${placeId}`;
+    const cacheTsKey = `${cacheKey}_ts`;
         const cached = localStorage.getItem(cacheKey);
         const cachedTs = parseInt(localStorage.getItem(cacheTsKey) || '0');
         const now = Date.now();
         const maxAge = 5 * 60 * 1000; // 5 دقائق
         if (cached && now - cachedTs < maxAge) {
-            try { displayAds(JSON.parse(cached)); } catch(e) {}
+            console.log('Using cached ads (age ms): ' + (now - cachedTs));
+            try { displayAds(JSON.parse(cached)); } catch(e) { console.warn('Error parsing cached ads: ' + e.message); }
         }
 
-        const res = await fetch(${API_URL}?action=getAdsByPlaceId&placeId=${placeId}&_ts=${Date.now()}, { cache: "no-store" });
-        const data = await res.json();
+    const requestUrl = `${API_URL}?action=getAdsByPlaceId&placeId=${encodeURIComponent(placeId)}&_ts=${Date.now()}`;
+    console.log('Fetching: ' + requestUrl);
+    try {
+        const res = await fetch(requestUrl, { cache: "no-store" });
+        const text = await res.text();
+        let data;
+    try { data = JSON.parse(text); console.log('Fetched JSON, length: ' + (Array.isArray(data) ? data.length : (data && Object.keys(data).length ? Object.keys(data).length : 'unknown'))); }
+    catch(parseErr) { console.warn('Failed to parse JSON response: ' + parseErr.message + '\nResponse text: ' + text.slice(0,2000)); throw parseErr; }
         displayAds(data);
-        try { localStorage.setItem(cacheKey, JSON.stringify(data)); localStorage.setItem(cacheTsKey, String(Date.now())); } catch(e) {}
+    try { localStorage.setItem(cacheKey, JSON.stringify(data)); localStorage.setItem(cacheTsKey, String(Date.now())); } catch(e) { console.warn('Failed to cache data: ' + e.message); }
         // سيتم إخفاء اللودر مباشرة بعد أول دفعة عرض داخل displayAds
+    } catch (fetchErr) {
+        console.warn('Fetch error: ' + (fetchErr && fetchErr.message ? fetchErr.message : String(fetchErr)));
+        throw fetchErr;
+    }
     } catch (error) {
         console.error("حدث خطأ في جلب البيانات:", error);
         hideLoader();
@@ -1283,7 +1396,73 @@ function displayAds(ads) {
             }
 
             // الصور والفيديو
-            const allImages = Array.isArray(ad.images) ? ad.images.filter(img => img && img.trim() !== '') : [];
+            // جمع الصور من حقول متعددة (images array أو الأعمدة صورة1..صورة8 أو رابط صورة1..رابط صورة8 أو حقول شائعة)
+            const allImages = [];
+            // 1) images array
+            if (Array.isArray(ad.images)) {
+                ad.images.forEach(i => { if (i && typeof i === 'string' && i.trim() !== '') allImages.push(i.trim()); });
+            }
+
+            // 2) Arabic sheet columns صورة1..صورة8 and رابط صورة1..رابط صورة8
+            for (let i = 1; i <= 8; i++) {
+                const keyImg = `صورة${i}`;
+                const keyLink = `رابط صورة${i}`;
+                if (ad[keyImg] && typeof ad[keyImg] === 'string' && ad[keyImg].trim() !== '') allImages.push(ad[keyImg].trim());
+                if (ad[keyLink] && typeof ad[keyLink] === 'string' && ad[keyLink].trim() !== '') allImages.push(ad[keyLink].trim());
+            }
+
+            // 3) common english variants image1..image8, linkImage1..linkImage8
+            for (let i = 1; i <= 8; i++) {
+                const k1 = `image${i}`, k2 = `linkImage${i}`, k3 = `img${i}`;
+                if (ad[k1] && typeof ad[k1] === 'string' && ad[k1].trim() !== '') allImages.push(ad[k1].trim());
+                if (ad[k2] && typeof ad[k2] === 'string' && ad[k2].trim() !== '') allImages.push(ad[k2].trim());
+                if (ad[k3] && typeof ad[k3] === 'string' && ad[k3].trim() !== '') allImages.push(ad[k3].trim());
+            }
+
+            // 4) single-field fallbacks
+            const possibleSingle = [ad.image, ad.img, ad.picture, ad.cover, ad.photo];
+            for (const v of possibleSingle) {
+                if (v && typeof v === 'string' && v.trim() !== '') allImages.push(v.trim());
+            }
+
+            // Normalize: remove empties and duplicates while preserving order
+            const seen = new Set();
+            const normalizedImages = allImages.map(s => (s || '').trim()).filter(s => s !== '').filter(s => {
+                if (seen.has(s)) return false; seen.add(s); return true;
+            }).map(s => {
+                // Convert Google Drive share/view links to direct image links
+                try {
+                    // Examples:
+                    // https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+                    // https://drive.google.com/open?id=FILE_ID
+                    const m1 = s.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+                    const m2 = s.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+                    if (m1 && m1[1]) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
+                    if (m2 && m2[1]) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
+                } catch (e) {}
+                // Otherwise return as-is
+                return s;
+            });
+
+            // Build images HTML
+            const fallbackImg = 'icons/icon-192.png';
+            const imagesHtml = normalizedImages.length ? normalizedImages.map((imgSrc, imgIndex) => {
+                const escapedAlt = (ad.title || 'صورة الإعلان').replace(/"/g, '');
+                // preload first image to speed up appearance
+                if (imgIndex === 0) {
+                    try {
+                        const link = document.createElement('link');
+                        link.rel = 'preload';
+                        link.as = 'image';
+                        link.href = imgSrc;
+                        link.fetchpriority = 'high';
+                        document.head.appendChild(link);
+                    } catch (e) {}
+                }
+                return `<img src="${imgSrc}" loading="eager" decoding="async" fetchpriority="high" onerror="tryAlternateImage(this)" onload="this.classList.add('img-loaded')" class="w-full h-full object-contain p-4" alt="${escapedAlt}">`;
+            }).join('') : '';
+
+            const imageCountHtml = `<div class="text-sm text-slate-600 mt-2">الصور: ${normalizedImages.length}</div>`;
             let videoUrl = '';
             if (ad['رابط الفيديو'] && ad['رابط الفيديو'].trim() !== '') {
                 videoUrl = ad['رابط الفيديو'].trim();
@@ -1291,34 +1470,44 @@ function displayAds(ads) {
                 videoUrl = ad.video.trim();
             }
 
-            const imagesHtml = allImages.map(img => <img src="${img}" alt="صورة" style="max-width: 100%; height: auto;" loading="lazy" decoding="async">).join('');
             const videoHtml = videoUrl ? createVideoHtml(videoUrl) : '';
+
+            // debug logging removed
+
+            const statusBadgeHtml = (statusClass !== 'hidden') ? `<div class="status-badge ${statusClass}">${statusValue}</div>` : '';
+            const imagesHtmlWrapped = imagesHtml ? `<div class="ad-images">${imagesHtml}</div>` : '<p>لا توجد صور</p>';
+            const videoHtmlWrapped = videoHtml ? `<div class="ad-video">${videoHtml}</div>` : '';
+            const couponHtml = (ad.coupon || ad['كوبون خصم']) ? `<div class="coupon">كوبون الخصم: ${ad.coupon || ad['كوبون خصم']}</div>` : '';
+            const registrationHtml = (ad.registrationStatus || ad['حالة التسجيل']) ? `
+                <div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+                    <p style="margin: 0; font-weight: 600; color: #1976d2;"><strong>حالة التسجيل:</strong> ${ad.registrationStatus || ad['حالة التسجيل']}</p>
+                </div>` : '';
+            const packageHtml = (ad.packageStatus || ad['حالة الباقة']) ? `
+                <div style="margin-top: 10px; padding: 10px; background: #f3e5f5; border-radius: 8px; border-left: 4px solid #9c27b0;">
+                    <p style="margin: 0; font-weight: 600; color: #7b1fa2;"><strong>حالة الباقة:</strong> ${ad.packageStatus || ad['حالة الباقة']}</p>
+                </div>` : '';
+            const mallHtml = (ad.mall || ad['الموقع أو المول'] || ad.location || ad['الموقع'] || ad['location']) ? `<div class="text-xs text-indigo-700 font-semibold mt-1">الموقع أو المول: <span class='font-normal text-slate-700'>${ad.mall || ad['الموقع أو المول'] || ad.location || ad['الموقع'] || ad['location']}</span></div>` : '';
+            const addressHtml = (ad.address || ad['العنوان التفصيلي'] || ad['العنوان'] || ad['address']) ? `<div class="text-xs text-slate-700 font-semibold mt-1 mb-2">العنوان: <span class='font-normal text-slate-700'>${ad.address || ad['العنوان التفصيلي'] || ad['العنوان'] || ad['address']}</span></div>` : '';
 
             const wrapper = document.createElement('div');
             wrapper.innerHTML = `
                 <div class="ad-card" data-place-id="${placeId || ''}">
-                    ${statusClass !== 'hidden' ? <div class="status-badge ${statusClass}">${statusValue}</div> : ''}
-                    ${imagesHtml ? <div class="ad-images">${imagesHtml}</div> : '<p>لا توجد صور</p>'}
-                    ${videoHtml ? <div class="ad-video">${videoHtml}</div> : ''}
+                    ${statusBadgeHtml}
+                    ${imagesHtmlWrapped}
+                    ${videoHtmlWrapped}
                     <div class="ad-details">
                         <h3>${ad.title || ad['العنوان'] || ''}</h3>
                         <p><strong>نوع الإعلان:</strong> ${ad.type || ad['نوع الاعلان'] || ''}</p>
                         <p>${ad.description || ad['الوصف'] || ''}</p>
                         <p><strong>تاريخ البداية:</strong> ${ad['تاريخ البداية'] || ad['بداية'] || ad['Start Date'] || ad['start_date'] || ad.startDate || ''}</p>
                         <p><strong>تاريخ النهاية:</strong> ${ad['تاريخ النهاية'] || ad['نهاية'] || ad['End Date'] || ad['end_date'] || ad.endDate || ''}</p>
-                        ${ad.coupon || ad['كوبون خصم'] ? <div class="coupon">كوبون الخصم: ${ad.coupon || ad['كوبون خصم']}</div> : ''}
-                        ${ad.registrationStatus || ad['حالة التسجيل'] ? `<div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
-                            <p style="margin: 0; font-weight: 600; color: #1976d2;">
-                                <strong>حالة التسجيل:</strong> ${ad.registrationStatus || ad['حالة التسجيل']}
-                            </p>
-                        </div>` : ''}
-                        ${ad.packageStatus || ad['حالة الباقة'] ? `<div style="margin-top: 10px; padding: 10px; background: #f3e5f5; border-radius: 8px; border-left: 4px solid #9c27b0;">
-                            <p style="margin: 0; font-weight: 600; color: #7b1fa2;">
-                                <strong>حالة الباقة:</strong> ${ad.packageStatus || ad['حالة الباقة']}
-                            </p>
-                        </div>` : ''}
-                        ${ad.mall || ad['الموقع أو المول'] || ad.location || ad['الموقع'] || ad['location'] ? <div class="text-xs text-indigo-700 font-semibold mt-1">الموقع أو المول: <span class='font-normal text-slate-700'>${ad.mall || ad['الموقع أو المول'] || ad.location || ad['الموقع'] || ad['location']}</span></div> : ''}
-                        ${ad.address || ad['العنوان التفصيلي'] || ad['العنوان'] || ad['address'] ? <div class="text-xs text-slate-700 font-semibold mt-1 mb-2">العنوان: <span class='font-normal text-slate-700'>${ad.address || ad['العنوان التفصيلي'] || ad['العنوان'] || ad['address']}</span></div> : ''}
+                        ${imageCountHtml}
+                        ${couponHtml}
+                        <!-- images shown inline; button removed -->
+                        ${registrationHtml}
+                        ${packageHtml}
+                        ${mallHtml}
+                        ${addressHtml}
                     </div>
                 </div>
             `;
@@ -1355,12 +1544,11 @@ function showSkeletons(count = 6) {
 function clearSkeletons() {
   const container = document.getElementById('adsContainer');
   if (!container) return;
-  // احذف فقط البطاقات التي تحتوي على عناصر skeleton حتى لا نحذف الإعلانات الحقيقية
-  container.querySelectorAll('.ad-card').forEach(el => {
-    if (el.querySelector('.skeleton')) {
-      el.remove();
+    // If there are any real ad cards, remove skeletons immediately
+    const realCards = container.querySelectorAll('.ad-card:not(.skeleton)');
+    if (realCards && realCards.length) {
+        container.querySelectorAll('.skeleton').forEach(s => s.remove());
     }
-  });
 }
 
 // Dark Mode Functionality
@@ -1435,6 +1623,19 @@ document.addEventListener('DOMContentLoaded', function() {
     
     fetchAds();
     initLightbox();
+    // refresh button
+    const refreshBtn = document.getElementById('refreshAdsBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            const pid = getPlaceId();
+            if (pid) {
+                try { localStorage.removeItem(`ads_cache_${pid}`); localStorage.removeItem(`ads_cache_${pid}_ts`); } catch(e) {}
+            }
+            // force fetch
+            showLoader(); fetchAds();
+        });
+    }
+    // open-images handler removed
 });
 
 setInterval(fetchAds, 600000);
