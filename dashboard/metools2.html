@@ -343,10 +343,10 @@
 
     <!-- أزرار التحكم -->
     <div class="flex flex-wrap justify-center gap-2 md:gap-4 mt-4 md:mt-6">
-      <button type="button" onclick="addRow()" class="px-3 py-2 md:px-4 md:py-2 bg-blue-500 text-white rounded-lg text-sm md:text-base">📝 إضافة صنف</button>
-      <button type="button" onclick="downloadPDF()" class="px-3 py-2 md:px-4 md:py-2 bg-red-600 text-white rounded-lg text-sm md:text-base">📥 تحميل PDF</button>
-      <button type="button" onclick="printDoc()" class="px-3 py-2 md:px-4 md:py-2 bg-gray-700 text-white rounded-lg text-sm md:text-base">🖨️ طباعة</button>
-      <button type="button" onclick="shareDoc()" class="px-3 py-2 md:px-4 md:py-2 bg-green-600 text-white rounded-lg text-sm md:text-base">⚡ مشاركة</button>
+      <button type="button" onclick="addRow()" class="px-3 py-2 md:px-4 md:py-2 bg-blue-500 text-white rounded-lg text-sm md:text-base hover:bg-blue-600">📝 إضافة صنف</button>
+      <button type="button" onclick="downloadPDF()" class="px-3 py-2 md:px-4 md:py-2 bg-red-600 text-white rounded-lg text-sm md:text-base hover:bg-red-700">📥 تحميل PDF</button>
+      <button type="button" onclick="printDoc()" class="px-3 py-2 md:px-4 md:py-2 bg-gray-700 text-white rounded-lg text-sm md:text-base hover:bg-gray-800">🖨️ طباعة</button>
+      <button type="button" onclick="shareDoc()" class="px-3 py-2 md:px-4 md:py-2 bg-green-600 text-white rounded-lg text-sm md:text-base hover:bg-green-700">⚡ مشاركة</button>
     </div>
   </div>
 
@@ -443,7 +443,11 @@
     }
 
     function openDateTimePicker() {
-      document.getElementById('datetimeInput').showPicker();
+      try {
+        document.getElementById('datetimeInput').showPicker();
+      } catch (e) {
+        document.getElementById('datetimeInput').focus();
+      }
     }
 
     function setDocType(type) {
@@ -535,23 +539,17 @@
             </td>
             <td style="text-align: center !important; vertical-align: middle !important; padding: 8px; border: 1px solid #d1d5db;">
               <input type="number" 
-                     value="0" min="0" 
+                     value="0" min="0" step="0.01"
                      style="text-align: center !important; width: 100%; border: none; background: transparent; padding: 4px; margin: 0; box-sizing: border-box; font-size: inherit; display: block;" 
                      oninput="updateTotal()">
             </td>
             <td class="total" style="text-align: center !important; vertical-align: middle !important; padding: 8px; border: 1px solid #d1d5db; font-weight: bold;">0</td>
             <td class="remove-row-btn" style="text-align: center !important; vertical-align: middle !important; padding: 8px; border: 1px solid #d1d5db;">
-              <button type="button" onclick="this.closest('tr').remove(); updateTotal()" style="color: #ef4444; background: none; border: none; cursor: pointer;">✖</button>
+              <button type="button" onclick="this.closest('tr').remove(); updateTotal()" style="color: #ef4444; background: none; border: none; cursor: pointer; font-size: 16px;">✖</button>
             </td>
           </tr>
         `;
       } else {
         row = `
           <tr>
-            <td style="text-align: center !important; vertical-align: middle !important; padding: 8px; border: 1px solid #d1d5db;">
-              <input type="text" 
-                     style="text-align: center !important; width: 100%; border: none; background: transparent; padding: 4px; margin: 0; box-sizing: border-box; font-size: inherit; display: block;" 
-                     placeholder="اسم الصنف" 
-                     oninput="updatePreview()">
-            </td>
-            <td style="text-align: center !important; vertical-
+            <td style="text-align: center !important; vertical-align: middle !important
