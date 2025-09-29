@@ -1,5 +1,6 @@
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
+// الكود الخاص بك
 const CACHE_NAME = "ban-cache-v11";
 const urlsToCache = [
   "/Ban/",
