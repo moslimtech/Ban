@@ -415,6 +415,20 @@
     </div>
   </section>
 
+   <!-- Floating cash icon -->
+    <!-- Calculator icon -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7" aria-hidden="true">
+      <path d="M7 2a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V4a2 2 0 00-2-2H7zm8 2v3H9V4h6zM9 9h6v2H9V9zm0 4h2v2H9v-2zm4 0h2v2h-2v-2zM9 17h2v2H9v-2zm4 0h2v2h-2v-2z"/>
+    </svg>
+  <button id="cashFloatingBtn" type="button" aria-label="أدوات بان" title="أدوات بان" class="fixed bottom-20 left-6 z-50 inline-flex items-center justify-center w-14 h-14 rounded-full bg-indigo-600/80 text-white shadow-lg hover:scale-105 transition-transform" style="backdrop-filter: blur(6px); box-shadow: 0 6px 18px rgba(6,8,24,0.18);">
+    <!-- hint badge -->
+    <span class="absolute -top-3 -left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md" style="transform: translate(0, -8%);">كاشك</span>
+    <!-- Calculator icon -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7" aria-hidden="true">
+      <path d="M7 2a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V4a2 2 0 00-2-2H7zm8 2v3H9V4h6zM9 9h6v2H9V9zm0 4h2v2H9v-2zm4 0h2v2h-2v-2zM9 17h2v2H9v-2zm4 0h2v2h-2v-2z"/>
+    </svg>
+  </button>
+
   <!-- Floating tools icon -->
     <!-- Calculator icon -->
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7" aria-hidden="true">
@@ -2107,6 +2121,26 @@
     (function(){
       const btn = document.getElementById('metoolsFloatingBtn');
       const url = 'https://moslimtech.github.io/Ban/metools';
+      if (!btn) return;
+      btn.addEventListener('click', function(){
+        // افتح الرابط في نفس الصفحة
+        window.location.href = url;
+      });
+      // دعم لوحة المفاتيح (Enter/Space)
+      btn.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          btn.click();
+        }
+      });
+    })();
+  </script>
+
+  <script>
+    // فتح صفحة metools من الزر كـ button وليس رابط
+    (function(){
+      const btn = document.getElementById('cashFloatingBtn');
+      const url = 'https://moslimtech.github.io/Ban/cash';
       if (!btn) return;
       btn.addEventListener('click', function(){
         // افتح الرابط في نفس الصفحة
