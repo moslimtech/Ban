@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>مولّد أكواد تحويل الكاش – بان للإعلانات</title>
+  <meta name="theme-color" content="#0d9488" />
+  <link rel="icon" href="/Ban/icons/icon-192.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Tajawal', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+    .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(6px); }
+    .btn-anim { transition: transform .12s ease, box-shadow .12s ease; }
+    .btn-anim:active { transform: translateY(2px) scale(.995); }
+  </style>
+
+  <!-- load manifest according to user language -->
+  <script>
+    const userLang = navigator.language || navigator.userLanguage;
+    const manifest = document.createElement('link');
+    manifest.rel = 'manifest';
+
+    if (userLang && userLang.startsWith && userLang.startsWith('ar')) {
+      manifest.href = '/Ban/manifest-ar.json?v=1';
+    } else {
+      manifest.href = '/Ban/manifest-en.json?v=1';
+    }
+
+    document.head.appendChild(manifest);
+  </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-sky-50 via-white to-emerald-50 flex items-center justify-center p-6">
+  <div class="max-w-3xl w-full">
+    <header class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-4">
+        <img src="https://moslimtech.github.io/Ban/icons/icon-192.png" alt="logo" class="w-14 h-14 rounded-lg shadow" />
+        <div>
+          <h1 class="text-xl font-bold">مولّد أكواد تحويل الكاش – بان للإعلانات</h1>
+          <p class="text-sm text-slate-600 mt-0.5">سهل • سريع • يفتح تطبيق التحويل مباشرة</p>
+        </div>
+      </div>
+      <a href="https://moslimtech.github.io/Ban/" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow btn-anim hover:shadow-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M7.707 14.707a1 1 0 01-1.414 0L2.586 11l3.707-3.707a1 1 0 011.414 1.414L5.414 11l2.293 2.293a1 1 0 010 1.414zM13 5a1 1 0 100 2h.01A5.002 5.002 0 0118 12a1 1 0 102 0 7.002 7.002 0 00-7-7H13z" clip-rule="evenodd" />
+        </svg>
+        الرجوع
+      </a>
+    </header>
+
+    <main class="glass p-6 rounded-2xl shadow-lg">
+      <form id="cashForm" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-slate-700 mb-1">رقم المستلم</label>
+            <div class="flex gap-2">
+              <input id="phoneInput" type="tel" inputmode="tel" placeholder="اختر من جهات الاتصال أو اكتب الرقم" class="flex-1 px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-sky-300" />
+              <button type="button" id="pickContactBtn" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-600 text-white btn-anim hover:bg-sky-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M8 9a3 3 0 100-6 3 3 0 000 6z"/><path fill-rule="evenodd" d="M2 13a6 6 0 1112 0v1H2v-1z" clip-rule="evenodd"/></svg>
+                اختيار من جهات الاتصال
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">المبلغ (جنيه)</label>
+            <input id="amountInput" type="number" min="1" placeholder="25" class="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-emerald-300" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-2">اختر الشبكة</label>
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <button type="button" data-net="vodafone" class="network-btn px-3 py-2 rounded-lg border bg-white hover:shadow-md">فودافون</button>
+            <button type="button" data-net="etisalat" class="network-btn px-3 py-2 rounded-lg border bg-white hover:shadow-md">اتصالات</button>
+            <button type="button" data-net="orange" class="network-btn px-3 py-2 rounded-lg border bg-white hover:shadow-md">اورانج</button>
+            <button type="button" data-net="we" class="network-btn px-3 py-2 rounded-lg border bg-white hover:shadow-md">وي</button>
+            <button type="button" data-net="instapay" class="network-btn px-3 py-2 rounded-lg border bg-white hover:shadow-md">إنستاباي</button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button id="generateBtn" type="button" class="ml-auto px-4 py-2 rounded-xl bg-emerald-500 text-white font-semibold shadow-lg btn-anim hover:bg-emerald-600">🔁 تحويل الآن</button>
+          <button id="previewBtn" type="button" class="px-4 py-2 rounded-xl bg-white border font-medium btn-anim hover:shadow">👁️ معاينة الكود</button>
+        </div>
+
+        <div id="resultBox" class="mt-4 hidden p-4 rounded-lg bg-white border">
+          <p class="text-sm text-slate-700">تم توليد الرابط/الكود — اضغط "تحويل الآن" لفتحه مباشرة على جهازك أو انسخ الكود:</p>
+          <pre id="resultText" class="mt-2 bg-slate-50 p-3 rounded text-sm overflow-auto"></pre>
+          <div class="mt-3 flex gap-2">
+            <button id="copyBtn" class="px-3 py-2 rounded bg-sky-600 text-white">نسخ</button>
+            <a id="openLinkBtn" class="px-3 py-2 rounded bg-emerald-500 text-white" href="#" target="_blank" rel="noopener">فتح</a>
+          </div>
+        </div>
+
+      </form>
+
+      <p class="mt-5 text-xs text-slate-600">ملاحظة: قد لا يعمل اختيار جهات الاتصال في بعض المتصفحات — سيحاول المتصفح فتح قائمة جهات الاتصال إن أمكن، وإلا يمكنك إدخال الرقم يدويًا.</p>
+    </main>
+
+    <footer class="mt-6 text-center text-xs text-slate-500">© بان للإعلانات</footer>
+  </div>
+
+  <script>
+    // Configuration: templates for USSD / deep links
+    const templates = {
+      vodafone: (phone, amount) => `*9*7*${phone}*${amount}#`,
+      etisalat: (phone, amount) => `*777*${phone}*${amount}#`,
+      orange: (phone, amount) => `*115*1*${phone}*${amount}#`,
+      we: (phone, amount) => `*322*${phone}*${amount}#`,
+      // instapay uses your provided ipn link (web) and appends params (if needed)
+      instapay: (phone, amount) => `https://ipn.eg/S/ibrahimmabroukeldeeb/instapay/4ZCmRA?recipient=${phone}&amount=${amount}`
+    };
+
+    // Elements
+    const pickContactBtn = document.getElementById('pickContactBtn');
+    const phoneInput = document.getElementById('phoneInput');
+    const amountInput = document.getElementById('amountInput');
+    const networkButtons = document.querySelectorAll('.network-btn');
+    const generateBtn = document.getElementById('generateBtn');
+    const previewBtn = document.getElementById('previewBtn');
+    const resultBox = document.getElementById('resultBox');
+    const resultText = document.getElementById('resultText');
+    const copyBtn = document.getElementById('copyBtn');
+    const openLinkBtn = document.getElementById('openLinkBtn');
+
+    let selectedNetwork = 'vodafone';
+
+    // select default network visual
+    function markSelected() {
+      networkButtons.forEach(b => {
+        if (b.dataset.net === selectedNetwork) {
+          b.classList.add('bg-emerald-50', 'border-emerald-300');
+        } else {
+          b.classList.remove('bg-emerald-50', 'border-emerald-300');
+        }
+      });
+    }
+    markSelected();
+
+    networkButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedNetwork = btn.dataset.net;
+        markSelected();
+      });
+    });
+
+    // Contact picker (only available in some browsers / PWA)
+    pickContactBtn.addEventListener('click', async () => {
+      try {
+        // New Contacts API (experimental) - Chrome on Android (PWA) supports it behind flags in some versions
+        if (navigator.contacts && navigator.contacts.select) {
+          const props = ['tel', 'name'];
+          const opts = { multiple: false };
+          const contacts = await navigator.contacts.select(props, opts);
+          if (contacts && contacts.length) {
+            const tel = (contacts[0].tel && contacts[0].tel[0]) || '';
+            phoneInput.value = tel.replace(/\s|\-/g, '');
+            return;
+          }
+        }
+
+        // Fallback: try generic contact picker or notify user
+        phoneInput.focus();
+        alert('جاري محاولة فتح جهات الاتصال... إذا لم يعمل المتصفح الخاص بك، الرجاء إدخال الرقم يدوياً.');
+      } catch (e) {
+        console.error(e);
+        phoneInput.focus();
+        alert('حدث خطأ أثناء محاولة الوصول إلى جهات الاتصال. الرجاء إدخال الرقم يدوياً.');
+      }
+    });
+
+    // Utility: clean phone number (remove non-digits)
+    function cleanPhone(p) {
+      if (!p) return '';
+      return p.replace(/[^0-9]/g, '');
+    }
+
+    function buildAction(network, phone, amount) {
+      const cleaned = cleanPhone(phone);
+      if (!cleaned) return null;
+      if (!amount || Number(amount) <= 0) return null;
+
+      if (network === 'instapay') {
+        return templates.instapay(cleaned, amount);
+      }
+
+      const code = templates[network](cleaned, amount);
+      return 'tel:' + encodeURIComponent(code);
+    }
+
+    // Generate and open
+    generateBtn.addEventListener('click', () => {
+      const phone = phoneInput.value.trim();
+      const amount = amountInput.value.trim();
+      const link = buildAction(selectedNetwork, phone, amount);
+      if (!link) {
+        alert('من فضلك تأكد من إدخال رقم صالح والمبلغ.');
+        return;
+      }
+
+      // Show preview (show actual USSD code for copy, or full instapay URL)
+      resultBox.classList.remove('hidden');
+      resultText.textContent = selectedNetwork === 'instapay' ? link : decodeURIComponent(link.replace(/^tel:/, ''));
+      openLinkBtn.href = link;
+
+      // Try to open directly
+      try {
+        if (selectedNetwork === 'instapay') {
+          window.location.href = link;
+          return;
+        }
+        window.location.href = link;
+      } catch (e) {
+        console.error(e);
+      }
+    });
+
+    previewBtn.addEventListener('click', () => {
+      const phone = phoneInput.value.trim();
+      const amount = amountInput.value.trim();
+      const link = buildAction(selectedNetwork, phone, amount);
+      if (!link) {
+        alert('من فضلك تأكد من إدخال رقم صالح والمبلغ.');
+        return;
+      }
+      resultBox.classList.remove('hidden');
+      resultText.textContent = selectedNetwork === 'instapay' ? link : decodeURIComponent(link.replace(/^tel:/, ''));
+      openLinkBtn.href = link;
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      const txt = resultText.textContent;
+      try {
+        await navigator.clipboard.writeText(txt);
+        copyBtn.textContent = 'تم النسخ ✓';
+        setTimeout(() => copyBtn.textContent = 'نسخ', 1500);
+      } catch (e) {
+        alert('لم نتمكن من نسخ النص. انسخه يدويًا من المربع.');
+      }
+    });
+
+    // prevent form submit
+    document.getElementById('cashForm').addEventListener('submit', (e) => e.preventDefault());
+
+    // default amount
+    amountInput.value = 25;
+
+    // Register Service Worker for PWA and Firebase Messaging
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/Ban/firebase-messaging-sw.js')
+        .then(() => console.log('✅ Firebase Messaging SW Registered'))
+        .catch(err => console.log('❌ SW registration failed:', err));
+    }
+  </script>
+</body>
+</html>
