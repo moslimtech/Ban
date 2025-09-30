@@ -1052,7 +1052,7 @@ function validateFiles() {
   }
   if (uploadedVideos.length > 0) {
     const v = uploadedVideos[0];
-    if (v.size > maxSize * 5) { showError('حجم الفيديو أكبر من 50MB'); return false; }
+    if (v.size > maxSize * 50) { showError('حجم الفيديو أكبر من 500MB'); return false; }
     if (!allowedVideoTypes.includes(v.type)) { showError('نوع الفيديو غير مدعوم'); return false; }
   }
   return true;
