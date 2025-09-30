@@ -67,7 +67,7 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification?.title || "📢 إشعار جديد";
   const notificationOptions = {
     body: payload.notification?.body || "لديك إشعار جديد",
-    icon: "/Ban/icon.png", // ضع مسار أيقونتك إن وُجدت
+    icon: "/Ban/icons/icon-192.png", // ضع مسار أيقونتك إن وُجدت
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
