@@ -547,6 +547,7 @@
       cursor: pointer;
       font-weight: 600;
       font-size: 15px;
+      user-select: none;
     }
     
     .btn:active {
@@ -573,6 +574,8 @@
       transition: all 0.2s ease;
       position: relative;
       overflow: hidden;
+      cursor: pointer;
+      user-select: none;
     }
     
     .network-btn::before {
@@ -585,6 +588,7 @@
       background: linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(13, 148, 136, 0.1) 100%);
       opacity: 0;
       transition: opacity 0.2s ease;
+      pointer-events: none;
     }
     
     .network-btn:hover::before {
@@ -592,9 +596,9 @@
     }
     
     .network-active {
-      border-color: #14b8a6;
-      background: linear-gradient(135deg, rgba(20, 184, 166, 0.15) 0%, rgba(13, 148, 136, 0.15) 100%);
-      color: #0d9488;
+      border-color: #14b8a6 !important;
+      background: linear-gradient(135deg, rgba(20, 184, 166, 0.15) 0%, rgba(13, 148, 136, 0.15) 100%) !important;
+      color: #0d9488 !important;
       box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
     }
     
@@ -638,11 +642,15 @@
       inset: 0;
       background: rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(4px);
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       z-index: 1000;
       animation: fadeIn 0.2s ease;
+    }
+    
+    .modal-backdrop.show {
+      display: flex !important;
     }
     
     @keyframes fadeIn {
@@ -759,11 +767,26 @@
       background: var(--card-bg);
       cursor: pointer;
       transition: all 0.2s ease;
+      user-select: none;
     }
     
     .icon-btn:hover {
       border-color: #14b8a6;
       transform: translateY(-2px);
+    }
+    
+    .table-btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+    
+    .table-btn:active {
+      transform: scale(0.95);
     }
     
     @media (max-width: 768px) {
@@ -805,13 +828,13 @@
 
       <div class="flex items-center gap-2">
         <button id="themeToggle" class="icon-btn">🌗</button>
-        <a href="https://moslimtech.github.io/Ban/" class="icon-btn">📢</a>
+        <a href="https://moslimtech.github.io/Ban/" class="icon-btn" style="text-decoration: none;">📢</a>
       </div>
     </header>
 
     <!-- Main Form -->
     <main class="card p-6">
-      <form id="cashForm" class="space-y-6">
+      <form id="cashForm" class="space-y-6" onsubmit="return false;">
         <!-- Phone & Amount -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -826,7 +849,7 @@
 
           <div>
             <label class="block text-sm font-semibold mb-2" style="color: var(--text-muted)">💰 المبلغ (جنيه)</label>
-            <input id="amountInput" type="number" min="1" placeholder="25" />
+            <input id="amountInput" type="number" min="1" placeholder="25" value="25" />
           </div>
         </div>
 
@@ -863,9 +886,9 @@
               <div id="resultText" class="code-display"></div>
               
               <div class="flex flex-wrap gap-2 mt-4">
-                <button id="copyBtn" class="btn px-4 py-2 rounded-lg" style="background: #0ea5e9; color: white;">📋 نسخ</button>
-                <a id="openLinkBtn" class="btn px-4 py-2 rounded-lg" href="#" style="background: #10b981; color: white;">🔗 فتح</a>
-                <a id="whatsappBtn" class="btn px-4 py-2 rounded-lg" href="#" style="background: #25d366; color: white;">💬 واتساب</a>
+                <button id="copyBtn" type="button" class="btn px-4 py-2 rounded-lg" style="background: #0ea5e9; color: white;">📋 نسخ</button>
+                <a id="openLinkBtn" class="btn px-4 py-2 rounded-lg" href="#" style="background: #10b981; color: white; text-decoration: none;">🔗 فتح</a>
+                <a id="whatsappBtn" class="btn px-4 py-2 rounded-lg" href="#" target="_blank" rel="noopener" style="background: #25d366; color: white; text-decoration: none;">💬 واتساب</a>
               </div>
             </div>
             
@@ -886,14 +909,14 @@
   </div>
 
   <!-- History Modal -->
-  <div id="historyBackdrop" class="modal-backdrop hidden">
+  <div id="historyBackdrop" class="modal-backdrop">
     <div class="modal-card">
       <div class="flex items-center justify-between mb-4 pb-4" style="border-bottom: 2px solid var(--border);">
         <h3 class="font-bold text-xl">📜 سجل المعاملات</h3>
         <div class="flex gap-2">
-          <button id="downloadCsvBtn" class="btn px-3 py-2 rounded-lg" style="background: #3b82f6; color: white;" title="تحميل CSV">📥</button>
-          <button id="clearHistoryBtn" class="btn px-3 py-2 rounded-lg" style="background: #ef4444; color: white;" title="حذف الكل">🗑️</button>
-          <button id="closeHistoryBtn" class="btn px-3 py-2 rounded-lg" style="border: 2px solid var(--border);">✕ إغلاق</button>
+          <button id="downloadCsvBtn" type="button" class="btn px-3 py-2 rounded-lg" style="background: #3b82f6; color: white;" title="تحميل CSV">📥</button>
+          <button id="clearHistoryBtn" type="button" class="btn px-3 py-2 rounded-lg" style="background: #ef4444; color: white;" title="حذف الكل">🗑️</button>
+          <button id="closeHistoryBtn" type="button" class="btn px-3 py-2 rounded-lg" style="border: 2px solid var(--border);">✕ إغلاق</button>
         </div>
       </div>
 
@@ -974,7 +997,9 @@
     const saved = localStorage.getItem('theme') || (prefersDark ? 'dark' : 'light');
     applyTheme(saved);
     
-    themeToggle.addEventListener('click', () => {
+    themeToggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       const now = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
       applyTheme(now);
     });
@@ -982,18 +1007,27 @@
     /********** Network selection **********/
     function markSelected() {
       networkButtons.forEach(b => {
-        if (b.dataset.net === selectedNetwork) b.classList.add('network-active');
-        else b.classList.remove('network-active');
+        b.classList.remove('network-active');
+        if (b.dataset.net === selectedNetwork) {
+          b.classList.add('network-active');
+        }
       });
     }
-    networkButtons.forEach(btn => btn.addEventListener('click', () => { 
-      selectedNetwork = btn.dataset.net; 
-      markSelected(); 
-    }));
+    
+    networkButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        selectedNetwork = btn.dataset.net;
+        markSelected();
+      });
+    });
     markSelected();
 
     /********** Contact picker **********/
-    pickContactBtn.addEventListener('click', async () => {
+    pickContactBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       try {
         if (navigator.contacts && navigator.contacts.select) {
           const props = ['tel','name'];
@@ -1007,8 +1041,8 @@
         }
         phoneInput.focus();
         alert('اختيار جهات الاتصال غير مدعوم. الرجاء إدخال الرقم يدوياً.');
-      } catch(e) {
-        console.error(e);
+      } catch(err) {
+        console.error(err);
         phoneInput.focus();
         alert('حدث خطأ. الرجاء إدخال الرقم يدوياً.');
       }
@@ -1042,11 +1076,25 @@
       const intl = toInternational(cleaned);
 
       if (network === 'instapay') {
-        return { type:'instapay', deep: templates.instapayDeep(intl, amount), web: templates.instapayWeb(intl, amount), local, intl, amount };
+        return { 
+          type:'instapay', 
+          deep: templates.instapayDeep(intl, amount), 
+          web: templates.instapayWeb(intl, amount), 
+          local, 
+          intl, 
+          amount 
+        };
       }
 
       const code = templates[network](local, amount);
-      return { type:'ussd', url: 'tel:' + encodeURIComponent(code), code: code, local, intl, amount };
+      return { 
+        type:'ussd', 
+        url: 'tel:' + encodeURIComponent(code), 
+        code: code, 
+        local, 
+        intl, 
+        amount 
+      };
     }
 
     /********** History **********/
@@ -1055,14 +1103,18 @@
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
       catch(e){ return []; }
     }
-    function saveHistory(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
+    function saveHistory(arr) { 
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); 
+    }
     function addHistoryItem(item) {
       const arr = loadHistory();
       arr.unshift(item);
       if (arr.length > 500) arr.pop();
       saveHistory(arr);
     }
-    function clearHistory() { localStorage.removeItem(STORAGE_KEY); }
+    function clearHistory() { 
+      localStorage.removeItem(STORAGE_KEY); 
+    }
 
     /********** UI: show result **********/
     function showResult(obj) {
@@ -1091,7 +1143,10 @@
       updateTotalsDisplay();
     }
 
-    generateBtn.addEventListener('click', () => {
+    generateBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
       const phone = phoneInput.value.trim();
       const amount = amountInput.value.trim();
       const obj = buildActionLink(selectedNetwork, phone, amount);
@@ -1118,7 +1173,7 @@
         try { window.location.href = obj.deep; } catch(_) {}
         setTimeout(() => { window.location.href = obj.web; }, 1200);
       } else {
-        try { window.location.href = obj.url; } catch(e){ console.error(e); }
+        try { window.location.href = obj.url; } catch(err){ console.error(err); }
       }
     });
 
@@ -1127,19 +1182,35 @@
       const fallback = openLinkBtn.getAttribute('data-fallback');
       if (!fallback) return;
       e.preventDefault();
-      try { window.location.href = href; } catch(e){ console.error(e); }
+      try { window.location.href = href; } catch(err){ console.error(err); }
       setTimeout(() => { window.location.href = fallback; }, 1200);
     });
 
-    previewBtn.addEventListener('click', () => {
+    previewBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const phone = phoneInput.value.trim();
+      const amount = amountInput.value
+          previewBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
       const phone = phoneInput.value.trim();
       const amount = amountInput.value.trim();
       const obj = buildActionLink(selectedNetwork, phone, amount);
-      if (!obj) { alert('⚠️ من فضلك تأكد من إدخال رقم صالح والمبلغ.'); return; }
+      
+      if (!obj) { 
+        alert('⚠️ من فضلك تأكد من إدخال رقم صالح والمبلغ.'); 
+        return; 
+      }
       showResult(obj);
     });
 
-    copyBtn.addEventListener('click', async () => {
+    copyBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
       const txt = resultText.textContent || '';
       try {
         await navigator.clipboard.writeText(txt);
@@ -1149,21 +1220,186 @@
           copyBtn.textContent = '📋 نسخ';
           copyBtn.style.background = '#0ea5e9';
         }, 2000);
-      } catch (e) {
+      } catch (err) {
         alert('نسخ غير مدعوم. انسخ النص يدوياً.');
       }
     });
 
     /********** History modal **********/
-    historyBtn.addEventListener('click', () => { 
+    historyBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       renderHistory(); 
-      historyBackdrop.classList.remove('hidden'); 
+      historyBackdrop.classList.add('show');
     });
     
-    closeHistoryBtn.addEventListener('click', () => { 
-      historyBackdrop.classList.add('hidden'); 
+    closeHistoryBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      historyBackdrop.classList.remove('show');
     });
 
-    clearHistoryBtn.addEventListener('click', () => {
-      if (!confirm('⚠️ هل متأكد من حذف كل المعاملات؟
-\<Streaming stoppped because the conversation grew too long for this model\>
+    historyBackdrop.addEventListener('click', (e) => {
+      if (e.target === historyBackdrop) {
+        historyBackdrop.classList.remove('show');
+      }
+    });
+
+    clearHistoryBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (!confirm('⚠️ هل متأكد من حذف كل المعاملات؟')) return;
+      clearHistory();
+      renderHistory();
+      updateTotalsDisplay();
+    });
+
+    downloadCsvBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      downloadHistoryCSV();
+    });
+
+    function renderHistory() {
+      const arr = loadHistory();
+      historyTbody.innerHTML = '';
+      
+      if (!arr.length) {
+        historyStats.innerHTML = `<p style="color: var(--text-muted)">لا توجد معاملات محفوظة بعد.</p>`;
+        modalTotalConfirmed.textContent = '0';
+        return;
+      }
+
+      // stats
+      const totalAmount = arr.reduce((s,t)=>s+Number(t.amount||0),0);
+      const confirmedAmount = arr.filter(t=>t.confirmed).reduce((s,t)=>s+Number(t.amount||0),0);
+      const totalCount = arr.length;
+      const confirmedCount = arr.filter(t=>t.confirmed).length;
+
+      historyStats.innerHTML = `
+        📊 عدد العمليات: <strong>${totalCount}</strong> — 
+        مجموع المبالغ: <strong>${totalAmount}</strong> ج — 
+        تم التأكيد: <strong>${confirmedCount}</strong> (${confirmedAmount} ج)
+      `;
+
+      arr.forEach((t, idx) => {
+        const tr = document.createElement('tr');
+        
+        const networkNames = {
+          vodafone: 'فودافون 🔴',
+          etisalat: 'اتصالات 🟢',
+          orange: 'أورانج 🟠',
+          we: 'وي 🟣',
+          instapay: 'إنستاباي 💳'
+        };
+        
+        tr.innerHTML = `
+          <td style="white-space:nowrap; font-size: 13px;">${t.date || '-'}</td>
+          <td style="font-weight: 600;">${t.local || t.number || '-'}</td>
+          <td style="font-weight: 600; color: #0d9488;">${t.amount || 0} ج</td>
+          <td>${networkNames[t.network] || t.network}</td>
+          <td>
+            ${t.confirmed 
+              ? '<span class="badge confirmed">✓ تم التحويل</span>' 
+              : '<span class="badge pending">⏳ قيد التنفيذ</span>'
+            }
+          </td>
+          <td>
+            ${!t.confirmed 
+              ? `<button type="button" data-idx="${idx}" class="confirm-row table-btn" style="background: #10b981; color: white;">✓ تأكيد</button>` 
+              : ''
+            }
+            <button type="button" data-del="${idx}" class="delete-row table-btn" style="background: #fee; color: #b91c1c; margin-right: 4px;">🗑️</button>
+          </td>
+        `;
+        historyTbody.appendChild(tr);
+      });
+
+      // attach handlers
+      document.querySelectorAll('.confirm-row').forEach(b => {
+        b.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const idx = Number(b.getAttribute('data-idx'));
+          confirmFromHistory(idx);
+        });
+      });
+      
+      document.querySelectorAll('.delete-row').forEach(b => {
+        b.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const idx = Number(b.getAttribute('data-del'));
+          deleteFromHistory(idx);
+        });
+      });
+
+      modalTotalConfirmed.textContent = confirmedAmount;
+    }
+
+    function confirmFromHistory(index) {
+      const arr = loadHistory();
+      if (!arr[index]) return;
+      arr[index].confirmed = true;
+      saveHistory(arr);
+      renderHistory();
+      updateTotalsDisplay();
+    }
+
+    function deleteFromHistory(index) {
+      const arr = loadHistory();
+      if (!arr[index]) return;
+      if (!confirm('⚠️ حذف هذه المعاملة؟')) return;
+      arr.splice(index, 1);
+      saveHistory(arr);
+      renderHistory();
+      updateTotalsDisplay();
+    }
+
+    function updateTotalsDisplay() {
+      const arr = loadHistory();
+      const total = arr.filter(x=>x.confirmed).reduce((s,x)=>s+Number(x.amount||0), 0);
+      totalConfirmedSpan.textContent = total;
+      modalTotalConfirmed.textContent = total;
+    }
+
+    /********** Download CSV **********/
+    function downloadHistoryCSV() {
+      const arr = loadHistory();
+      if (!arr.length) { 
+        alert('⚠️ لا توجد معاملات لتحميلها.'); 
+        return; 
+      }
+      
+      let csv = 'التاريخ,رقم المستلم,المبلغ,الشبكة,تم التأكيد
+';
+      arr.forEach(t => {
+        csv += `"${t.date || '-'}","${t.number || t.local || '-'}","${t.amount || 0}","${t.network || '-'}","${t.confirmed ? 'نعم':'لا'}"
+`;
+      });
+      
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'ban_transactions_' + new Date().getTime() + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    /********** Initialize **********/
+    updateTotalsDisplay();
+
+    /********** Register Service Worker (PWA) **********/
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/Ban/firebase-messaging-sw.js')
+        .then(() => console.log('✅ Service Worker Registered'))
+        .catch(err => console.log('❌ SW registration failed:', err));
+    }
+  </script>
+</body>
+</html>
+
