@@ -3,465 +3,288 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>مولّد أكواد تحويل الكاش</title>
-
-  <!-- Minimal consolidated CSS (keeps core layout and components used by the page) -->
+  <title>مولّد أكواد تحويل الكاش – بان للإعلانات</title>
+  <meta name="theme-color" content="#0d9488" />
+  <link rel="icon" href="/Ban/icons/icon-192.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root{
-      --card-bg:#ffffff;
-      --border:#e5e7eb;
-      --text:#0f172a;
-      --text-muted:#6b7280;
-      --success:#10b981;
-      --danger:#ef4444;
-      --primary:#14b8a6;
-    }
-    html,body{height:100%;margin:0;font-family:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial;direction:rtl}
-    body{background:#f8fafc;color:var(--text);-webkit-font-smoothing:antialiased}
-    .min-h-screen{min-height:100vh}
-    .p-4{padding:1rem}.md\:p-6{padding:1.5rem}
-    .max-w-5xl{max-width:80rem;margin:0 auto}
-    .card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px}
-    .p-6{padding:1.5rem}.p-4{padding:1rem}
-    .flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}
-    .gap-4{gap:1rem}.gap-2{gap:.5rem}
-    .text-rtl{direction:rtl;text-align:right}
-    .btn{padding:.5rem .75rem;border-radius:10px;background:transparent;border:1px solid var(--border);cursor:pointer}
-    .btn-primary{background:var(--primary);color:#fff;border:none}
-    .network-btn{padding:.5rem;border-radius:8px;border:1px solid var(--border);background:transparent}
-    .hidden{display:none}
-    .result-box{margin-top:1rem}
-    .code-display{font-family:monospace;background:var(--card-bg);border:1px solid var(--border);padding:.75rem;border-radius:8px}
-    .modal-backdrop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.5);z-index:1000}
-    .modal-backdrop.show{display:flex}
-    .modal-card{background:var(--card-bg);padding:1rem;border-radius:12px;max-width:900px;width:95%}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:.5rem;border-bottom:1px solid var(--border);text-align:right}
-    .notification{position:fixed;top:20px;right:20px;background:var(--success);color:#fff;padding:12px 18px;border-radius:10px;z-index:9999;display:none}
-    .notification.show{display:block}
-    @media (max-width:768px){.modal-card{width:98%}}
+    body { font-family: 'Tajawal', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; -webkit-font-smoothing:antialiased; }
+    .glass { background: rgba(255,255,255,0.75); backdrop-filter: blur(8px); }
+    .btn-anim { transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease; }
+    .btn-anim:active { transform: translateY(1px) scale(.998); }
+
+    /* Responsive utilities for this page */
+    .network-btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; padding:.6rem .75rem; border-radius:.75rem; border:1px solid rgba(15,23,42,0.06); background:white; cursor:pointer; font-weight:600 }
+    .network-btn[aria-pressed="true"] { background:linear-gradient(90deg,#ecfccb,#bbf7d0); border-color: #86efac; box-shadow: 0 6px 18px rgba(16,185,129,0.08); }
+    .network-grid { display:grid; grid-template-columns: repeat(2,1fr); gap:.5rem }
+    @media(min-width:720px){ .network-grid { grid-template-columns: repeat(5,1fr); } }
+
+    /* Make main CTAs full width on small screens */
+    .cta-row { display:flex; gap:.5rem; align-items:center }
+    .cta-row .primary { flex:1 }
+    @media(min-width:720px){ .cta-row { flex-direction:row } .cta-row .primary { flex:unset } }
+
+    /* Result box style */
+    #resultBox { border-left:4px solid #10b981; background:linear-gradient(180deg,#ffffff,#fbfffb); }
+    #resultText { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace; font-size:0.95rem }
+
+    /* Inputs */
+    input[type="tel"], input[type="number"] { border:1px solid rgba(15,23,42,0.06); }
+    input:focus { outline: none; box-shadow: 0 0 0 4px rgba(16,185,129,0.06); }
   </style>
 
+  <!-- load manifest according to user language -->
   <script>
-    // attach a manifest depending on language (keeps original behavior)
-    (function(){
-      const userLang = navigator.language || navigator.userLanguage || 'ar';
-      const manifest = document.createElement('link');
-      manifest.rel = 'manifest';
-      manifest.href = userLang && userLang.startsWith && userLang.startsWith('ar') ? '/Ban/manifest-ar.json?v=1' : '/Ban/manifest-en.json?v=1';
-      document.head.appendChild(manifest);
-    })();
+    const userLang = navigator.language || navigator.userLanguage;
+    const manifest = document.createElement('link');
+    manifest.rel = 'manifest';
 
-    const elements = {
-      phoneInput: document.getElementById('phoneInput'),
-      amountInput: document.getElementById('amountInput'),
-      networkButtons: document.querySelectorAll('.network-btn'),
-      generateBtn: document.getElementById('generateBtn'),
-      previewBtn: document.getElementById('previewBtn'),
-      historyBtn: document.getElementById('historyBtn'),
-      resultBox: document.getElementById('resultBox'),
-      resultText: document.getElementById('resultText'),
-      copyBtn: document.getElementById('copyBtn'),
-      openLinkBtn: document.getElementById('openLinkBtn'),
-      whatsappBtn: document.getElementById('whatsappBtn'),
-      showNetwork: document.getElementById('showNetwork'),
-      totalConfirmedSpan: document.getElementById('totalConfirmed'),
-      pickContactBtn: document.getElementById('pickContactBtn'),
-      historyBackdrop: document.getElementById('historyBackdrop'),
-      historyTbody: document.getElementById('historyTbody'),
-      historyStats: document.getElementById('historyStats'),
-      closeHistoryBtn: document.getElementById('closeHistoryBtn'),
-      clearHistoryBtn: document.getElementById('clearHistoryBtn'),
-      downloadCsvBtn: document.getElementById('downloadCsvBtn'),
-      modalTotalConfirmed: document.getElementById('modalTotalConfirmed'),
-      themeToggle: document.getElementById('themeToggle'),
-      notification: document.getElementById('notification')
-    };
-
-    let selectedNetwork = 'vodafone';
-  </script>
-
-    <!-- /********** Templates & Phone Utilities **********/
-    const templates = {
-      vodafone: (localPhone, amount) => `*9*7*${localPhone}*${amount}#`,
-      etisalat: (localPhone, amount) => `*777*${localPhone}*${amount}#`,
-      orange: (localPhone, amount) => `*115*1*${localPhone}*${amount}#`,
-      we: (localPhone, amount) => `*322*${localPhone}*${amount}#`,
-      instapayDeep: (phone, amount) => `instapay://pay?recipient=${phone}&amount=${amount}`,
-      instapayWeb: (phone, amount) => `https://ipn.eg/S/instapay?recipient=${phone}&amount=${amount}`
-    };
-
-    const phoneUtils = {
-      onlyDigits(str){ return String(str||'').replace(/[^0-9]/g, ''); },
-      toLocal(digits){
-        if (!digits) return '';
-        if (digits.length === 11 && digits.startsWith('0')) return digits;
-        if (digits.length === 10) return '0' + digits;
-        if (digits.startsWith('20')) return '0' + digits.slice(2);
-        return digits;
-      },
-      toInternational(digits){
-        if (!digits) return '';
-        if (digits.startsWith('0')) return '20' + digits.slice(1);
-        if (digits.startsWith('+')) return digits.replace(/^\+/, '');
-        return digits;
-      }
-    };
-
-    /********** Code Generator **********/
-    const codeGenerator = {
-      build(network, phoneRaw, amountRaw){
-        const cleaned = phoneUtils.onlyDigits(phoneRaw);
-        const amount = Number(amountRaw) || 0;
-        if (!cleaned || amount <= 0) return null;
-
-        const local = phoneUtils.toLocal(cleaned);
-        const intl = phoneUtils.toInternational(cleaned);
-
-        if (network === 'instapay') {
-          return {
-            type: 'instapay',
-            deep: templates.instapayDeep(intl, amount),
-            web: templates.instapayWeb(intl, amount),
-            local,
-            intl,
-            amount
-          };
-        }
-
-        const templateFunc = templates[network];
-        if (!templateFunc) return null;
-
-        const code = templateFunc(local, amount);
-        return {
-          type: 'ussd',
-          url: 'tel:' + encodeURIComponent(code),
-          code: code,
-          local,
-          intl,
-          amount
-        };
-      }
-    };
-
-
-    /********** Result Display **********/
-    const resultDisplay = {
-      networkNames: {
-        vodafone: 'فودافون 🔴',
-        etisalat: 'اتصالات 🟢',
-        orange: 'أورانج 🟠',
-        we: 'وي 🟣',
-        instapay: 'إنستاباي 💳'
-      },
-      
-      show(obj) {
-        if (!elements.resultBox) return;
-        
-        elements.resultBox.classList.remove('hidden');
-        elements.resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        
-        if (obj.type === 'instapay') {
-          if (elements.resultText) elements.resultText.textContent = obj.web;
-          if (elements.openLinkBtn) {
-            elements.openLinkBtn.href = obj.deep;
-            elements.openLinkBtn.setAttribute('data-fallback', obj.web);
-          }
-        } else {
-          if (elements.resultText) elements.resultText.textContent = obj.code;
-          if (elements.openLinkBtn) {
-            elements.openLinkBtn.href = obj.url;
-            elements.openLinkBtn.removeAttribute('data-fallback');
-          }
-        }
-        
-        if (elements.showNetwork) {
-          elements.showNetwork.textContent = this.networkNames[selectedNetwork] || selectedNetwork;
-        }
-        if (elements.whatsappBtn) {
-          elements.whatsappBtn.href = 'https://wa.me/' + obj.intl;
-        }
-        this.updateTotals();
-      },
-      
-      updateTotals() {
-        const arr = historyManager.load();
-        const total = arr.filter(x => x.confirmed).reduce((s, x) => s + Number(x.amount || 0), 0);
-        const formattedTotal = total.toLocaleString('ar-EG');
-        
-        if (elements.totalConfirmedSpan) elements.totalConfirmedSpan.textContent = formattedTotal;
-        if (elements.modalTotalConfirmed) elements.modalTotalConfirmed.textContent = formattedTotal;
-      }
-    };
-
-    /********** Main Actions **********/
-    const actions = {
-      init() {
-        if (elements.generateBtn) {
-          elements.generateBtn.addEventListener('click', this.generate.bind(this));
-        }
-        if (elements.previewBtn) {
-          elements.previewBtn.addEventListener('click', this.preview.bind(this));
-        }
-        if (elements.copyBtn) {
-          elements.copyBtn.addEventListener('click', this.copy.bind(this));
-        }
-        if (elements.openLinkBtn) {
-          elements.openLinkBtn.addEventListener('click', this.openLink.bind(this));
-        }
-      },
-      
-      async generate(e) {
-        e.preventDefault();
-        
-        if (!inputValidator.validateForm()) return;
-        
-        setLoading(elements.generateBtn, true);
-        
-        try {
-          const phone = elements.phoneInput ? elements.phoneInput.value.trim() : '';
-          const amount = elements.amountInput ? elements.amountInput.value.trim() : '';
-          const obj = codeGenerator.build(selectedNetwork, phone, amount);
-          
-          if (!obj) {
-            showNotification('⚠️ حدث خطأ في توليد الكود', 'error');
-            return;
-          }
-
-          historyManager.add({
-            number: phoneUtils.onlyDigits(phone),
-            local: obj.local,
-            intl: obj.intl,
-            amount: obj.amount,
-            network: selectedNetwork,
-            confirmed: false
-          });
-
-          resultDisplay.show(obj);
-          showNotification('✅ تم توليد الكود بنجاح وحفظه في السجل');
-
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          if (obj.type === 'instapay') {
-            try {
-              window.location.href = obj.deep;
-              setTimeout(() => { window.location.href = obj.web; }, 1500);
-            } catch (err) {
-              console.error('خطأ في فتح إنستاباي:', err);
-              window.location.href = obj.web;
-            }
-          } else {
-            try {
-              window.location.href = obj.url;
-            } catch (err) {
-              console.error('خطأ في فتح تطبيق الهاتف:', err);
-              showNotification('⚠️ تعذر فتح تطبيق الهاتف تلقائياً. يرجى نسخ الكود واستخدامه يدوياً', 'error');
-            }
-          }
-        } catch (err) {
-          console.error('خطأ عام:', err);
-          showNotification('⚠️ حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى', 'error');
-        } finally {
-          setLoading(elements.generateBtn, false);
-        }
-      },
-      
-      preview(e) {
-        e.preventDefault();
-        
-        if (!inputValidator.validateForm()) return;
-        
-        const phone = elements.phoneInput ? elements.phoneInput.value.trim() : '';
-        const amount = elements.amountInput ? elements.amountInput.value.trim() : '';
-        const obj = codeGenerator.build(selectedNetwork, phone, amount);
-        
-        if (!obj) {
-          showNotification('⚠️ حدث خطأ في توليد الكود', 'error');
-          return;
-        }
-        
-        resultDisplay.show(obj);
-        showNotification('👁️ معاينة الكود (لم يتم حفظه في السجل بعد)');
-      },
-      
-      async copy(e) {
-        e.preventDefault();
-        
-        const txt = elements.resultText ? elements.resultText.textContent || '' : '';
-        if (!txt) {
-          showNotification('⚠️ لا يوجد كود للنسخ', 'error');
-          return;
-        }
-        
-        try {
-          await navigator.clipboard.writeText(txt);
-          if (elements.copyBtn) {
-            elements.copyBtn.textContent = '✅ تم النسخ';
-            elements.copyBtn.style.background = 'var(--success)';
-          }
-          showNotification('📋 تم نسخ الكود بنجاح');
-          
-          setTimeout(() => {
-            if (elements.copyBtn) {
-              elements.copyBtn.textContent = '📋 نسخ';
-              elements.copyBtn.style.background = '#0ea5e9';
-            }
-          }, 2500);
-          } catch (err) {
-            console.error('خطأ في النسخ:', err);
-            try {
-              const textArea = document.createElement('textarea');
-              textArea.value = txt;
-              document.body.appendChild(textArea);
-              textArea.select();
-              document.execCommand('copy');
-              document.body.removeChild(textArea);
-              showNotification('📋 تم نسخ الكود بنجاح');
-            } catch (fallbackErr) {
-              showNotification('⚠️ فشل في نسخ النص. يرجى النسخ يدوياً', 'error');
-            }
-          }
-        }
-      });
-    });
-          
-          elements.historyTbody.querySelectorAll('.delete-row').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-              e.preventDefault();
-              
-              const transaction = arr[Number(btn.getAttribute('data-del'))];
-              const confirmMsg = `⚠️ هل تريد حذف هذه المعاملة نهائياً؟
-الرقم: ${transaction.local || transaction.number}
-المبلغ: ${transaction.amount} جنيه
-الشبكة: ${transaction.network}
-لا يمكن التراجع عن هذا الإجراء.`;
-              
-              if (!confirm(confirmMsg)) return;
-              
-              const idx = Number(btn.getAttribute('data-del'));
-              if (historyManager.delete(idx)) {
-                this.render();
-                resultDisplay.updateTotals();
-                showNotification('🗑️ تم حذف المعاملة بنجاح');
-              }
-            });
-          });
-        }
-
-        if (elements.modalTotalConfirmed) {
-          elements.modalTotalConfirmed.textContent = confirmedAmount.toLocaleString('ar-EG');
-        }
-      },
-      
-      clear() {
-        const confirmMsg = `⚠️ هل أنت متأكد من حذف جميع المعاملات؟\n\u2022 سيتم حذف جميع البيانات نهائياً\n\u2022 لن تتمكن من استرداد هذه البيانات\n\u2022 سيتم إعادة تعيين الإجماليات إلى الصفر\n\nهذا الإجراء لا يمكن التراجع عنه.`;
-        if (!confirm(confirmMsg)) return;
-        historyManager.clear();
-        this.render();
-        resultDisplay.updateTotals();
-        showNotification('🗑️ تم حذف جميع المعاملات بنجاح');
-      },
-      
-      download() {
-        const arr = historyManager.load();
-        if (!arr.length) {
-          showNotification('⚠️ لا توجد معاملات لتحميلها', 'error');
-          return;
-        }
-        
-        const CSV_BOM = '\ufeff';
-        let csv = `${CSV_BOM}التاريخ,رقم المستلم,المبلغ (جنيه),الشبكة,الحالة,تاريخ التأكيد\n`;
-        arr.forEach(t => {
-          const confirmedDate = t.confirmed && t.confirmedAt ?
-            new Date(t.confirmedAt).toLocaleString('ar-EG') : 'لم يتم التأكيد';
-          csv += `"${t.date || '-'}","${t.number || t.local || '-'}","${t.amount || 0}","${t.network || '-'}","${t.confirmed ? 'مؤكد':'في الانتظار'}","${confirmedDate}"\n`;
-        });
-        
-        try {
-          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          
-          const now = new Date();
-          const filename = `معاملات_بان_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}.csv`;
-          
-          a.href = url;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          
-          showNotification('📥 تم تحميل ملف البيانات بنجاح');
-        } catch (err) {
-          console.error('خطأ في التحميل:', err);
-          showNotification('⚠️ حدث خطأ أثناء تحميل الملف', 'error');
-        }
-      }
-    };
-
-    /********** Service Worker **********/
-    const serviceWorkerManager = {
-      init() {
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('/Ban/firebase-messaging-sw.js')
-            .then(() => console.log('✅ تم تسجيل Service Worker بنجاح'))
-            .catch(err => console.log('❌ فشل في تسجيل Service Worker:', err));
-        }
-      }
-    };
-
-    /********** Application Initialization **********/
-    const app = {
-      init() {
-        try {
-          themeManager.init();
-          networkManager.init();
-          inputValidator.init();
-          contactPicker.init();
-          actions.init();
-          historyModal.init();
-          serviceWorkerManager.init();
-          
-          resultDisplay.updateTotals();
-          
-          setTimeout(() => {
-            if (elements.phoneInput) elements.phoneInput.focus();
-          }, 300);
-          
-          document.documentElement.setAttribute('lang', 'ar');
-          document.documentElement.setAttribute('dir', 'rtl');
-          
-          console.log('✅ تطبيق مولد أكواد الكاش جاهز للاستخدام');
-          
-          setTimeout(() => {
-            showNotification('🎉 مرحباً بك في مولد أكواد تحويل الكاش');
-          }, 1000);
-          
-        } catch (err) {
-          console.error('خطأ في تهيئة التطبيق:', err);
-          showNotification('⚠️ حدث خطأ في تحميل التطبيق', 'error');
-        }
-      }
-    };
-
-    // بدء التطبيق
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', app.init);
+    if (userLang && userLang.startsWith && userLang.startsWith('ar')) {
+      manifest.href = '/Ban/manifest-ar.json?v=1';
     } else {
-      app.init();
+      manifest.href = '/Ban/manifest-en.json?v=1';
     }
 
-    // معالجة الأخطاء العامة
-    window.addEventListener('error', (e) => {
-      console.error('خطأ عام في التطبيق:', e.error);
-      showNotification('⚠️ حدث خطأ غير متوقع', 'error');
+    document.head.appendChild(manifest);
+  </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-sky-50 via-white to-emerald-50 flex items-center justify-center p-6">
+  <div class="max-w-3xl w-full">
+    <header class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-4">
+        <img src="https://moslimtech.github.io/Ban/icons/icon-192.png" alt="logo" class="w-14 h-14 rounded-lg shadow" />
+        <div>
+          <h1 class="text-xl font-bold">مولّد أكواد تحويل الكاش – بان للإعلانات</h1>
+          <p class="text-sm text-slate-600 mt-0.5">سهل • سريع • يفتح تطبيق التحويل مباشرة</p>
+        </div>
+      </div>
+      <a href="https://moslimtech.github.io/Ban/" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow btn-anim hover:shadow-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M7.707 14.707a1 1 0 01-1.414 0L2.586 11l3.707-3.707a1 1 0 011.414 1.414L5.414 11l2.293 2.293a1 1 0 010 1.414zM13 5a1 1 0 100 2h.01A5.002 5.002 0 0118 12a1 1 0 102 0 7.002 7.002 0 00-7-7H13z" clip-rule="evenodd" />
+        </svg>
+        الرجوع
+      </a>
+    </header>
+
+    <main class="glass p-6 rounded-2xl shadow-lg">
+      <form id="cashForm" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-slate-700 mb-1">رقم المستلم</label>
+            <div class="flex gap-2">
+              <input id="phoneInput" type="tel" inputmode="tel" placeholder="اختر من جهات الاتصال أو اكتب الرقم" class="flex-1 px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-sky-300" />
+              <button type="button" id="pickContactBtn" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-600 text-white btn-anim hover:bg-sky-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M8 9a3 3 0 100-6 3 3 0 000 6z"/><path fill-rule="evenodd" d="M2 13a6 6 0 1112 0v1H2v-1z" clip-rule="evenodd"/></svg>
+               
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">المبلغ (جنيه)</label>
+            <input id="amountInput" type="number" min="1" placeholder="25" class="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-emerald-300" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-2">اختر الشبكة</label>
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div class="network-grid" role="radiogroup" aria-label="اختر شبكة الدفع">
+              <button type="button" data-net="vodafone" class="network-btn" aria-pressed="false">فودافون</button>
+              <button type="button" data-net="etisalat" class="network-btn" aria-pressed="false">اتصالات</button>
+              <button type="button" data-net="orange" class="network-btn" aria-pressed="false">اورانج</button>
+              <button type="button" data-net="we" class="network-btn" aria-pressed="false">وي</button>
+              <button type="button" data-net="instapay" class="network-btn" aria-pressed="false">إنستاباي</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cta-row mt-2">
+          <button id="generateBtn" type="button" class="primary px-4 py-3 rounded-xl bg-emerald-500 text-white font-semibold shadow-lg btn-anim hover:bg-emerald-600" aria-label="تحويل الآن">🔁 تحويل الآن</button>
+          <button id="previewBtn" type="button" class="px-4 py-3 rounded-xl bg-white border font-medium btn-anim hover:shadow md:ml-2" aria-label="معاينة الكود">👁️ معاينة الكود</button>
+        </div>
+
+        <div id="resultBox" class="mt-4 hidden p-4 rounded-lg border" role="status" aria-live="polite">
+          <p class="text-sm text-slate-700">تم توليد الرابط/الكود — اضغط "تحويل الآن" لفتحه مباشرة على جهازك أو انسخ الكود:</p>
+          <pre id="resultText" class="mt-2 bg-slate-50 p-3 rounded text-sm overflow-auto"></pre>
+          <div class="mt-3 flex gap-2">
+            <button id="copyBtn" class="px-3 py-2 rounded bg-sky-600 text-white" aria-label="نسخ الكود">نسخ</button>
+            <a id="openLinkBtn" class="px-3 py-2 rounded bg-emerald-500 text-white" href="#" target="_blank" rel="noopener" role="link" aria-label="فتح الرابط">فتح</a>
+          </div>
+        </div>
+
+      </form>
+
+      <p class="mt-5 text-xs text-slate-600">ملاحظة: قد لا يعمل اختيار جهات الاتصال , يمكنك إدخال الرقم يدويًا.</p>
+    </main>
+
+    <footer class="mt-6 text-center text-xs text-slate-500">© بان للإعلانات</footer>
+  </div>
+
+  <script>
+    // Configuration: templates for USSD / deep links
+    const templates = {
+      vodafone: (phone, amount) => `*9*7*${phone}*${amount}#`,
+      etisalat: (phone, amount) => `*777*${phone}*${amount}#`,
+      orange: (phone, amount) => `*115*1*${phone}*${amount}#`,
+      we: (phone, amount) => `*322*${phone}*${amount}#`,
+      // instapay uses your provided ipn link (web) and appends params (if needed)
+      instapay: (phone, amount) => `https://ipn.eg/S/ibrahimmabroukeldeeb/instapay/4ZCmRA?recipient=${phone}&amount=${amount}`
+    };
+
+  // Elements
+  const pickContactBtn = document.getElementById('pickContactBtn');
+  const phoneInput = document.getElementById('phoneInput');
+  const amountInput = document.getElementById('amountInput');
+  const networkButtons = Array.from(document.querySelectorAll('.network-btn'));
+    const generateBtn = document.getElementById('generateBtn');
+    const previewBtn = document.getElementById('previewBtn');
+    const resultBox = document.getElementById('resultBox');
+    const resultText = document.getElementById('resultText');
+    const copyBtn = document.getElementById('copyBtn');
+    const openLinkBtn = document.getElementById('openLinkBtn');
+
+    let selectedNetwork = 'vodafone';
+
+    // normalize common phone forms into local 0XXXXXXXXX (Egypt-centric)
+    function normalizeLocalPhone(input) {
+      if (!input) return '';
+      let s = String(input).trim();
+      // remove spaces, dashes, parentheses
+      s = s.replace(/[^0-9+]/g, '');
+      if (s.startsWith('+')) s = s.slice(1);
+      // if starts with 20 (Egypt code) convert to 0...
+      if (s.startsWith('20') && s.length >= 11) return '0' + s.slice(2);
+      // if 10 digits assume missing leading 0
+      if (s.length === 10) return '0' + s;
+      // if already 11 and starts with 0, fine
+      if (s.length === 11 && s.startsWith('0')) return s;
+      return s; // fallback, cleaned digits
+    }
+
+    // select default network visual using aria-pressed
+    function setNetworkSelection(net) {
+      selectedNetwork = net || selectedNetwork;
+      networkButtons.forEach(b => {
+        const is = b.dataset.net === selectedNetwork;
+        b.setAttribute('aria-pressed', is ? 'true' : 'false');
+      });
+    }
+    setNetworkSelection(selectedNetwork);
+
+    networkButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        setNetworkSelection(btn.dataset.net);
+      });
     });
 
-    window.addEventListener('unhandledrejection', (e) => {
-      console.error('Promise مرفوض:', e.reason);
-      e.preventDefault();
-    }); -->
+    // Contact picker (only available in some browsers / PWA)
+    pickContactBtn.addEventListener('click', async () => {
+      try {
+        // New Contacts API (experimental) - Chrome on Android (PWA) supports it behind flags in some versions
+        if (navigator.contacts && navigator.contacts.select) {
+          const props = ['tel', 'name'];
+          const opts = { multiple: false };
+          const contacts = await navigator.contacts.select(props, opts);
+          if (contacts && contacts.length) {
+            const tel = (contacts[0].tel && contacts[0].tel[0]) || '';
+            phoneInput.value = tel.replace(/\s|\-/g, '');
+            return;
+          }
+        }
+
+        // Fallback: try generic contact picker or notify user
+        phoneInput.focus();
+        alert('جاري محاولة فتح جهات الاتصال... إذا لم يعمل المتصفح الخاص بك، الرجاء إدخال الرقم يدوياً.');
+      } catch (e) {
+        console.error(e);
+        phoneInput.focus();
+        alert('حدث خطأ أثناء محاولة الوصول إلى جهات الاتصال. الرجاء إدخال الرقم يدوياً.');
+      }
+    });
+
+    // Utility: clean phone number (remove non-digits)
+    function cleanPhone(p) {
+      if (!p) return '';
+      return p.replace(/[^0-9]/g, '');
+    }
+
+    function buildAction(network, phone, amount) {
+      const cleaned = cleanPhone(phone);
+      if (!cleaned) return null;
+      if (!amount || Number(amount) <= 0) return null;
+
+      if (network === 'instapay') {
+        return templates.instapay(cleaned, amount);
+      }
+
+      const code = templates[network](cleaned, amount);
+      return 'tel:' + encodeURIComponent(code);
+    }
+
+    // Generate and open
+    generateBtn.addEventListener('click', () => {
+  const phone = normalizeLocalPhone(phoneInput.value.trim());
+  const amount = amountInput.value.trim();
+      const link = buildAction(selectedNetwork, phone, amount);
+      if (!link) {
+        alert('من فضلك تأكد من إدخال رقم صالح والمبلغ.');
+        return;
+      }
+
+      // Show preview (show actual USSD code for copy, or full instapay URL)
+      resultBox.classList.remove('hidden');
+      resultText.textContent = selectedNetwork === 'instapay' ? link : decodeURIComponent(link.replace(/^tel:/, ''));
+      openLinkBtn.href = link;
+
+      // Try to open directly
+      try {
+        if (selectedNetwork === 'instapay') {
+          window.location.href = link;
+          return;
+        }
+        window.location.href = link;
+      } catch (e) {
+        console.error(e);
+      }
+    });
+
+    previewBtn.addEventListener('click', () => {
+  const phone = normalizeLocalPhone(phoneInput.value.trim());
+  const amount = amountInput.value.trim();
+      const link = buildAction(selectedNetwork, phone, amount);
+      if (!link) {
+        alert('من فضلك تأكد من إدخال رقم صالح والمبلغ.');
+        return;
+      }
+      resultBox.classList.remove('hidden');
+      resultText.textContent = selectedNetwork === 'instapay' ? link : decodeURIComponent(link.replace(/^tel:/, ''));
+      openLinkBtn.href = link;
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      const txt = resultText.textContent;
+      try {
+        await navigator.clipboard.writeText(txt);
+        copyBtn.textContent = 'تم النسخ ✓';
+        setTimeout(() => copyBtn.textContent = 'نسخ', 1500);
+      } catch (e) {
+        alert('لم نتمكن من نسخ النص. انسخه يدويًا من المربع.');
+      }
+    });
+
+    // prevent form submit
+    document.getElementById('cashForm').addEventListener('submit', (e) => e.preventDefault());
+
+    // default amount
+    amountInput.value = 25;
+
+    // Register Service Worker for PWA and Firebase Messaging
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/Ban/firebase-messaging-sw.js')
+        .then(() => console.log('✅ Firebase Messaging SW Registered'))
+        .catch(err => console.log('❌ SW registration failed:', err));
+    }
   </script>
 </body>
 </html>
