@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>مولّد أكواد تحويل الكاش – بان للإعلانات</title>
+  <meta name="theme-color" content="#0d9488" />
+  <link rel="icon" href="https://moslimtech.github.io/Ban/icons/icon-192.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Tajawal', system-ui, -apple-system, 'Segoe UI', Roboto, Arial; }
+    .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(6px); }
+    .btn-anim { transition: transform .12s ease, box-shadow .12s ease; }
+    .btn-anim:active { transform: translateY(2px) scale(.995); }
+    .modal-backdrop { position: fixed; inset:0; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:60; }
+    .modal-card { width:95%; max-width:880px; max-height:85vh; overflow:auto; border-radius:12px; padding:16px; background:var(--card-bg); }
+    :root {
+      --bg: linear-gradient(180deg,#f0f9ff,#ecfdf5);
+      --card-bg: rgba(255,255,255,0.95);
+      --text: #0f172a;
+      --muted: #475569;
+    }
+    .dark {
+      --bg: linear-gradient(180deg,#071627,#042f2f);
+      --card-bg: rgba(2,6,23,0.75);
+      --text: #e6eef0;
+      --muted: #94a3b8;
+    }
+    body { background: var(--bg); color: var(--text); }
+    .muted { color: var(--muted); }
+    /* ستايل الزر النشط للشبكة مطابق للصورة */
+    .network-active {
+        background: rgba(34,197,94,0.12); /* خلفية خضراء فاتحة */
+        border-color: #22c55e; /* حدود خضراء صلبة */
+        color: #166534; /* نص أخضر داكن */
+    }
+    /* ستايل النقاط الملونة بجانب أسماء الشبكات */
+    .color-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-left: 8px; /* المسافة بين النقطة والنص (للاتجاه من اليمين لليسار) */
+        vertical-align: middle;
+    }
+    /* ستايل أيقونة إنستاباي */
+    .instapay-icon {
+        display: inline-flex;
+        align-items: center;
+        margin-left: 8px;
+        vertical-align: middle;
+    }
+    .instapay-stripe {
+        width: 8px;
+        height: 10px;
+    }
+    .instapay-stripe:first-child { background-color: #facc15; } /* أصفر */
+    .instapay-stripe:last-child { background-color: #0f172a; } /* داكن */
+
+    /* تعديل اتجاه الأيقونة والنص داخل أزرار الشبكات لتناسب RTL */
+    .network-btn {
+        flex-direction: row-reverse; /* لوضع الأيقونة قبل النص */
+    }
+
+    table { width:100%; border-collapse: collapse; }
+    th, td { padding:8px 10px; border-bottom:1px solid rgba(0,0,0,0.06); text-align:right; font-size:14px; }
+    .badge { padding:6px 8px; border-radius:8px; font-size:13px; }
+    .confirmed { background: #dcfce7; color:#166534; }
+    .pending { background: #fff7ed; color:#92400e; }
+    /* إضافة ظل وحدود خفيفة للكارد الرئيسي ليطابق الصورة */
+    .modal-card.glass {
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+  </style>
+
+  <!-- manifest by language -->
+  <script>
+    const userLang = navigator.language || navigator.userLanguage || 'ar';
+    const manifest = document.createElement('link');
+    manifest.rel = 'manifest';
+    if (userLang.startsWith('ar')) manifest.href = '/Ban/manifest-ar.json?v=1';
+    else manifest.href = '/Ban/manifest-en.json?v=1';
+    document.head.appendChild(manifest);
+  </script>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+  <div class="max-w-4xl w-full">
+    <header class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-4">
+        <img src="https://moslimtech.github.io/Ban/icons/icon-192.png" alt="logo" class="w-12 h-12 rounded-lg shadow" />
+        <div>
+          <h1 class="text-lg font-bold">مولّد أكواد تحويل الكاش – بان للإعلانات</h1>
+          <p class="text-sm muted">سهل • سريع • آمن</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- أزرار دائرية وموقع "بان" وأيقونة "المنزل" -->
+        <a href="https://moslimtech.github.io/Ban/" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-orange-100 shadow btn-anim hover:shadow-md text-xl">🏠</a>
+        <button id="themeToggle" class="w-10 h-10 rounded-full border btn-anim flex items-center justify-center text-xl">🌗</button>
+      </div>
+    </header>
+
+    <main class="modal-card glass p-5">
+      <form id="cashForm" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium muted mb-1 flex items-center gap-1">
+              <!-- أيقونة الهاتف بجانب "رقم المستلم" -->
+              <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.774a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path></svg>
+              رقم المستلم
+            </label>
+            <div class="flex gap-2 items-center">
+              <!-- زر اختيار جهة اتصال مطابق للصورة -->
+              <button type="button" id="pickContactBtn" class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500 text-white btn-anim hover:bg-emerald-600 text-lg">👤</button>
+              <input id="phoneInput" type="tel" inputmode="tel" placeholder="01xxxxxxxxx" class="flex-1 px-3 py-2 rounded-lg border focus:outline-none" />
+            </div>
+            <p class="text-xs muted mt-1 mr-12 text-left">مثال: 01012345678</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium muted mb-1 flex items-center gap-1">
+              <!-- أيقونة المال بجانب "المبلغ" -->
+              <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.457 4.907a1 1 0 01-.708 1.41l-2.008.402a1 1 0 01-1.127-.514L9.896 15.68a1 1 0 01.442-.319l2.25-.45a1 1 0 011.41.708zM15 11a1 1 0 100-2 1 1 0 000 2zm-5 6a1 1 0 110-2 1 1 0 010 2z" clip-rule="evenodd"></path></svg>
+              المبلغ (جنيه)
+            </label>
+            <input id="amountInput" type="number" min="1" value="25" placeholder="25" class="w-full px-3 py-2 rounded-lg border focus:outline-none" />
+            <p class="text-xs muted mt-1">الحد الأدنى: 1 جنيه</p>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium muted mb-2 flex items-center gap-1">
+            <!-- أيقونة إشارة الشبكة بجانب "اختر الشبكة" -->
+            <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
+            اختر الشبكة
+          </label>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <button type="button" data-net="vodafone" class="network-btn px-3 py-2 rounded-lg border bg-white flex items-center justify-center btn-anim">
+                <span class="color-dot" style="background-color: #ef4444;"></span>فودافون
+            </button>
+            <button type="button" data-net="etisalat" class="network-btn px-3 py-2 rounded-lg border bg-white flex items-center justify-center btn-anim">
+                <span class="color-dot" style="background-color: #22c55e;"></span>اتصالات
+            </button>
+            <button type="button" data-net="orange" class="network-btn px-3 py-2 rounded-lg border bg-white flex items-center justify-center btn-anim">
+                <span class="color-dot" style="background-color: #f97316;"></span>اورانج
+            </button>
+            <button type="button" data-net="we" class="network-btn px-3 py-2 rounded-lg border bg-white flex items-center justify-center btn-anim">
+                <span class="color-dot" style="background-color: #8b5cf6;"></span>وي
+            </button>
+            <button type="button" data-net="instapay" class="network-btn px-3 py-2 rounded-lg border bg-white flex items-center justify-center btn-anim">
+                <span class="instapay-icon"><span class="instapay-stripe"></span><span class="instapay-stripe"></span></span>إنستاباي
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 justify-end">
+          <!-- زر "تحويل الآن" باللون الأخضر الصارخ وأيقونة الصاروخ -->
+          <button id="generateBtn" type="button" class="px-4 py-2 rounded-xl bg-teal-500 text-white font-semibold shadow-lg btn-anim hover:bg-teal-600 flex items-center gap-2">
+            <span class="text-lg">🚀</span> تحويل الآن
+          </button>
+          <!-- زر "معاينة" باللون الأبيض وأيقونة العين -->
+          <button id="previewBtn" type="button" class="px-4 py-2 rounded-xl bg-white border font-medium btn-anim hover:shadow flex items-center gap-2">
+            <span class="text-lg">👁️</span> معاينة
+          </button>
+          <!-- زر "السجل" باللون البرتقالي وأيقونة اللوحة -->
+          <button id="historyBtn" type="button" class="px-4 py-2 rounded-xl bg-amber-500 text-white btn-anim hover:bg-amber-600 flex items-center gap-2">
+            <span class="text-lg">📜</span> السجل
+          </button>
+        </div>
+
+        <div id="resultBox" class="mt-4 hidden p-4 rounded-lg bg-white border">
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div class="flex-1">
+              <p class="text-sm muted">تم توليد الرابط/الكود — افتح التطبيق أو انسخ الكود:</p>
+              <pre id="resultText" class="code mt-2 text-sm bg-gray-50 p-2 rounded overflow-x-auto"></pre>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <button id="copyBtn" class="px-3 py-2 rounded bg-sky-600 text-white btn-anim hover:bg-sky-700">نسخ</button>
+                <a id="openLinkBtn" class="px-3 py-2 rounded bg-emerald-500 text-white btn-anim hover:bg-emerald-600" href="#" target="_blank" rel="noopener">فتح</a>
+                <a id="whatsappBtn" class="px-3 py-2 rounded bg-green-600 text-white btn-anim hover:bg-green-700" href="#" target="_blank" rel="noopener">واتساب</a>
+              </div>
+            </div>
+            <div class="text-sm muted text-right">
+              <div>الشبكة: <span id="showNetwork">-</span></div>
+              <div class="mt-2">الإجمالي المؤكد: <strong id="totalConfirmed">0</strong> ج</div>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </main>
+
+    <footer class="mt-4 text-center text-xs muted">© 2025 بان للإعلانات • جميع الحقوق محفوظة</footer>
+  </div>
+
+  <!-- History Modal (always accessible via historyBtn) -->
+  <div id="historyBackdrop" class="modal-backdrop hidden">
+    <div class="modal-card" role="dialog" aria-modal="true">
+      <div class="flex flex-wrap items-center justify-between mb-3 gap-2">
+        <h3 class="font-bold text-lg">📜 المعاملات السابقة</h3>
+        <div class="flex flex-wrap gap-2">
+          <button id="downloadCsvBtn" class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">💾 تحميل CSV</button>
+          <button id="clearHistoryBtn" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm">🗑️ مسح الكل</button>
+          <button id="closeHistoryBtn" class="px-3 py-2 bg-gray-200 rounded-lg text-sm">إغلاق</button>
+        </div>
+      </div>
+
+      <div id="historyStats" class="mb-3 text-sm muted"></div>
+
+      <div id="historyTableWrapper" class="overflow-auto">
+        <table id="historyTable" class="bg-transparent">
+          <thead>
+            <tr>
+              <th>📅 التاريخ</th>
+              <th>📱 الرقم</th>
+              <th>💰 المبلغ</th>
+              <th>📶 الشبكة</th>
+              <th>الحالة</th>
+              <th>الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="historyTbody">
+            <!-- rows generated by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-4 text-right">
+        <strong>إجمالي المبلغ المؤكد: <span id="modalTotalConfirmed">0</span> جنيه</strong>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /********** Configuration **********/
+    const templates = {
+      vodafone: (localPhone, amount) => `*9*7*${localPhone}*${amount}#`,
+      etisalat: (localPhone, amount) => `*777*${localPhone}*${amount}#`,
+      orange: (localPhone, amount) => `*115*1*${localPhone}*${amount}#`,
+      we: (localPhone, amount) => `*322*${localPhone}*${amount}#`,
+      instapayDeep: (phone, amount) => `instapay://pay?recipient=${phone}&amount=${amount}`,
+      instapayWeb: (phone, amount) => `https://ipn.eg/S/instapay?recipient=${phone}&amount=${amount}`
+    };
+
+    /********** Elements **********/
+    const phoneInput = document.getElementById('phoneInput');
+    const amountInput = document.getElementById('amountInput');
+    const networkButtons = document.querySelectorAll('.network-btn');
+    const generateBtn = document.getElementById('generateBtn');
+    const previewBtn = document.getElementById('previewBtn');
+    const historyBtn = document.getElementById('historyBtn');
+    const resultBox = document.getElementById('resultBox');
+    const resultText = document.getElementById('resultText');
+    const copyBtn = document.getElementById('copyBtn');
+    const openLinkBtn = document.getElementById('openLinkBtn');
+    const whatsappBtn = document.getElementById('whatsappBtn');
+    const showNetwork = document.getElementById('showNetwork');
+    const totalConfirmedSpan = document.getElementById('totalConfirmed');
+
+    const pickContactBtn = document.getElementById('pickContactBtn');
+    const historyBackdrop = document.getElementById('historyBackdrop');
+    const historyTbody = document.getElementById('historyTbody');
+    const historyStats = document.getElementById('historyStats');
+    const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    const downloadCsvBtn = document.getElementById('downloadCsvBtn');
+    const modalTotalConfirmed = document.getElementById('modalTotalConfirmed');
+    const themeToggle = document.getElementById('themeToggle');
+
+    let selectedNetwork = 'vodafone'; // فودافون هو الشبكة الافتراضية المختارة في الصورة
+
+    /********** Theme (light/dark) **********/
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    function applyTheme(t) {
+      if (t === 'dark') document.documentElement.classList.add('dark'), localStorage.setItem('theme','dark');
+      else document.documentElement.classList.remove('dark'), localStorage.setItem('theme','light');
+    }
+    const saved = localStorage.getItem('theme') || (prefersDark ? 'dark' : 'light');
+    applyTheme(saved);
+    themeToggle.textContent = saved === 'dark' ? '☀️' : '🌙';
+    themeToggle.addEventListener('click', () => {
+      const now = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+      applyTheme(now);
+      themeToggle.textContent = now === 'dark' ? '☀️' : '🌙';
+    });
+
+    /********** Network selection visuals **********/
+    function markSelected() {
+      networkButtons.forEach(b => {
+        if (b.dataset.net === selectedNetwork) b.classList.add('network-active');
+        else b.classList.remove('network-active');
+      });
+    }
+    networkButtons.forEach(btn => btn.addEventListener('click', () => { selectedNetwork = btn.dataset.net; markSelected(); }));
+    markSelected();
+
+    /********** Contact picker (best-effort) **********/
+    pickContactBtn.addEventListener('click', async () => {
+      try {
+        if (navigator.contacts && navigator.contacts.select) {
+          const props = ['tel','name'];
+          const opts = { multiple:false };
+          const contacts = await navigator.contacts.select(props, opts);
+          if (contacts && contacts.length) {
+            const tel = (contacts[0].tel && contacts[0].tel[0]) || '';
+            phoneInput.value = tel.replace(/\s|-|\(|\)/g,'');
+            return;
+          }
+        }
+        phoneInput.focus();
+        alert('إذا لم يعمل اختيار جهات الاتصال في متصفحك، الرجاء لصق أو كتابة الرقم يدوياً.');
+      } catch(e) {
+        console.error(e);
+        phoneInput.focus();
+        alert('حدث خطأ أثناء الوصول لجهات الاتصال — الرجاء إدخال الرقم يدوياً.');
+      }
+    });
+
+    /********** Helpers: clean and convert numbers **********/
+    function onlyDigits(s=''){ return String(s||'').replace(/[^0-9]/g,''); }
+    function toLocal(cleaned) {
+      if (!cleaned) return '';
+      if (cleaned.startsWith('20')) return '0' + cleaned.slice(2);
+      if (cleaned.startsWith('2') && cleaned.length===11) return '0' + cleaned.slice(1);
+      if (cleaned.startsWith('0')) return cleaned;
+      if (cleaned.length === 9) return '0' + cleaned;
+      return cleaned;
+    }
+    function toInternational(cleaned) {
+      if (!cleaned) return '';
+      if (cleaned.startsWith('0')) return '2' + cleaned.slice(1);
+      if (cleaned.startsWith('20')) return cleaned;
+      if (cleaned.startsWith('2') && cleaned.length>2) return cleaned;
+      return cleaned;
+    }
+
+    /********** Build action links **********/
+    function buildActionLink(network, phoneRaw, amountRaw) {
+      const cleaned = onlyDigits(phoneRaw);
+      const amount = Number(amountRaw) || 0;
+      if (!cleaned || amount <= 0) return null;
+
+      const local = toLocal(cleaned);
+      const intl = toInternational(cleaned);
+
+      if (network === 'instapay') {
+        return { type:'instapay', deep: templates.instapayDeep(intl, amount), web: templates.instapayWeb(intl, amount), local, intl, amount };
+      }
+
+      const code = templates[network](local, amount);
+      return { type:'ussd', url: 'tel:' + encodeURIComponent(code), code: code, local, intl, amount };
+    }
+
+    /********** History (localStorage) **********/
+    const STORAGE_KEY = 'ban_cash_transactions_v1';
+    function loadHistory() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+      catch(e){ return []; }
+    }
+    function saveHistory(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
+    function addHistoryItem(item) {
+      const arr = loadHistory();
+      arr.unshift(item);
+      if (arr.length > 500) arr.pop();
+      saveHistory(arr);
+    }
+    function clearHistory() { localStorage.removeItem(STORAGE_KEY); }
+
+    /********** UI: show preview & open **********/
+    function showResult(obj) {
+      resultBox.classList.remove('hidden');
+      if (obj.type === 'instapay') {
+        resultText.textContent = obj.web;
+        openLinkBtn.href = obj.deep;
+        openLinkBtn.setAttribute('data-fallback', obj.web);
+        showNetwork.textContent = 'إنستاباي';
+      } else {
+        resultText.textContent = obj.code;
+        openLinkBtn.href = obj.url;
+        openLinkBtn.removeAttribute('data-fallback');
+        showNetwork.textContent = (selectedNetwork === 'vodafone' ? 'فودافون' : selectedNetwork === 'etisalat' ? 'اتصالات' : selectedNetwork === 'orange' ? 'اورانج' : 'وي');
+      }
+      whatsappBtn.href = 'https://wa.me/' + obj.intl;
+      updateTotalsDisplay();
+    }
+
+    generateBtn.addEventListener('click', () => {
+      const phone = phoneInput.value.trim();
+      const amount = amountInput.value.trim();
+      const obj = buildActionLink(selectedNetwork, phone, amount);
+      if (!obj) { alert('من فضلك تأكد من إدخال رقم صالح والمبلغ.'); return; }
+
+      // Save to history with confirmed=false + date
+      const now = new Date();
+      addHistoryItem({ number: onlyDigits(phone), local: obj.local, intl: obj.intl, amount: obj.amount, network: selectedNetwork, date: now.toLocaleString('ar-EG'), confirmed: false });
+
+      showResult(obj);
+
+      // Try to open automatically:
+      if (obj.type === 'instapay') {
+        try { window.location.href = obj.deep; } catch(_) {}
+        setTimeout(() => { window.location.href = obj.web; }, 1200);
+      } else {
+        try { window.location.href = obj.url; } catch(e){ console.error(e); }
+      }
+    });
+
+    openLinkBtn.addEventListener('click', (e) => {
+      const href = openLinkBtn.href;
+      const fallback = openLinkBtn.getAttribute('data-fallback');
+      if (!fallback) return;
+      e.preventDefault();
+      try { window.location.href = href; } catch(e){ console.error(e); }
+      setTimeout(() => { window.location.href = fallback; }, 1200);
+    });
+
+    previewBtn.addEventListener('click', () => {
+      const phone = phoneInput.value.trim();
+      const amount = amountInput.value.trim();
+      const obj = buildActionLink(selectedNetwork, phone, amount);
+      if (!obj) { alert('من فضلك تأكد من إدخال رقم صالح والمبلغ.'); return; }
+      showResult(obj);
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      const txt = resultText.textContent || '';
+      try {
+        await navigator.clipboard.writeText(txt);
+        copyBtn.textContent = 'تم النسخ ✓';
+        setTimeout(() => copyBtn.textContent = 'نسخ', 1500);
+      } catch (e) {
+        alert('نسخ غير مدعوم. انسخ النص يدويًا.');
+      }
+    });
+
+    /********** History modal UI & table **********/
+    historyBtn.addEventListener('click', () => { renderHistory(); historyBackdrop.classList.remove('hidden'); historyBackdrop.style.display='flex'; });
+    closeHistoryBtn.addEventListener('click', () => { historyBackdrop.classList.add('hidden'); historyBackdrop.style.display='none'; });
+
+    clearHistoryBtn.addEventListener('click', () => {
+      if (!confirm('هل متأكد من حذف كل المعاملات؟')) return;
+      clearHistory();
+      renderHistory();
+      updateTotalsDisplay();
+    });
+
+    function renderHistory() {
+      const arr = loadHistory();
+      historyTbody.innerHTML = '';
+      if (!arr.length) {
+        historyStats.innerHTML = `<p class="muted">لا توجد معاملات محفوظة بعد.</p>`;
+        modalTotalConfirmed.textContent = '0';
+        return;
+      }
+
+      // stats
+      const totalAmount = arr.reduce((s,t)=>s+Number(t.amount),0);
+      const confirmedAmount = arr.filter(t=>t.confirmed).reduce((s,t)=>s+Number(t.amount),0);
+      const totalCount = arr.length;
+      const confirmedCount = arr.filter(t=>t.confirmed).length;
+
+      historyStats.innerHTML = `📊 عدد العمليات: <strong>${totalCount}</strong> — مجموع المبالغ: <strong>${totalAmount}</strong> ج — تم التأكيد: <strong>${confirmedCount}</strong> (${confirmedAmount} ج)`;
+
+      arr.forEach((t, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="white-space:nowrap">${t.date}</td>
+          <td>${t.local || t.number}</td>
+          <td>${t.amount}</td>
+          <td>${t.network}</td>
+          <td>${t.confirmed ? '<span class="badge confirmed">تم التحويل</span>' : '<span class="badge pending">قيد التنفيذ</span>'}</td>
+          <td style="white-space:nowrap">
+            ${t.confirmed ? '' : `<button data-idx="${idx}" class="confirm-row px-2 py-1 rounded bg-emerald-500 text-white text-xs">تأكيد</button>`}
+            <button data-del="${idx}" class="delete-row px-2 py-1 rounded bg-red-100 ml-2 text-xs">حذف</button>
+          </td>
+        `;
+        historyTbody.appendChild(tr);
+      });
+
+      // attach handlers
+      historyTbody.querySelectorAll('.confirm-row').forEach(b=>{
+        b.addEventListener('click', (e)=>{
+          const idx = Number(b.getAttribute('data-idx'));
+          confirmFromHistory(idx);
+        });
+      });
+      historyTbody.querySelectorAll('.delete-row').forEach(b=>{
+        b.addEventListener('click', (e)=>{
+          const idx = Number(b.getAttribute('data-del'));
+          deleteFromHistory(idx);
+        });
+      });
+
+      modalTotalConfirmed.textContent = confirmedAmount;
+    }
+
+    function confirmFromHistory(index) {
+      const arr = loadHistory();
+      if (!arr[index]) return;
+      arr[index].confirmed = true;
+      saveHistory(arr);
+      renderHistory();
+      updateTotalsDisplay();
+    }
+
+    function deleteFromHistory(index) {
+      const arr = loadHistory();
+      if (!arr[index]) return;
+      if (!confirm('حذف هذه المعاملة؟')) return;
+      arr.splice(index,1);
+      saveHistory(arr);
+      renderHistory();
+      updateTotalsDisplay();
+    }
+
+    function updateTotalsDisplay() {
+      const arr = loadHistory();
+      const total = arr.filter(x=>x.confirmed).reduce((s,x)=>s+Number(x.amount),0);
+      totalConfirmedSpan.textContent = total;
+      modalTotalConfirmed.textContent = total;
+    }
+
+    /********** Download CSV (includes date) **********/
+    downloadCsvBtn.addEventListener('click', downloadHistoryCSV);
+    function downloadHistoryCSV() {
+      const arr = loadHistory();
+      if (!arr.length) { alert('لا توجد معاملات لتحميلها.'); return; }
+      let csv = 'التاريخ,رقم المستلم,المبلغ,الشبكة,تم التأكيد
+';
+      arr.forEach(t=>{
+        csv += `"${t.date}",${t.number || t.local},${t.amount},${t.network},${t.confirmed ? 'نعم':'لا'}
+`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'transactions_history.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    /********** Register Service Worker (PWA) **********/
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/Ban/firebase-messaging-sw.js')
+        .then(()=>console.log('✅ Firebase Messaging SW Registered'))
+        .catch(err=>console.log('❌ SW registration failed:', err));
+    }
+
+    // default amount
+    amountInput.value = 25;
+  </script>
+</body>
+</html>
