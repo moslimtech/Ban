@@ -11,6 +11,20 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
   
+  <script>
+    // تكوين Tailwind لدعم RTL بشكل أفضل
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'arabic': ['Cairo', 'Tajawal', 'system-ui', 'sans-serif'],
+          }
+        }
+      },
+      plugins: [],
+    }
+  </script>
+  
   <style>
     * { 
       margin: 0; 
@@ -18,11 +32,17 @@
       box-sizing: border-box; 
     }
     
+    html {
+      direction: rtl;
+      text-align: right;
+    }
+    
     body { 
       font-family: 'Cairo', 'Tajawal', system-ui, -apple-system, sans-serif;
       transition: background 0.3s ease, color 0.3s ease;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      direction: rtl;
     }
     
     :root {
@@ -64,6 +84,7 @@
       backdrop-filter: blur(10px);
     }
     
+    /* تحسين الأزرار لدعم RTL */
     .btn {
       transition: all 0.2s ease;
       border: none;
@@ -76,6 +97,7 @@
       justify-content: center;
       text-decoration: none;
       white-space: nowrap;
+      text-align: center;
     }
     
     .btn:disabled {
@@ -99,6 +121,7 @@
       transform: translateY(-1px);
     }
     
+    /* تحسين أزرار الشبكة مع دعم RTL أفضل */
     .network-btn {
       padding: 12px 16px;
       border-radius: 12px;
@@ -111,13 +134,15 @@
       overflow: hidden;
       cursor: pointer;
       user-select: none;
+      text-align: center;
+      direction: rtl;
     }
     
     .network-btn::before {
       content: '';
       position: absolute;
       top: 0;
-      left: 0;
+      right: 0; /* تغيير من left إلى right للـ RTL */
       width: 100%;
       height: 100%;
       background: linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(13, 148, 136, 0.1) 100%);
@@ -142,7 +167,7 @@
       content: '✓';
       position: absolute;
       top: 4px;
-      right: 4px;
+      left: 4px; /* تغيير من right إلى left للـ RTL */
       width: 20px;
       height: 20px;
       background: #14b8a6;
@@ -155,6 +180,7 @@
       font-weight: bold;
     }
     
+    /* تحسين الإدخالات لدعم RTL */
     input, select {
       width: 100%;
       padding: 12px 16px;
@@ -165,11 +191,15 @@
       font-size: 15px;
       transition: all 0.2s ease;
       font-family: 'Cairo', sans-serif;
+      direction: rtl;
+      text-align: right;
     }
     
     input::placeholder {
       color: var(--text-muted);
       opacity: 0.8;
+      text-align: right;
+      direction: rtl;
     }
     
     input:focus, select:focus {
@@ -182,6 +212,31 @@
       border-color: var(--danger);
     }
     
+    /* تحسين الإشعارات لدعم RTL */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px; /* تغيير من left إلى right */
+      transform: translateX(0); /* إزالة translateX(-50%) */
+      background: var(--success);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      z-index: 9999;
+      opacity: 0;
+      transform: translateX(20px);
+      transition: all 0.3s ease;
+      direction: rtl;
+      text-align: right;
+    }
+    
+    .notification.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    
+    /* تحسين النوافذ المنبثقة */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -212,6 +267,7 @@
       transform: translateY(20px);
       transition: transform 0.3s ease, opacity 0.3s ease;
       opacity: 0;
+      direction: rtl;
     }
     
     .modal-backdrop.show .modal-card {
@@ -219,10 +275,12 @@
       opacity: 1;
     }
     
+    /* تحسين الجداول لدعم RTL */
     table {
       width: 100%;
       border-collapse: separate;
       border-spacing: 0 8px;
+      direction: rtl;
     }
     
     th {
@@ -240,6 +298,7 @@
       background: var(--card-bg);
       border: 1px solid var(--border);
       vertical-align: middle;
+      text-align: right;
     }
     
     tr:first-child td:first-child {
@@ -284,6 +343,7 @@
       padding: 20px;
       margin-top: 20px;
       animation: slideDown 0.3s ease;
+      direction: rtl;
     }
     
     @keyframes slideDown {
@@ -297,6 +357,7 @@
       }
     }
     
+    /* تحسين عرض الكود */
     .code-display {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -310,7 +371,7 @@
       letter-spacing: 1px;
       margin: 12px 0;
       word-break: break-all;
-      direction: ltr;
+      direction: ltr; /* الكود يبقى LTR */
     }
     
     .icon-btn {
@@ -374,31 +435,29 @@
       100% { transform: rotate(360deg); }
     }
     
-    .notification {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--success);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 12px;
-      font-weight: 600;
-      z-index: 9999;
-      opacity: 0;
-      transform: translateX(-50%) translateY(-20px);
-      transition: all 0.3s ease;
+    /* تحسينات RTL إضافية */
+    .flex-rtl {
+      display: flex;
+      flex-direction: row-reverse;
     }
     
-    .notification.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
+    .text-rtl {
+      direction: rtl;
+      text-align: right;
     }
     
+    /* إصلاح التخطيط للشاشات الصغيرة */
     @media (max-width: 768px) {
+      .notification {
+        right: 10px;
+        left: auto;
+        max-width: calc(100vw - 20px);
+      }
+      
       .modal-card {
         padding: 16px;
         width: 98%;
+        margin: 10px;
       }
       
       table {
@@ -412,6 +471,37 @@
       .btn {
         font-size: 14px;
       }
+      
+      .network-btn {
+        padding: 10px 12px;
+        font-size: 14px;
+      }
+    }
+    
+    /* تحسين التباعد والمحاذاة */
+    .gap-rtl-2 {
+      gap: 0.5rem;
+    }
+    
+    .gap-rtl-3 {
+      gap: 0.75rem;
+    }
+    
+    .gap-rtl-4 {
+      gap: 1rem;
+    }
+    
+    /* إصلاح مشاكل الفليكس مع RTL */
+    .flex-row-reverse {
+      flex-direction: row-reverse;
+    }
+    
+    .justify-between-rtl {
+      justify-content: space-between;
+    }
+    
+    .items-center-rtl {
+      align-items: center;
     }
   </style>
 
@@ -429,82 +519,122 @@
     <!-- Header -->
     <header class="flex items-center justify-between mb-6 card p-4">
       <div class="flex items-center gap-4">
-        <img src="https://moslimtech.github.io/Ban/icons/icon-192.png" alt="logo" class="w-14 h-14 rounded-xl shadow-lg" />
-        <div>
+        <img src="https://moslimtech.github.io/Ban/icons/icon-192.png" alt="شعار بان للإعلانات" class="w-14 h-14 rounded-xl shadow-lg" />
+        <div class="text-rtl">
           <h1 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-600">مولّد أكواد تحويل الكاش</h1>
           <p class="text-sm" style="color: var(--text-muted)">بان للإعلانات • سهل • سريع • آمن</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
-        <button id="themeToggle" class="icon-btn" title="تغيير المظهر">🌗</button>
-        <a href="https://moslimtech.github.io/Ban/" class="icon-btn" title="الرئيسية">📢</a>
+        <button id="themeToggle" class="icon-btn" title="تغيير المظهر" aria-label="تغيير المظهر">🌗</button>
+        <a href="https://moslimtech.github.io/Ban/" class="icon-btn" title="الصفحة الرئيسية" aria-label="الصفحة الرئيسية">📢</a>
       </div>
     </header>
 
     <!-- Main Form -->
     <main class="card p-6">
-      <form id="cashForm" class="space-y-6" onsubmit="return false;">
+      <form id="cashForm" class="space-y-6" onsubmit="return false;" role="form" aria-label="نموذج توليد أكواد التحويل">
         <!-- Phone & Amount -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-semibold mb-2" style="color: var(--text-muted)">📱 رقم المستلم</label>
+            <label for="phoneInput" class="block text-sm font-semibold mb-2 text-rtl" style="color: var(--text-muted)">📱 رقم المستلم</label>
             <div class="flex gap-2">
-              <input id="phoneInput" type="tel" inputmode="tel" placeholder="01xxxxxxxxx" class="flex-1" maxlength="11" />
-              <button type="button" id="pickContactBtn" class="btn btn-primary px-4 rounded-xl" title="اختيار من جهات الاتصال">
+              <input 
+                id="phoneInput" 
+                type="tel" 
+                inputmode="tel" 
+                placeholder="01xxxxxxxxx" 
+                class="flex-1" 
+                maxlength="11" 
+                aria-describedby="phone-help"
+                required
+              />
+              <button 
+                type="button" 
+                id="pickContactBtn" 
+                class="btn btn-primary px-4 rounded-xl" 
+                title="اختيار من جهات الاتصال"
+                aria-label="اختيار رقم من جهات الاتصال"
+              >
                 👤
               </button>
             </div>
-            <small style="color: var(--text-muted); font-size: 12px;" class="mt-1 block">مثال: 01012345678</small>
+            <small id="phone-help" style="color: var(--text-muted); font-size: 12px;" class="mt-1 block text-rtl">مثال: 01012345678</small>
           </div>
 
           <div>
-            <label class="block text-sm font-semibold mb-2" style="color: var(--text-muted)">💰 المبلغ (جنيه)</label>
-            <input id="amountInput" type="number" min="1" max="999999" placeholder="25" value="25" />
-            <small style="color: var(--text-muted); font-size: 12px;" class="mt-1 block">الحد الأدنى: 1 جنيه</small>
+            <label for="amountInput" class="block text-sm font-semibold mb-2 text-rtl" style="color: var(--text-muted)">💰 المبلغ (جنيه)</label>
+            <input 
+              id="amountInput" 
+              type="number" 
+              min="1" 
+              max="999999" 
+              placeholder="25" 
+              value="25" 
+              aria-describedby="amount-help"
+              required
+            />
+            <small id="amount-help" style="color: var(--text-muted); font-size: 12px;" class="mt-1 block text-rtl">الحد الأدنى: 1 جنيه</small>
           </div>
         </div>
 
         <!-- Network Selection -->
         <div>
-          <label class="block text-sm font-semibold mb-3" style="color: var(--text-muted)">📶 اختر الشبكة</label>
-          <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <button type="button" data-net="vodafone" class="network-btn">🔴 فودافون</button>
-            <button type="button" data-net="etisalat" class="network-btn">🟢 اتصالات</button>
-            <button type="button" data-net="orange" class="network-btn">🟠 أورانج</button>
-            <button type="button" data-net="we" class="network-btn">🟣 وي</button>
-            <button type="button" data-net="instapay" class="network-btn">💳 إنستاباي</button>
+          <label class="block text-sm font-semibold mb-3 text-rtl" style="color: var(--text-muted)">📶 اختر الشبكة</label>
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-3" role="radiogroup" aria-label="اختيار شبكة الهاتف">
+            <button type="button" data-net="vodafone" class="network-btn" role="radio" aria-checked="true">🔴 فودافون</button>
+            <button type="button" data-net="etisalat" class="network-btn" role="radio" aria-checked="false">🟢 اتصالات</button>
+            <button type="button" data-net="orange" class="network-btn" role="radio" aria-checked="false">🟠 أورانج</button>
+            <button type="button" data-net="we" class="network-btn" role="radio" aria-checked="false">🟣 وي</button>
+            <button type="button" data-net="instapay" class="network-btn" role="radio" aria-checked="false">💳 إنستاباي</button>
           </div>
         </div>
 
         <!-- Action Buttons -->
         <div class="flex flex-wrap items-center gap-3">
-          <button id="generateBtn" type="button" class="btn btn-primary px-6 py-3 rounded-xl flex-1 md:flex-none">
+          <button 
+            id="generateBtn" 
+            type="button" 
+            class="btn btn-primary px-6 py-3 rounded-xl flex-1 md:flex-none"
+            aria-describedby="generate-help"
+          >
             🚀 تحويل الآن
           </button>
-          <button id="previewBtn" type="button" class="btn px-6 py-3 rounded-xl" style="background: var(--card-bg); border: 2px solid var(--border);">
+          <button 
+            id="previewBtn" 
+            type="button" 
+            class="btn px-6 py-3 rounded-xl" 
+            style="background: var(--card-bg); border: 2px solid var(--border);"
+          >
             👁️ معاينة
           </button>
-          <button id="historyBtn" type="button" class="btn px-6 py-3 rounded-xl" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+          <button 
+            id="historyBtn" 
+            type="button" 
+            class="btn px-6 py-3 rounded-xl" 
+            style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;"
+          >
             📜 السجل
           </button>
         </div>
+        <small id="generate-help" style="color: var(--text-muted); font-size: 12px;" class="text-rtl">سيتم فتح تطبيق الهاتف أو عرض الكود للنسخ</small>
 
         <!-- Result Box -->
         <div id="resultBox" class="hidden result-box">
           <div class="flex items-start justify-between flex-wrap gap-4">
             <div class="flex-1 min-w-[250px]">
-              <p class="text-sm font-semibold mb-2" style="color: var(--text-muted)">✅ تم توليد الكود بنجاح</p>
-              <div id="resultText" class="code-display"></div>
+              <p class="text-sm font-semibold mb-2 text-rtl" style="color: var(--text-muted)">✅ تم توليد الكود بنجاح</p>
+              <div id="resultText" class="code-display" aria-label="الكود المولد"></div>
               
               <div class="flex flex-wrap gap-2 mt-4">
-                <button id="copyBtn" type="button" class="btn px-4 py-2 rounded-lg" style="background: #0ea5e9; color: white;">📋 نسخ</button>
-                <a id="openLinkBtn" class="btn px-4 py-2 rounded-lg" href="#" style="background: #10b981; color: white;">🔗 فتح</a>
-                <a id="whatsappBtn" class="btn px-4 py-2 rounded-lg" href="#" target="_blank" rel="noopener" style="background: #25d366; color: white;">💬 واتساب</a>
+                <button id="copyBtn" type="button" class="btn px-4 py-2 rounded-lg" style="background: #0ea5e9; color: white;" aria-label="نسخ الكود">📋 نسخ</button>
+                <a id="openLinkBtn" class="btn px-4 py-2 rounded-lg" href="#" style="background: #10b981; color: white;" aria-label="فتح الرابط">🔗 فتح</a>
+                <a id="whatsappBtn" class="btn px-4 py-2 rounded-lg" href="#" target="_blank" rel="noopener" style="background: #25d366; color: white;" aria-label="إرسال عبر واتساب">💬 واتساب</a>
               </div>
             </div>
             
-            <div class="text-sm" style="color: var(--text-muted)">
+            <div class="text-sm text-rtl" style="color: var(--text-muted)">
               <div class="mb-2">🌐 الشبكة: <strong id="showNetwork">-</strong></div>
               <div class="px-4 py-2 rounded-lg" style="background: rgba(20, 184, 166, 0.1);">
                 💵 الإجمالي المؤكد: <strong id="totalConfirmed" style="color: #0d9488;">0</strong> ج
@@ -515,49 +645,49 @@
       </form>
     </main>
 
-    <footer class="mt-6 text-center text-sm" style="color: var(--text-muted)">
+    <footer class="mt-6 text-center text-sm text-rtl" style="color: var(--text-muted)">
       © 2025 بان للإعلانات • جميع الحقوق محفوظة
     </footer>
   </div>
 
   <!-- History Modal -->
-  <div id="historyBackdrop" class="modal-backdrop">
+  <div id="historyBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="history-title">
     <div class="modal-card">
       <div class="flex items-center justify-between mb-4 pb-4" style="border-bottom: 2px solid var(--border);">
-        <h3 class="font-bold text-xl">📜 سجل المعاملات</h3>
+        <h3 id="history-title" class="font-bold text-xl text-rtl">📜 سجل المعاملات</h3>
         <div class="flex gap-2">
-          <button id="downloadCsvBtn" type="button" class="btn px-3 py-2 rounded-lg" style="background: #3b82f6; color: white;" title="تحميل CSV">📥</button>
-          <button id="clearHistoryBtn" type="button" class="btn px-3 py-2 rounded-lg" style="background: #ef4444; color: white;" title="حذف الكل">🗑️</button>
-          <button id="closeHistoryBtn" type="button" class="btn px-3 py-2 rounded-lg" style="border: 2px solid var(--border);">✕ إغلاق</button>
+          <button id="downloadCsvBtn" type="button" class="btn px-3 py-2 rounded-lg" style="background: #3b82f6; color: white;" title="تحميل ملف CSV" aria-label="تحميل السجل كملف CSV">📥</button>
+          <button id="clearHistoryBtn" type="button" class="btn px-3 py-2 rounded-lg" style="background: #ef4444; color: white;" title="حذف جميع المعاملات" aria-label="حذف جميع المعاملات">🗑️</button>
+          <button id="closeHistoryBtn" type="button" class="btn px-3 py-2 rounded-lg" style="border: 2px solid var(--border);" aria-label="إغلاق النافذة">✕ إغلاق</button>
         </div>
       </div>
 
-      <div id="historyStats" class="mb-4 p-4 rounded-lg" style="background: rgba(20, 184, 166, 0.1);"></div>
+      <div id="historyStats" class="mb-4 p-4 rounded-lg text-rtl" style="background: rgba(20, 184, 166, 0.1);"></div>
 
       <div class="overflow-x-auto">
-        <table>
+        <table role="table" aria-label="جدول المعاملات">
           <thead>
             <tr>
-              <th>📅 التاريخ</th>
-              <th>📱 الرقم</th>
-              <th>💰 المبلغ</th>
-              <th>📶 الشبكة</th>
-              <th>الحالة</th>
-              <th>الإجراءات</th>
+              <th scope="col">📅 التاريخ</th>
+              <th scope="col">📱 الرقم</th>
+              <th scope="col">💰 المبلغ</th>
+              <th scope="col">📶 الشبكة</th>
+              <th scope="col">الحالة</th>
+              <th scope="col">الإجراءات</th>
             </tr>
           </thead>
           <tbody id="historyTbody"></tbody>
         </table>
       </div>
 
-      <div class="mt-6 pt-4 text-lg font-bold text-center" style="border-top: 2px solid var(--border);">
+      <div class="mt-6 pt-4 text-lg font-bold text-center text-rtl" style="border-top: 2px solid var(--border);">
         💵 إجمالي المبلغ المؤكد: <span id="modalTotalConfirmed" style="color: #0d9488;">0</span> جنيه
       </div>
     </div>
   </div>
 
   <!-- Notification -->
-  <div id="notification" class="notification"></div>
+  <div id="notification" class="notification" role="alert" aria-live="polite"></div>
 
   <script>
     /********** Configuration **********/
@@ -605,9 +735,13 @@
       notification.textContent = message;
       notification.style.background = type === 'error' ? 'var(--danger)' : 'var(--success)';
       notification.classList.add('show');
+      
+      // إضافة دعم إمكانية الوصول
+      notification.setAttribute('aria-label', message);
+      
       setTimeout(() => {
         notification.classList.remove('show');
-      }, 3000);
+      }, 4000);
     }
 
     function setLoading(button, loading) {
@@ -615,10 +749,12 @@
         button.disabled = true;
         button.classList.add('loading');
         button.style.color = 'transparent';
+        button.setAttribute('aria-busy', 'true');
       } else {
         button.disabled = false;
         button.classList.remove('loading');
         button.style.color = '';
+        button.setAttribute('aria-busy', 'false');
       }
     }
 
@@ -641,10 +777,12 @@
           document.documentElement.classList.add('dark');
           localStorage.setItem('theme', 'dark');
           elements.themeToggle.textContent = '☀️';
+          elements.themeToggle.setAttribute('title', 'تغيير إلى المظهر الفاتح');
         } else {
           document.documentElement.classList.remove('dark');
           localStorage.setItem('theme', 'light');
           elements.themeToggle.textContent = '🌙';
+          elements.themeToggle.setAttribute('title', 'تغيير إلى المظهر الداكن');
         }
       }
     };
@@ -664,26 +802,39 @@
       
       updateUI() {
         elements.networkButtons.forEach(btn => {
-          btn.classList.toggle('network-active', btn.dataset.net === selectedNetwork);
+          const isActive = btn.dataset.net === selectedNetwork;
+          btn.classList.toggle('network-active', isActive);
+          btn.setAttribute('aria-checked', isActive);
         });
       }
     };
 
-    /********** Input Validation **********/
+    /********** Input Validation - محسن للغة العربية **********/
     const inputValidator = {
       init() {
         elements.phoneInput.addEventListener('input', (e) => {
-          // Only allow digits
-          let value = e.target.value.replace(/[^0-9]/g, '');
-          // Limit to 11 digits
+          // Only allow digits - مناسب للأرقام العربية والإنجليزية
+          let value = e.target.value.replace(/[^\u0660-\u06690-9]/g, '');
+          // تحويل الأرقام العربية إلى إنجليزية
+          value = this.convertArabicToEnglish(value);
           if (value.length > 11) value = value.slice(0, 11);
           e.target.value = value;
         });
 
         elements.amountInput.addEventListener('input', (e) => {
-          let value = parseInt(e.target.value);
+          let value = this.convertArabicToEnglish(e.target.value);
+          value = parseInt(value);
           if (value < 1) e.target.value = 1;
           if (value > 999999) e.target.value = 999999;
+        });
+      },
+      
+      // تحويل الأرقام العربية إلى إنجليزية
+      convertArabicToEnglish(str) {
+        const arabicNumbers = '٠١٢٣٤٥٦٧٨٩';
+        const englishNumbers = '0123456789';
+        return str.replace(/[٠-٩]/g, (match) => {
+          return englishNumbers[arabicNumbers.indexOf(match)];
         });
       },
       
@@ -692,7 +843,7 @@
         const amount = elements.amountInput.value.trim();
         
         if (!phone || phone.length < 10 || phone.length > 11) {
-          showNotification('⚠️ رقم الهاتف غير صحيح', 'error');
+          showNotification('⚠️ رقم الهاتف غير صحيح. يجب أن يكون 10 أو 11 رقم', 'error');
           elements.phoneInput.focus();
           return false;
         }
@@ -748,7 +899,7 @@
               }
             } else {
               elements.phoneInput.focus();
-              showNotification('⚠️ اختيار جهات الاتصال غير مدعوم', 'error');
+              showNotification('⚠️ اختيار جهات الاتصال غير مدعوم في هذا المتصفح', 'error');
             }
           } catch (err) {
             console.error(err);
@@ -797,18 +948,24 @@
 
     /********** History Manager **********/
     const historyManager = {
-      STORAGE_KEY: 'ban_cash_transactions_v1',
+      STORAGE_KEY: 'ban_cash_transactions_v2', // إصدار محسن
       
       load() {
         try {
           return JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '[]');
         } catch (e) {
+          console.error('خطأ في تحميل السجل:', e);
           return [];
         }
       },
       
       save(arr) {
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(arr));
+        try {
+          localStorage.setItem(this.STORAGE_KEY, JSON.stringify(arr));
+        } catch (e) {
+          console.error('خطأ في حفظ السجل:', e);
+          showNotification('⚠️ خطأ في حفظ البيانات', 'error');
+        }
       },
       
       add(item) {
@@ -816,9 +973,15 @@
         arr.unshift({
           ...item,
           id: Date.now(),
-          date: new Date().toLocaleString('ar-EG')
+          date: new Date().toLocaleString('ar-EG-u-ca-islamic', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
         });
-        if (arr.length > 500) arr.pop();
+        if (arr.length > 1000) arr.pop(); // زيادة الحد الأقصى
         this.save(arr);
       },
       
@@ -830,6 +993,7 @@
         const arr = this.load();
         if (arr[index]) {
           arr[index].confirmed = true;
+          arr[index].confirmedAt = new Date().toISOString();
           this.save(arr);
           return true;
         }
@@ -859,6 +1023,7 @@
       
       show(obj) {
         elements.resultBox.classList.remove('hidden');
+        elements.resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         
         if (obj.type === 'instapay') {
           elements.resultText.textContent = obj.web;
@@ -878,8 +1043,8 @@
       updateTotals() {
         const arr = historyManager.load();
         const total = arr.filter(x => x.confirmed).reduce((s, x) => s + Number(x.amount || 0), 0);
-        elements.totalConfirmedSpan.textContent = total;
-        elements.modalTotalConfirmed.textContent = total;
+        elements.totalConfirmedSpan.textContent = total.toLocaleString('ar-EG');
+        elements.modalTotalConfirmed.textContent = total.toLocaleString('ar-EG');
       }
     };
 
@@ -920,20 +1085,30 @@
           });
 
           resultDisplay.show(obj);
-          showNotification('✅ تم توليد الكود بنجاح');
+          showNotification('✅ تم توليد الكود بنجاح وحفظه في السجل');
 
-          // Auto-open
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // Auto-open مع تأخير للسماح للمستخدم برؤية النتيجة
+          await new Promise(resolve => setTimeout(resolve, 1000));
           
           if (obj.type === 'instapay') {
-            window.location.href = obj.deep;
-            setTimeout(() => { window.location.href = obj.web; }, 1200);
+            try {
+              window.location.href = obj.deep;
+              setTimeout(() => { window.location.href = obj.web; }, 1500);
+            } catch (err) {
+              console.error('خطأ في فتح إنستاباي:', err);
+              window.location.href = obj.web;
+            }
           } else {
-            window.location.href = obj.url;
+            try {
+              window.location.href = obj.url;
+            } catch (err) {
+              console.error('خطأ في فتح تطبيق الهاتف:', err);
+              showNotification('⚠️ تعذر فتح تطبيق الهاتف تلقائياً. يرجى نسخ الكود واستخدامه يدوياً', 'error');
+            }
           }
         } catch (err) {
-          console.error(err);
-          showNotification('⚠️ حدث خطأ غير متوقع', 'error');
+          console.error('خطأ عام:', err);
+          showNotification('⚠️ حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى', 'error');
         } finally {
           setLoading(elements.generateBtn, false);
         }
@@ -954,48 +1129,67 @@
         }
         
         resultDisplay.show(obj);
-        showNotification('👁️ معاينة الكود');
+        showNotification('👁️ معاينة الكود (لم يتم حفظه في السجل بعد)');
       },
       
       async copy(e) {
         e.preventDefault();
         
         const txt = elements.resultText.textContent || '';
-        if (!txt) return;
+        if (!txt) {
+          showNotification('⚠️ لا يوجد كود للنسخ', 'error');
+          return;
+        }
         
         try {
           await navigator.clipboard.writeText(txt);
           elements.copyBtn.textContent = '✅ تم النسخ';
           elements.copyBtn.style.background = 'var(--success)';
-          showNotification('📋 تم نسخ الكود');
+          showNotification('📋 تم نسخ الكود بنجاح');
           
           setTimeout(() => {
             elements.copyBtn.textContent = '📋 نسخ';
             elements.copyBtn.style.background = '#0ea5e9';
-          }, 2000);
+          }, 2500);
         } catch (err) {
-          showNotification('⚠️ فشل في نسخ النص', 'error');
+          console.error('خطأ في النسخ:', err);
+          // Fallback للمتصفحات القديمة
+          try {
+            const textArea = document.createElement('textarea');
+            textArea.value = txt;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            showNotification('📋 تم نسخ الكود بنجاح');
+          } catch (fallbackErr) {
+            showNotification('⚠️ فشل في نسخ النص. يرجى النسخ يدوياً', 'error');
+          }
         }
       },
       
       openLink(e) {
         const fallback = elements.openLinkBtn.getAttribute('data-fallback');
-        if (!fallback) return;
+        if (!fallback) return true; // دع الرابط يُفتح طبيعياً
         
         e.preventDefault();
         const href = elements.openLinkBtn.href;
         
         try {
           window.location.href = href;
-          setTimeout(() => { window.location.href = fallback; }, 1200);
+          setTimeout(() => { 
+            if (!document.hidden) { // إذا لم يغادر المستخدم الصفحة
+              window.location.href = fallback; 
+            }
+          }, 1500);
         } catch (err) {
-          console.error(err);
+          console.error('خطأ في فتح الرابط:', err);
           window.location.href = fallback;
         }
       }
     };
 
-    /********** History Modal **********/
+    /********** History Modal - محسن لدعم RTL **********/
     const historyModal = {
       init() {
         elements.historyBtn.addEventListener('click', this.open.bind(this));
@@ -1009,6 +1203,7 @@
         
         document.addEventListener('keydown', (e) => {
           if (e.key === 'Escape' && elements.historyBackdrop.classList.contains('show')) {
+            e.preventDefault();
             this.close();
           }
         });
@@ -1017,10 +1212,12 @@
       open() {
         this.render();
         elements.historyBackdrop.classList.add('show');
+        elements.closeHistoryBtn.focus(); // تحسين إمكانية الوصول
       },
       
       close() {
         elements.historyBackdrop.classList.remove('show');
+        elements.historyBtn.focus(); // إعادة التركيز للزر الأصلي
       },
       
       render() {
@@ -1028,49 +1225,64 @@
         elements.historyTbody.innerHTML = '';
         
         if (!arr.length) {
-          elements.historyStats.innerHTML = '<p style="color: var(--text-muted);">📋 لا توجد معاملات محفوظة بعد.</p>';
+          elements.historyStats.innerHTML = '<p style="color: var(--text-muted);" class="text-center">📋 لا توجد معاملات محفوظة بعد.<br><small>ستظهر هنا المعاملات بعد إجراء أول تحويل</small></p>';
           elements.modalTotalConfirmed.textContent = '0';
           return;
         }
 
-        // Statistics
+        // Statistics with better Arabic formatting
         const totalAmount = arr.reduce((s, t) => s + Number(t.amount || 0), 0);
         const confirmedAmount = arr.filter(t => t.confirmed).reduce((s, t) => s + Number(t.amount || 0), 0);
         const totalCount = arr.length;
         const confirmedCount = arr.filter(t => t.confirmed).length;
 
         elements.historyStats.innerHTML = `
-          📊 عدد العمليات: <strong>${totalCount}</strong> — 
-          مجموع المبالغ: <strong>${totalAmount}</strong> ج — 
-          تم التأكيد: <strong>${confirmedCount}</strong> (${confirmedAmount} ج)
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div class="text-rtl">
+              <div class="text-2xl font-bold" style="color: #0d9488;">${totalCount.toLocaleString('ar-EG')}</div>
+              <div class="text-sm">إجمالي العمليات</div>
+            </div>
+            <div class="text-rtl">
+              <div class="text-2xl font-bold" style="color: #0d9488;">${totalAmount.toLocaleString('ar-EG')}</div>
+              <div class="text-sm">إجمالي المبالغ (ج)</div>
+            </div>
+            <div class="text-rtl">
+              <div class="text-2xl font-bold" style="color: #059669;">${confirmedCount.toLocaleString('ar-EG')}</div>
+              <div class="text-sm">العمليات المؤكدة</div>
+            </div>
+            <div class="text-rtl">
+              <div class="text-2xl font-bold" style="color: #059669;">${confirmedAmount.toLocaleString('ar-EG')}</div>
+              <div class="text-sm">المبلغ المؤكد (ج)</div>
+            </div>
+          </div>
         `;
 
-        // Render rows
+        // Render rows with better Arabic support
         arr.forEach((t, idx) => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td style="white-space:nowrap; font-size: 13px;">${t.date || '-'}</td>
-            <td style="font-weight: 600;">${t.local || t.number || '-'}</td>
-            <td style="font-weight: 600; color: var(--primary);">${t.amount || 0} ج</td>
-            <td>${resultDisplay.networkNames[t.network] || t.network}</td>
-            <td>
+            <td style="white-space:nowrap; font-size: 13px; direction: rtl;">${t.date || '-'}</td>
+            <td style="font-weight: 600; direction: ltr; text-align: center;">${t.local || t.number || '-'}</td>
+            <td style="font-weight: 600; color: var(--primary); text-align: center;">${Number(t.amount || 0).toLocaleString('ar-EG')} ج</td>
+            <td class="text-center">${resultDisplay.networkNames[t.network] || t.network}</td>
+            <td class="text-center">
               ${t.confirmed 
-                ? '<span class="badge confirmed">✓ تم التحويل</span>' 
-                : '<span class="badge pending">⏳ قيد التنفيذ</span>'
+                ? '<span class="badge confirmed">✓ مؤكد</span>' 
+                : '<span class="badge pending">⏳ في الانتظار</span>'
               }
             </td>
-            <td>
+            <td class="text-center">
               ${!t.confirmed 
-                ? `<button type="button" data-idx="${idx}" class="confirm-row table-btn" style="background: var(--success); color: white;">✓ تأكيد</button>` 
+                ? `<button type="button" data-idx="${idx}" class="confirm-row table-btn" style="background: var(--success); color: white; margin-left: 4px;" title="تأكيد المعاملة">✓</button>` 
                 : ''
               }
-              <button type="button" data-del="${idx}" class="delete-row table-btn" style="background: #fee2e2; color: var(--danger);">🗑️</button>
+              <button type="button" data-del="${idx}" class="delete-row table-btn" style="background: #fee2e2; color: var(--danger);" title="حذف المعاملة">🗑️</button>
             </td>
           `;
           elements.historyTbody.appendChild(tr);
         });
 
-        // Attach event handlers
+        // Attach event handlers with improved UX
         elements.historyTbody.querySelectorAll('.confirm-row').forEach(btn => {
           btn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -1078,7 +1290,7 @@
             if (historyManager.confirm(idx)) {
               this.render();
               resultDisplay.updateTotals();
-              showNotification('✅ تم تأكيد المعاملة');
+              showNotification('✅ تم تأكيد المعاملة بنجاح');
             }
           });
         });
@@ -1086,28 +1298,49 @@
         elements.historyTbody.querySelectorAll('.delete-row').forEach(btn => {
           btn.addEventListener('click', (e) => {
             e.preventDefault();
-            if (!confirm('⚠️ حذف هذه المعاملة نهائياً؟')) return;
+            
+            const transaction = arr[Number(btn.getAttribute('data-del'))];
+            const confirmMsg = `⚠️ هل تريد حذف هذه المعاملة نهائياً؟
+` +
+                             `الرقم: ${transaction.local || transaction.number}
+` +
+                             `المبلغ: ${transaction.amount} جنيه
+` +
+                             `الشبكة: ${transaction.network}
+` +
+                             `لا يمكن التراجع عن هذا الإجراء.`;
+            
+            if (!confirm(confirmMsg)) return;
             
             const idx = Number(btn.getAttribute('data-del'));
             if (historyManager.delete(idx)) {
               this.render();
               resultDisplay.updateTotals();
-              showNotification('🗑️ تم حذف المعاملة');
+              showNotification('🗑️ تم حذف المعاملة بنجاح');
             }
           });
         });
 
-        elements.modalTotalConfirmed.textContent = confirmedAmount;
+        elements.modalTotalConfirmed.textContent = confirmedAmount.toLocaleString('ar-EG');
       },
       
       clear() {
-        if (!confirm('⚠️ هل متأكد من حذف جميع المعاملات؟
-هذا الإجراء لا يمكن التراجع عنه.')) return;
+        const confirmMsg = '⚠️ هل أنت متأكد من حذف جميع المعاملات؟
+' +
+                          '• سيتم حذف جميع البيانات نهائياً
+' +
+                          '• لن تتمكن من استرداد هذه البيانات
+' +
+                          '• سيتم إعادة تعيين الإجماليات إلى الصفر
+' +
+                          'هذا الإجراء لا يمكن التراجع عنه.';
+        
+        if (!confirm(confirmMsg)) return;
         
         historyManager.clear();
         this.render();
         resultDisplay.updateTotals();
-        showNotification('🗑️ تم حذف جميع المعاملات');
+        showNotification('🗑️ تم حذف جميع المعاملات بنجاح');
       },
       
       download() {
@@ -1117,33 +1350,44 @@
           return;
         }
         
-        let csv = 'التاريخ,رقم المستلم,المبلغ,الشبكة,تم التأكيد
-';
+        // إنشاء CSV مع دعم أفضل للعربية
+        let csv = '\ufeffالتاريخ,رقم المستلم,المبلغ (جنيه),الشبكة,الحالة,تاريخ التأكيد
+'; // BOM للـ UTF-8
         arr.forEach(t => {
-          csv += `"${t.date || '-'}","${t.number || t.local || '-'}","${t.amount || 0}","${t.network || '-'}","${t.confirmed ? 'نعم' : 'لا'}"
+          const confirmedDate = t.confirmed && t.confirmedAt ? 
+            new Date(t.confirmedAt).toLocaleString('ar-EG') : 'لم يتم التأكيد';
+          csv += `"${t.date || '-'}","${t.number || t.local || '-'}","${t.amount || 0}","${t.network || '-'}","${t.confirmed ? 'مؤكد':'في الانتظار'}","${confirmedDate}"
 `;
         });
         
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        
-        a.href = url;
-        a.download = `ban_transactions_${new Date().getTime()}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        showNotification('📥 تم تحميل الملف بنجاح');
+        try {
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          
+          const now = new Date();
+          const filename = `معاملات_بان_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}.csv`;
+          
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          
+          showNotification('📥 تم تحميل ملف البيانات بنجاح');
+        } catch (err) {
+          console.error('خطأ في التحميل:', err);
+          showNotification('⚠️ حدث خطأ أثناء تحميل الملف', 'error');
+        }
       }
     };
 
-    /********** Keyboard Shortcuts **********/
+    /********** Keyboard Shortcuts - محسن للعربية **********/
     const keyboardManager = {
       init() {
         document.addEventListener('keydown', (e) => {
-          // Only when not typing in inputs
+          // تجاهل الاختصارات عند الكتابة في الحقول
           if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
           
           switch(e.key) {
@@ -1156,14 +1400,17 @@
               
             case 'Escape':
               if (elements.historyBackdrop.classList.contains('show')) {
+                e.preventDefault();
                 historyModal.close();
               } else if (!elements.resultBox.classList.contains('hidden')) {
+                e.preventDefault();
                 elements.resultBox.classList.add('hidden');
               }
               break;
               
             case 'h':
             case 'H':
+            case 'ه': // الحرف العربي
               if (e.ctrlKey || e.metaKey) {
                 e.preventDefault();
                 historyModal.open();
@@ -1172,9 +1419,19 @@
               
             case 'c':
             case 'C':
+            case 'س': // الحرف العربي
               if ((e.ctrlKey || e.metaKey) && !elements.resultBox.classList.contains('hidden')) {
                 e.preventDefault();
                 elements.copyBtn.click();
+              }
+              break;
+              
+            case 'p':
+            case 'P':
+            case 'ف': // الحرف العربي  
+              if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                elements.previewBtn.click();
               }
               break;
           }
@@ -1187,8 +1444,12 @@
       init() {
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.register('/Ban/firebase-messaging-sw.js')
-            .then(() => console.log('✅ Service Worker registered'))
-            .catch(err => console.log('❌ SW registration failed:', err));
+            .then(registration => {
+              console.log('✅ تم تسجيل Service Worker بنجاح');
+            })
+            .catch(err => {
+              console.log('❌ فشل في تسجيل Service Worker:', err);
+            });
         }
       }
     };
@@ -1196,35 +1457,66 @@
     /********** Application Initialization **********/
     const app = {
       init() {
-        // Initialize all modules
-        themeManager.init();
-        networkManager.init();
-        inputValidator.init();
-        contactPicker.init();
-        actions.init();
-        historyModal.init();
-        keyboardManager.init();
-        serviceWorkerManager.init();
-        
-        // Update display
-        resultDisplay.updateTotals();
-        
-        // Focus phone input
-        setTimeout(() => {
-          elements.phoneInput.focus();
-        }, 500);
-        
-        console.log('✅ تطبيق مولد أكواد الكاش جاهز للاستخدام');
+        try {
+          // Initialize all modules
+          themeManager.init();
+          networkManager.init();
+          inputValidator.init();
+          contactPicker.init();
+          actions.init();
+          historyModal.init();
+          keyboardManager.init();
+          serviceWorkerManager.init();
+          
+          // Update display
+          resultDisplay.updateTotals();
+          
+          // Focus phone input with delay
+          setTimeout(() => {
+            if (elements.phoneInput) {
+              elements.phoneInput.focus();
+            }
+          }, 300);
+          
+          // تحسين إمكانية الوصول
+          document.documentElement.setAttribute('lang', 'ar');
+          document.documentElement.setAttribute('dir', 'rtl');
+          
+          // إضافة معلومات المطور
+          console.log('✅ تطبيق مولد أكواد الكاش جاهز للاستخدام');
+          console.log('🔧 تطوير: بان للإعلانات');
+          console.log('📱 دعم RTL والعربية: مُفعّل');
+          
+          // إظهار رسالة ترحيب
+          setTimeout(() => {
+            showNotification('🎉 مرحباً بك في مولد أكواد تحويل الكاش');
+          }, 1000);
+          
+        } catch (err) {
+          console.error('خطأ في تهيئة التطبيق:', err);
+          showNotification('⚠️ حدث خطأ في تحميل التطبيق', 'error');
+        }
       }
     };
 
-    // Start the application when DOM is ready
+    // بدء التطبيق عند تحميل DOM
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', app.init);
     } else {
       app.init();
     }
+
+    // معالجة الأخطاء العامة
+    window.addEventListener('error', (e) => {
+      console.error('خطأ عام في التطبيق:', e.error);
+      showNotification('⚠️ حدث خطأ غير متوقع', 'error');
+    });
+
+    // معالجة رفض Promise
+    window.addEventListener('unhandledrejection', (e) => {
+      console.error('Promise مرفوض:', e.reason);
+      e.preventDefault();
+    });
   </script>
 </body>
 </html>
-
