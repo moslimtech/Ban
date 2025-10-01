@@ -5,72 +5,105 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>مولّد أكواد تحويل الكاش – بان للإعلانات</title>
   <meta name="theme-color" content="#0d9488" />
-  <link rel="icon" href="https://moslimtech.github.io/Ban/icons/icon-192.png" />
+  <link rel="icon" href="/Ban/icons/icon-192.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: 'Tajawal', system-ui, -apple-system, 'Segoe UI', Roboto, Arial; }
-    .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(6px); }
-    .btn-anim { transition: transform .12s ease, box-shadow .12s ease; }
-    .btn-anim:active { transform: translateY(2px) scale(.995); }
-    .modal-backdrop { position: fixed; inset:0; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:60; }
-    .modal-card { width:95%; max-width:880px; max-height:85vh; overflow:auto; border-radius:12px; padding:16px; background:var(--card-bg); }
     :root {
-      --bg: linear-gradient(180deg,#f0f9ff,#ecfdf5);
-      --card-bg: rgba(255,255,255,0.95);
+      --bg: linear-gradient(145deg,#f2f9ff 0%,#f9fbff 40%,#f0fdf4 100%);
+      --card-bg: rgba(255,255,255,0.82);
       --text: #0f172a;
-      --muted: #475569;
+      --muted: #64748b;
+      --accent: #10b981;
+      --shadow: 0 20px 45px rgba(15,23,42,0.12);
     }
     .dark {
-      --bg: linear-gradient(180deg,#071627,#042f2f);
-      --card-bg: rgba(2,6,23,0.75);
-      --text: #e6eef0;
-      --muted: #94a3b8;
+      --bg: linear-gradient(160deg,#04111e 0%,#042321 40%,#0f172a 100%);
+      --card-bg: rgba(15,23,42,0.75);
+      --text: #e2e8f0;
+      --muted: #cbd5f5;
+      --accent: #34d399;
+      --shadow: 0 25px 55px rgba(2,6,23,0.45);
     }
-    body { background: var(--bg); color: var(--text); }
+    body { background: var(--bg); color: var(--text); transition: background .4s ease, color .3s ease; }
     .muted { color: var(--muted); }
-    /* ستايل الزر النشط للشبكة مطابق للصورة */
-    .network-active {
-        background: rgba(34,197,94,0.12); /* خلفية خضراء فاتحة */
-        border-color: #22c55e; /* حدود خضراء صلبة */
-        color: #166534; /* نص أخضر داكن */
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(18px);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,0.45);
+      overflow: hidden;
     }
-    /* ستايل النقاط الملونة بجانب أسماء الشبكات */
-    .color-dot {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        margin-left: 8px; /* المسافة بين النقطة والنص (للاتجاه من اليمين لليسار) */
-        vertical-align: middle;
+    .top-ribbon {
+      background: linear-gradient(135deg,#14b8a6 0%,#10b981 60%,#0ea5e9 100%);
+      color: #fff;
     }
-    /* ستايل أيقونة إنستاباي */
-    .instapay-icon {
-        display: inline-flex;
-        align-items: center;
-        margin-left: 8px;
-        vertical-align: middle;
-    }
-    .instapay-stripe {
-        width: 8px;
-        height: 10px;
-    }
-    .instapay-stripe:first-child { background-color: #facc15; } /* أصفر */
-    .instapay-stripe:last-child { background-color: #0f172a; } /* داكن */
-
-    /* تعديل اتجاه الأيقونة والنص داخل أزرار الشبكات لتناسب RTL */
+    .btn-anim { transition: transform .12s ease, box-shadow .12s ease, background .2s ease; }
+    .btn-anim:active { transform: translateY(1px) scale(.995); }
+    .network-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); gap: 12px; }
     .network-btn {
-        flex-direction: row-reverse; /* لوضع الأيقونة قبل النص */
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.75);
+      border: 1px solid rgba(148,163,184,0.18);
+      box-shadow: 0 8px 24px rgba(15,23,42,0.08);
+      font-size: 15px;
+      font-weight: 600;
+      transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
     }
-
+    .network-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(15,23,42,0.12); }
+    .network-active {
+      border-color: rgba(14,165,233,0.45);
+      background: #fff;
+      box-shadow: 0 20px 40px rgba(14,165,233,0.16);
+    }
+    .network-dot {
+      display: inline-flex;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      box-shadow: 0 0 12px currentColor;
+    }
+    .input-field {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(148,163,184,0.28);
+      background: rgba(255,255,255,0.75);
+      font-size: 15px;
+      outline: none;
+      transition: border .16s ease, box-shadow .16s ease;
+    }
+    .input-field:focus {
+      border-color: rgba(14,165,233,0.55);
+      box-shadow: 0 12px 32px rgba(14,165,233,0.16);
+      background: #fff;
+    }
+    .quick-actions button { border-radius: 16px; }
+    .quick-actions button span { font-weight: 600; }
     table { width:100%; border-collapse: collapse; }
-    th, td { padding:8px 10px; border-bottom:1px solid rgba(0,0,0,0.06); text-align:right; font-size:14px; }
-    .badge { padding:6px 8px; border-radius:8px; font-size:13px; }
-    .confirmed { background: #dcfce7; color:#166534; }
-    .pending { background: #fff7ed; color:#92400e; }
-    /* إضافة ظل وحدود خفيفة للكارد الرئيسي ليطابق الصورة */
-    .modal-card.glass {
-        border: 1px solid rgba(0,0,0,0.05);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    th, td { padding:10px 12px; border-bottom:1px solid rgba(148,163,184,0.15); text-align:right; font-size:14px; }
+    .badge { padding:6px 10px; border-radius:999px; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px; }
+    .confirmed { background: rgba(34,197,94,0.18); color:#166534; }
+    .pending { background: rgba(251,191,36,0.22); color:#92400e; }
+    #resultBox {
+      background: rgba(255,255,255,0.9);
+      border: 1px solid rgba(148,163,184,0.2);
+      border-radius: 24px;
+      box-shadow: 0 15px 32px rgba(15,23,42,0.12);
+    }
+    pre.code {
+      background: rgba(15,23,42,0.07);
+      padding: 12px 16px;
+      border-radius: 16px;
+      direction:ltr;
+      text-align:left;
+      word-break: break-all;
     }
   </style>
 
@@ -79,135 +112,157 @@
     const userLang = navigator.language || navigator.userLanguage || 'ar';
     const manifest = document.createElement('link');
     manifest.rel = 'manifest';
-    if (userLang.startsWith('ar')) manifest.href = '/Ban/manifest-ar.json?v=1';
-    else manifest.href = '/Ban/manifest-en.json?v=1';
+    manifest.href = userLang.startsWith('ar')
+      ? '/Ban/manifest-ar.json?v=1'
+      : '/Ban/manifest-en.json?v=1';
     document.head.appendChild(manifest);
   </script>
 </head>
-<body class="min-h-screen flex items-center justify-center p-6">
-  <div class="max-w-4xl w-full">
-    <header class="flex items-center justify-between mb-4">
-      <div class="flex items-center gap-4">
-        <img src="https://moslimtech.github.io/Ban/icons/icon-192.png" alt="logo" class="w-12 h-12 rounded-lg shadow" />
-        <div>
-          <h1 class="text-lg font-bold">مولّد أكواد تحويل الكاش – بان للإعلانات</h1>
-          <p class="text-sm muted">سهل • سريع • آمن</p>
-        </div>
-      </div>
+<body class="min-h-screen flex items-center justify-center py-12 px-4">
+  <div class="w-full max-w-3xl space-y-5">
 
-      <div class="flex items-center gap-2">
-        <!-- أزرار دائرية وموقع "بان" وأيقونة "المنزل" -->
-        <a href="https://moslimtech.github.io/Ban/" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-orange-100 shadow btn-anim hover:shadow-md text-xl">🏠</a>
-        <button id="themeToggle" class="w-10 h-10 rounded-full border btn-anim flex items-center justify-center text-xl">🌗</button>
+    <header class="flex items-center justify-between text-sm text-slate-500">
+      <div class="flex items-center gap-3">
+        <button id="themeToggle" class="btn-anim px-3 py-2 rounded-full bg-white/70 shadow">
+          🌙
+        </button>
+        <a href="https://moslimtech.github.io/Ban/"
+           class="btn-anim px-3 py-2 rounded-full bg-white/70 shadow inline-flex items-center gap-2">
+          📢 <span class="hidden sm:inline">الصفحة الرئيسية</span>
+        </a>
+      </div>
+      <div class="inline-flex items-center gap-2 bg-white/70 rounded-full px-4 py-2 shadow">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span class="font-medium text-slate-700">متصل الآن</span>
       </div>
     </header>
 
-    <main class="modal-card glass p-5">
-      <form id="cashForm" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium muted mb-1 flex items-center gap-1">
-              <!-- أيقونة الهاتف بجانب "رقم المستلم" -->
-              <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.774a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path></svg>
-              رقم المستلم
-            </label>
-            <div class="flex gap-2 items-center">
-              <!-- زر اختيار جهة اتصال مطابق للصورة -->
-              <button type="button" id="pickContactBtn" class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500 text-white btn-anim hover:bg-emerald-600 text-lg">👤</button>
-              <input id="phoneInput" type="tel" inputmode="tel" placeholder="01xxxxxxxxx" class="flex-1 px-3 py-2 rounded-lg border focus:outline-none" />
-            </div>
-            <p class="text-xs muted mt-1 mr-12 text-left">مثال: 01012345678</p>
+    <main class="glass-card">
+      <div class="top-ribbon px-6 py-5 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shadow-inner">
+            <img src="https://moslimtech.github.io/Ban/icons/icon-192.png" alt="logo" class="w-10 h-10 rounded-xl border border-white/40" />
           </div>
-
           <div>
-            <label class="block text-sm font-medium muted mb-1 flex items-center gap-1">
-              <!-- أيقونة المال بجانب "المبلغ" -->
-              <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.457 4.907a1 1 0 01-.708 1.41l-2.008.402a1 1 0 01-1.127-.514L9.896 15.68a1 1 0 01.442-.319l2.25-.45a1 1 0 011.41.708zM15 11a1 1 0 100-2 1 1 0 000 2zm-5 6a1 1 0 110-2 1 1 0 010 2z" clip-rule="evenodd"></path></svg>
-              المبلغ (جنيه)
-            </label>
-            <input id="amountInput" type="number" min="1" value="25" placeholder="25" class="w-full px-3 py-2 rounded-lg border focus:outline-none" />
-            <p class="text-xs muted mt-1">الحد الأدنى: 1 جنيه</p>
+            <h1 class="text-xl font-bold">مولّد أكواد تحويل الكاش</h1>
+            <p class="text-sm text-white/80">بان للإعلانات • سهل • سريع • آمن</p>
+          </div>
+        </div>
+        <div class="hidden sm:flex items-center gap-2 text-sm">
+          <span>🔐</span>
+          <span>معتمد من بان</span>
+        </div>
+      </div>
+
+      <form id="cashForm" class="p-6 sm:p-8 space-y-5 bg-gradient-to-b from-white/60 via-white/80 to-white/70">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div class="md:col-span-2 space-y-2">
+            <label class="block text-sm font-medium muted">رقم المستلم</label>
+            <div class="flex gap-2">
+              <div class="relative flex-1">
+                <input id="phoneInput" type="tel" inputmode="tel"
+                       placeholder="010XXXXXXXX"
+                       class="input-field pr-12" />
+                <div class="absolute inset-y-0 right-3 flex items-center text-lg text-emerald-500">
+                  <span>📱</span>
+                </div>
+              </div>
+              <button type="button" id="pickContactBtn"
+                      class="btn-anim inline-flex items-center justify-center px-4 py-3 rounded-2xl bg-emerald-500 text-white shadow-lg hover:bg-emerald-600">
+                👤
+              </button>
+            </div>
+            <p class="text-xs muted">مثال: 01012345678 • يقبل الصيغ الدولية والمحلية</p>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-sm font-medium muted">المبلغ (جنيه)</label>
+            <div class="relative">
+              <input id="amountInput" type="number" min="1" placeholder="25" class="input-field pr-10" />
+              <span class="absolute inset-y-0 right-3 flex items-center text-amber-500">💰</span>
+            </div>
           </div>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium muted mb-2 flex items-center gap-1">
-            <!-- أيقونة إشارة الشبكة بجانب "اختر الشبكة" -->
-            <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
-            اختر الشبكة
-          </label>
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-            <button type="button" data-net="vodafone" class="network-btn px-3 py-2 rounded-lg border bg-white flex items-center justify-center btn-anim">
-                <span class="color-dot" style="background-color: #ef4444;"></span>فودافون
+        <div class="space-y-2">
+          <label class="block text-sm font-medium muted">اختر الشبكة</label>
+          <div class="network-grid">
+            <button type="button" data-net="vodafone" class="network-btn">
+              <span class="font-semibold text-slate-700">فودافون</span>
+              <span class="network-dot" style="color:#ef4444;background:#ef4444;"></span>
             </button>
-            <button type="button" data-net="etisalat" class="network-btn px-3 py-2 rounded-lg border bg-white flex items-center justify-center btn-anim">
-                <span class="color-dot" style="background-color: #22c55e;"></span>اتصالات
+            <button type="button" data-net="etisalat" class="network-btn">
+              <span class="font-semibold text-slate-700">اتصالات</span>
+              <span class="network-dot" style="color:#22c55e;background:#22c55e;"></span>
             </button>
-            <button type="button" data-net="orange" class="network-btn px-3 py-2 rounded-lg border bg-white flex items-center justify-center btn-anim">
-                <span class="color-dot" style="background-color: #f97316;"></span>اورانج
+            <button type="button" data-net="orange" class="network-btn">
+              <span class="font-semibold text-slate-700">أورانج</span>
+              <span class="network-dot" style="color:#f97316;background:#f97316;"></span>
             </button>
-            <button type="button" data-net="we" class="network-btn px-3 py-2 rounded-lg border bg-white flex items-center justify-center btn-anim">
-                <span class="color-dot" style="background-color: #8b5cf6;"></span>وي
+            <button type="button" data-net="we" class="network-btn">
+              <span class="font-semibold text-slate-700">وي</span>
+              <span class="network-dot" style="color:#8b5cf6;background:#8b5cf6;"></span>
             </button>
-            <button type="button" data-net="instapay" class="network-btn px-3 py-2 rounded-lg border bg-white flex items-center justify-center btn-anim">
-                <span class="instapay-icon"><span class="instapay-stripe"></span><span class="instapay-stripe"></span></span>إنستاباي
+            <button type="button" data-net="instapay" class="network-btn">
+              <span class="font-semibold text-slate-700">إنستاباي</span>
+              <span class="network-dot" style="color:#facc15;background:#facc15;"></span>
             </button>
           </div>
+          <p class="text-xs muted">اضغط على الشبكة ليتم تمييزها، ويمكن التبديل في أي وقت.</p>
         </div>
 
-        <div class="flex flex-wrap items-center gap-3 justify-end">
-          <!-- زر "تحويل الآن" باللون الأخضر الصارخ وأيقونة الصاروخ -->
-          <button id="generateBtn" type="button" class="px-4 py-2 rounded-xl bg-teal-500 text-white font-semibold shadow-lg btn-anim hover:bg-teal-600 flex items-center gap-2">
-            <span class="text-lg">🚀</span> تحويل الآن
-          </button>
-          <!-- زر "معاينة" باللون الأبيض وأيقونة العين -->
-          <button id="previewBtn" type="button" class="px-4 py-2 rounded-xl bg-white border font-medium btn-anim hover:shadow flex items-center gap-2">
-            <span class="text-lg">👁️</span> معاينة
-          </button>
-          <!-- زر "السجل" باللون البرتقالي وأيقونة اللوحة -->
-          <button id="historyBtn" type="button" class="px-4 py-2 rounded-xl bg-amber-500 text-white btn-anim hover:bg-amber-600 flex items-center gap-2">
-            <span class="text-lg">📜</span> السجل
-          </button>
-        </div>
-
-        <div id="resultBox" class="mt-4 hidden p-4 rounded-lg bg-white border">
-          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div class="flex-1">
-              <p class="text-sm muted">تم توليد الرابط/الكود — افتح التطبيق أو انسخ الكود:</p>
-              <pre id="resultText" class="code mt-2 text-sm bg-gray-50 p-2 rounded overflow-x-auto"></pre>
-              <div class="mt-3 flex flex-wrap gap-2">
-                <button id="copyBtn" class="px-3 py-2 rounded bg-sky-600 text-white btn-anim hover:bg-sky-700">نسخ</button>
-                <a id="openLinkBtn" class="px-3 py-2 rounded bg-emerald-500 text-white btn-anim hover:bg-emerald-600" href="#" target="_blank" rel="noopener">فتح</a>
-                <a id="whatsappBtn" class="px-3 py-2 rounded bg-green-600 text-white btn-anim hover:bg-green-700" href="#" target="_blank" rel="noopener">واتساب</a>
+        <div id="resultBox" class="mt-4 hidden p-5 space-y-4">
+          <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div class="space-y-2 text-sm">
+              <p class="muted font-medium">تم توليد الرابط/الكود — افتح التطبيق أو انسخ الكود:</p>
+              <pre id="resultText" class="code text-sm"></pre>
+              <div class="flex flex-wrap gap-2">
+                <button id="copyBtn" type="button" class="btn-anim px-4 py-2 rounded-2xl bg-sky-500 text-white hover:bg-sky-600">نسخ</button>
+                <a id="openLinkBtn" class="btn-anim px-4 py-2 rounded-2xl bg-emerald-500 text-white hover:bg-emerald-600" href="#" target="_blank" rel="noopener">فتح</a>
+                <a id="whatsappBtn" class="btn-anim px-4 py-2 rounded-2xl bg-green-500 text-white hover:bg-green-600" href="#" target="_blank" rel="noopener">واتساب</a>
               </div>
             </div>
-            <div class="text-sm muted text-right">
-              <div>الشبكة: <span id="showNetwork">-</span></div>
+            <div class="text-sm bg-slate-900/5 rounded-2xl px-4 py-3">
+              <div>الشبكة المختارة: <strong id="showNetwork">-</strong></div>
               <div class="mt-2">الإجمالي المؤكد: <strong id="totalConfirmed">0</strong> ج</div>
             </div>
           </div>
         </div>
 
+        <div class="quick-actions grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+          <button id="historyBtn" type="button"
+                  class="btn-anim px-5 py-3 bg-white/80 border border-amber-200 text-amber-600 shadow hover:shadow-md hover:bg-white">
+            📜 <span>السجل</span>
+          </button>
+          <button id="previewBtn" type="button"
+                  class="btn-anim px-5 py-3 bg-white/80 border border-slate-200 text-slate-700 shadow hover:shadow-md hover:bg-white">
+            👁️ <span>معاينة</span>
+          </button>
+          <button id="generateBtn" type="button"
+                  class="btn-anim px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold shadow-xl hover:shadow-2xl">
+            تحويل الآن 🚀
+          </button>
+        </div>
       </form>
     </main>
 
-    <footer class="mt-4 text-center text-xs muted">© 2025 بان للإعلانات • جميع الحقوق محفوظة</footer>
+    <footer class="text-center text-xs muted">
+      © بان للإعلانات - جميع الحقوق محفوظة 2025
+    </footer>
   </div>
 
-  <!-- History Modal (always accessible via historyBtn) -->
+  <!-- History Modal -->
   <div id="historyBackdrop" class="modal-backdrop hidden">
     <div class="modal-card" role="dialog" aria-modal="true">
-      <div class="flex flex-wrap items-center justify-between mb-3 gap-2">
+      <div class="flex items-center justify-between mb-3">
         <h3 class="font-bold text-lg">📜 المعاملات السابقة</h3>
-        <div class="flex flex-wrap gap-2">
-          <button id="downloadCsvBtn" class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">💾 تحميل CSV</button>
-          <button id="clearHistoryBtn" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm">🗑️ مسح الكل</button>
-          <button id="closeHistoryBtn" class="px-3 py-2 bg-gray-200 rounded-lg text-sm">إغلاق</button>
+        <div class="flex gap-2 flex-wrap">
+          <button id="downloadCsvBtn" class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">💾 تحميل CSV</button>
+          <button id="clearHistoryBtn" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">🗑️ مسح الكل</button>
+          <button id="closeHistoryBtn" class="px-3 py-2 bg-gray-200 rounded-lg">إغلاق</button>
         </div>
       </div>
-
       <div id="historyStats" class="mb-3 text-sm muted"></div>
-
       <div id="historyTableWrapper" class="overflow-auto">
         <table id="historyTable" class="bg-transparent">
           <thead>
@@ -220,12 +275,9 @@
               <th>الإجراءات</th>
             </tr>
           </thead>
-          <tbody id="historyTbody">
-            <!-- rows generated by JS -->
-          </tbody>
+          <tbody id="historyTbody"></tbody>
         </table>
       </div>
-
       <div class="mt-4 text-right">
         <strong>إجمالي المبلغ المؤكد: <span id="modalTotalConfirmed">0</span> جنيه</strong>
       </div>
@@ -268,13 +320,18 @@
     const modalTotalConfirmed = document.getElementById('modalTotalConfirmed');
     const themeToggle = document.getElementById('themeToggle');
 
-    let selectedNetwork = 'vodafone'; // فودافون هو الشبكة الافتراضية المختارة في الصورة
+    let selectedNetwork = 'vodafone';
 
     /********** Theme (light/dark) **********/
     const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     function applyTheme(t) {
-      if (t === 'dark') document.documentElement.classList.add('dark'), localStorage.setItem('theme','dark');
-      else document.documentElement.classList.remove('dark'), localStorage.setItem('theme','light');
+      if (t === 'dark') {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme','dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme','light');
+      }
     }
     const saved = localStorage.getItem('theme') || (prefersDark ? 'dark' : 'light');
     applyTheme(saved);
@@ -292,7 +349,12 @@
         else b.classList.remove('network-active');
       });
     }
-    networkButtons.forEach(btn => btn.addEventListener('click', () => { selectedNetwork = btn.dataset.net; markSelected(); }));
+    networkButtons.forEach(btn =>
+      btn.addEventListener('click', () => {
+        selectedNetwork = btn.dataset.net;
+        markSelected();
+      })
+    );
     markSelected();
 
     /********** Contact picker (best-effort) **********/
@@ -379,7 +441,11 @@
         resultText.textContent = obj.code;
         openLinkBtn.href = obj.url;
         openLinkBtn.removeAttribute('data-fallback');
-        showNetwork.textContent = (selectedNetwork === 'vodafone' ? 'فودافون' : selectedNetwork === 'etisalat' ? 'اتصالات' : selectedNetwork === 'orange' ? 'اورانج' : 'وي');
+        const label = selectedNetwork === 'vodafone' ? 'فودافون'
+          : selectedNetwork === 'etisalat' ? 'اتصالات'
+          : selectedNetwork === 'orange' ? 'أورانج'
+          : 'وي';
+        showNetwork.textContent = label;
       }
       whatsappBtn.href = 'https://wa.me/' + obj.intl;
       updateTotalsDisplay();
@@ -391,13 +457,19 @@
       const obj = buildActionLink(selectedNetwork, phone, amount);
       if (!obj) { alert('من فضلك تأكد من إدخال رقم صالح والمبلغ.'); return; }
 
-      // Save to history with confirmed=false + date
       const now = new Date();
-      addHistoryItem({ number: onlyDigits(phone), local: obj.local, intl: obj.intl, amount: obj.amount, network: selectedNetwork, date: now.toLocaleString('ar-EG'), confirmed: false });
+      addHistoryItem({
+        number: onlyDigits(phone),
+        local: obj.local,
+        intl: obj.intl,
+        amount: obj.amount,
+        network: selectedNetwork,
+        date: now.toLocaleString('ar-EG'),
+        confirmed: false
+      });
 
       showResult(obj);
 
-      // Try to open automatically:
       if (obj.type === 'instapay') {
         try { window.location.href = obj.deep; } catch(_) {}
         setTimeout(() => { window.location.href = obj.web; }, 1200);
@@ -411,7 +483,7 @@
       const fallback = openLinkBtn.getAttribute('data-fallback');
       if (!fallback) return;
       e.preventDefault();
-      try { window.location.href = href; } catch(e){ console.error(e); }
+      try { window.location.href = href; } catch(err){ console.error(err); }
       setTimeout(() => { window.location.href = fallback; }, 1200);
     });
 
@@ -435,8 +507,15 @@
     });
 
     /********** History modal UI & table **********/
-    historyBtn.addEventListener('click', () => { renderHistory(); historyBackdrop.classList.remove('hidden'); historyBackdrop.style.display='flex'; });
-    closeHistoryBtn.addEventListener('click', () => { historyBackdrop.classList.add('hidden'); historyBackdrop.style.display='none'; });
+    historyBtn.addEventListener('click', () => {
+      renderHistory();
+      historyBackdrop.classList.remove('hidden');
+      historyBackdrop.style.display='flex';
+    });
+    closeHistoryBtn.addEventListener('click', () => {
+      historyBackdrop.classList.add('hidden');
+      historyBackdrop.style.display='none';
+    });
 
     clearHistoryBtn.addEventListener('click', () => {
       if (!confirm('هل متأكد من حذف كل المعاملات؟')) return;
@@ -454,13 +533,13 @@
         return;
       }
 
-      // stats
       const totalAmount = arr.reduce((s,t)=>s+Number(t.amount),0);
       const confirmedAmount = arr.filter(t=>t.confirmed).reduce((s,t)=>s+Number(t.amount),0);
       const totalCount = arr.length;
       const confirmedCount = arr.filter(t=>t.confirmed).length;
 
-      historyStats.innerHTML = `📊 عدد العمليات: <strong>${totalCount}</strong> — مجموع المبالغ: <strong>${totalAmount}</strong> ج — تم التأكيد: <strong>${confirmedCount}</strong> (${confirmedAmount} ج)`;
+      historyStats.innerHTML =
+        `📊 عدد العمليات: <strong>${totalCount}</strong> — مجموع المبالغ: <strong>${totalAmount}</strong> ج — تم التأكيد: <strong>${confirmedCount}</strong> (${confirmedAmount} ج)`;
 
       arr.forEach((t, idx) => {
         const tr = document.createElement('tr');
@@ -470,23 +549,22 @@
           <td>${t.amount}</td>
           <td>${t.network}</td>
           <td>${t.confirmed ? '<span class="badge confirmed">تم التحويل</span>' : '<span class="badge pending">قيد التنفيذ</span>'}</td>
-          <td style="white-space:nowrap">
-            ${t.confirmed ? '' : `<button data-idx="${idx}" class="confirm-row px-2 py-1 rounded bg-emerald-500 text-white text-xs">تأكيد</button>`}
-            <button data-del="${idx}" class="delete-row px-2 py-1 rounded bg-red-100 ml-2 text-xs">حذف</button>
+          <td>
+            ${t.confirmed ? '' : `<button data-idx="${idx}" class="confirm-row px-3 py-1 rounded bg-emerald-500 text-white">تأكيد</button>`}
+            <button data-del="${idx}" class="delete-row px-3 py-1 rounded bg-red-100 ml-2">حذف</button>
           </td>
         `;
         historyTbody.appendChild(tr);
       });
 
-      // attach handlers
       historyTbody.querySelectorAll('.confirm-row').forEach(b=>{
-        b.addEventListener('click', (e)=>{
+        b.addEventListener('click', ()=>{
           const idx = Number(b.getAttribute('data-idx'));
           confirmFromHistory(idx);
         });
       });
       historyTbody.querySelectorAll('.delete-row').forEach(b=>{
-        b.addEventListener('click', (e)=>{
+        b.addEventListener('click', ()=>{
           const idx = Number(b.getAttribute('data-del'));
           deleteFromHistory(idx);
         });
@@ -521,7 +599,7 @@
       modalTotalConfirmed.textContent = total;
     }
 
-    /********** Download CSV (includes date) **********/
+    /********** Download CSV **********/
     downloadCsvBtn.addEventListener('click', downloadHistoryCSV);
     function downloadHistoryCSV() {
       const arr = loadHistory();
@@ -548,7 +626,6 @@
         .catch(err=>console.log('❌ SW registration failed:', err));
     }
 
-    // default amount
     amountInput.value = 25;
   </script>
 </body>
