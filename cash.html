@@ -13,7 +13,7 @@
     .btn-anim { transition: transform .12s ease, box-shadow .12s ease; }
     .btn-anim:active { transform: translateY(2px) scale(.995); }
     .modal-backdrop { position: fixed; inset:0; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:60; }
-  .modal-card { width:95%; max-width:880px; max-height:85vh; overflow:auto; border-radius:12px; padding:16px; background:var(--card-bg); }
+    .modal-card { width:95%; max-width:880px; max-height:85vh; overflow:auto; border-radius:12px; padding:16px; background:var(--card-bg); }
     :root {
       --bg: linear-gradient(180deg,#f0f9ff,#ecfdf5);
       --card-bg: rgba(255,255,255,0.95);
@@ -28,11 +28,7 @@
     }
     body { background: var(--bg); color: var(--text); }
     .muted { color: var(--muted); }
-  .network-active { background: rgba(34,197,94,0.12); border-color: rgba(34,197,94,0.25); }
-  /* Responsive network buttons */
-  .network-btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; padding:.6rem .75rem; border-radius:.75rem; border:1px solid rgba(15,23,42,0.06); background:white; cursor:pointer; font-weight:600 }
-  @media (max-width:600px) { .network-btn { display:block; width:100%; text-align:center; padding:.9rem; font-size:1rem } .network-grid { display:grid; grid-template-columns:1fr; gap:.6rem } }
-  @media (min-width:601px) { .network-grid { display:grid; grid-template-columns: repeat(5,1fr); gap:.5rem } }
+    .network-active { background: rgba(34,197,94,0.12); border-color: rgba(34,197,94,0.25); }
     table { width:100%; border-collapse: collapse; }
     th, td { padding:8px 10px; border-bottom:1px solid rgba(0,0,0,0.06); text-align:right; font-size:14px; }
     .badge { padding:6px 8px; border-radius:8px; font-size:13px; }
@@ -69,7 +65,7 @@
 
     <main class="modal-card glass p-5">
       <form id="cashForm" class="space-y-4">
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
           <div class="md:col-span-2">
             <label class="block text-sm font-medium muted mb-1">رقم المستلم</label>
             <div class="flex gap-2">
@@ -85,15 +81,14 @@
           </div>
         </div>
 
-          <div>
-            <label class="block text-sm font-medium muted mb-2">اختر الشبكة</label>
-            <div class="network-grid">
-              <button type="button" data-net="vodafone" class="network-btn" aria-pressed="false">فودافون</button>
-              <button type="button" data-net="etisalat" class="network-btn" aria-pressed="false">اتصالات</button>
-              <button type="button" data-net="orange" class="network-btn" aria-pressed="false">اورانج</button>
-              <button type="button" data-net="we" class="network-btn" aria-pressed="false">وي</button>
-              <button type="button" data-net="instapay" class="network-btn" aria-pressed="false">إنستاباي</button>
-            </div>
+        <div>
+          <label class="block text-sm font-medium muted mb-2">اختر الشبكة</label>
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <button type="button" data-net="vodafone" class="network-btn px-3 py-2 rounded-lg border bg-white">فودافون</button>
+            <button type="button" data-net="etisalat" class="network-btn px-3 py-2 rounded-lg border bg-white">اتصالات</button>
+            <button type="button" data-net="orange" class="network-btn px-3 py-2 rounded-lg border bg-white">اورانج</button>
+            <button type="button" data-net="we" class="network-btn px-3 py-2 rounded-lg border bg-white">وي</button>
+            <button type="button" data-net="instapay" class="network-btn px-3 py-2 rounded-lg border bg-white">إنستاباي</button>
           </div>
         </div>
 
@@ -221,12 +216,11 @@
     /********** Network selection visuals **********/
     function markSelected() {
       networkButtons.forEach(b => {
-        const is = b.dataset.net === selectedNetwork;
-        if (is) b.classList.add('network-active'); else b.classList.remove('network-active');
-        b.setAttribute('aria-pressed', is ? 'true' : 'false');
+        if (b.dataset.net === selectedNetwork) b.classList.add('network-active');
+        else b.classList.remove('network-active');
       });
     }
-    networkButtons.forEach(btn => btn.addEventListener('click', () => { selectedNetwork = btn.dataset.net; markSelected(); btn.focus(); }));
+    networkButtons.forEach(btn => btn.addEventListener('click', () => { selectedNetwork = btn.dataset.net; markSelected(); }));
     markSelected();
 
     /********** Contact picker (best-effort) **********/
@@ -330,13 +324,6 @@
       addHistoryItem({ number: onlyDigits(phone), local: obj.local, intl: obj.intl, amount: obj.amount, network: selectedNetwork, date: now.toLocaleString('ar-EG'), confirmed: false });
 
       showResult(obj);
-
-      // accessibility: scroll result into view and focus
-      try {
-        resultBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        resultBox.setAttribute('tabindex', '-1');
-        resultBox.focus();
-      } catch (e) {}
 
       // Try to open automatically:
       if (obj.type === 'instapay') {
