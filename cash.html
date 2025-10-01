@@ -6,6 +6,20 @@
   <title>مولّد أكواد تحويل الكاش – بان للإعلانات</title>
   <meta name="theme-color" content="#0d9488" />
   <link rel="icon" href="/Ban/icons/icon-192.png" />
+  
+  <!-- حل مؤقت: إخفاء تحذير CDN -->
+  <script>
+    // إخفاء تحذير Tailwind CDN (حل مؤقت فقط)
+    const originalWarn = console.warn;
+    console.warn = function(...args) {
+      const message = args.join(' ');
+      if (message.includes('cdn.tailwindcss.com should not be used in production')) {
+        return; // تجاهل هذا التحذير
+      }
+      originalWarn.apply(console, args);
+    };
+  </script>
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,15 +27,17 @@
   
   <script>
     // تكوين Tailwind لدعم RTL بشكل أفضل
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            'arabic': ['Cairo', 'Tajawal', 'system-ui', 'sans-serif'],
+    if (typeof tailwind !== 'undefined') {
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              'arabic': ['Cairo', 'Tajawal', 'system-ui', 'sans-serif'],
+            }
           }
-        }
-      },
-      plugins: [],
+        },
+        plugins: [],
+      };
     }
   </script>
   
@@ -84,7 +100,6 @@
       backdrop-filter: blur(10px);
     }
     
-    /* تحسين الأزرار لدعم RTL */
     .btn {
       transition: all 0.2s ease;
       border: none;
@@ -121,7 +136,6 @@
       transform: translateY(-1px);
     }
     
-    /* تحسين أزرار الشبكة مع دعم RTL أفضل */
     .network-btn {
       padding: 12px 16px;
       border-radius: 12px;
@@ -142,7 +156,7 @@
       content: '';
       position: absolute;
       top: 0;
-      right: 0; /* تغيير من left إلى right للـ RTL */
+      right: 0;
       width: 100%;
       height: 100%;
       background: linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(13, 148, 136, 0.1) 100%);
@@ -167,7 +181,7 @@
       content: '✓';
       position: absolute;
       top: 4px;
-      left: 4px; /* تغيير من right إلى left للـ RTL */
+      left: 4px;
       width: 20px;
       height: 20px;
       background: #14b8a6;
@@ -180,7 +194,6 @@
       font-weight: bold;
     }
     
-    /* تحسين الإدخالات لدعم RTL */
     input, select {
       width: 100%;
       padding: 12px 16px;
@@ -212,12 +225,10 @@
       border-color: var(--danger);
     }
     
-    /* تحسين الإشعارات لدعم RTL */
     .notification {
       position: fixed;
       top: 20px;
-      right: 20px; /* تغيير من left إلى right */
-      transform: translateX(0); /* إزالة translateX(-50%) */
+      right: 20px;
       background: var(--success);
       color: white;
       padding: 12px 24px;
@@ -236,7 +247,6 @@
       transform: translateX(0);
     }
     
-    /* تحسين النوافذ المنبثقة */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -275,7 +285,6 @@
       opacity: 1;
     }
     
-    /* تحسين الجداول لدعم RTL */
     table {
       width: 100%;
       border-collapse: separate;
@@ -357,7 +366,6 @@
       }
     }
     
-    /* تحسين عرض الكود */
     .code-display {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -371,7 +379,7 @@
       letter-spacing: 1px;
       margin: 12px 0;
       word-break: break-all;
-      direction: ltr; /* الكود يبقى LTR */
+      direction: ltr;
     }
     
     .icon-btn {
@@ -435,18 +443,11 @@
       100% { transform: rotate(360deg); }
     }
     
-    /* تحسينات RTL إضافية */
-    .flex-rtl {
-      display: flex;
-      flex-direction: row-reverse;
-    }
-    
     .text-rtl {
       direction: rtl;
       text-align: right;
     }
     
-    /* إصلاح التخطيط للشاشات الصغيرة */
     @media (max-width: 768px) {
       .notification {
         right: 10px;
@@ -476,32 +477,6 @@
         padding: 10px 12px;
         font-size: 14px;
       }
-    }
-    
-    /* تحسين التباعد والمحاذاة */
-    .gap-rtl-2 {
-      gap: 0.5rem;
-    }
-    
-    .gap-rtl-3 {
-      gap: 0.75rem;
-    }
-    
-    .gap-rtl-4 {
-      gap: 1rem;
-    }
-    
-    /* إصلاح مشاكل الفليكس مع RTL */
-    .flex-row-reverse {
-      flex-direction: row-reverse;
-    }
-    
-    .justify-between-rtl {
-      justify-content: space-between;
-    }
-    
-    .items-center-rtl {
-      align-items: center;
     }
   </style>
 
@@ -731,20 +706,21 @@
 
     /********** Utility Functions **********/
     function showNotification(message, type = 'success') {
-      const notification = elements.notification;
-      notification.textContent = message;
-      notification.style.background = type === 'error' ? 'var(--danger)' : 'var(--success)';
-      notification.classList.add('show');
+      if (!elements.notification) return;
       
-      // إضافة دعم إمكانية الوصول
-      notification.setAttribute('aria-label', message);
+      elements.notification.textContent = message;
+      elements.notification.style.background = type === 'error' ? 'var(--danger)' : 'var(--success)';
+      elements.notification.classList.add('show');
+      elements.notification.setAttribute('aria-label', message);
       
       setTimeout(() => {
-        notification.classList.remove('show');
+        elements.notification.classList.remove('show');
       }, 4000);
     }
 
     function setLoading(button, loading) {
+      if (!button) return;
+      
       if (loading) {
         button.disabled = true;
         button.classList.add('loading');
@@ -761,7 +737,9 @@
     /********** Theme Management **********/
     const themeManager = {
       init() {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (!elements.themeToggle) return;
+        
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         const saved = localStorage.getItem('theme') || (prefersDark ? 'dark' : 'light');
         this.apply(saved);
         
@@ -776,13 +754,17 @@
         if (theme === 'dark') {
           document.documentElement.classList.add('dark');
           localStorage.setItem('theme', 'dark');
-          elements.themeToggle.textContent = '☀️';
-          elements.themeToggle.setAttribute('title', 'تغيير إلى المظهر الفاتح');
+          if (elements.themeToggle) {
+            elements.themeToggle.textContent = '☀️';
+            elements.themeToggle.setAttribute('title', 'تغيير إلى المظهر الفاتح');
+          }
         } else {
           document.documentElement.classList.remove('dark');
           localStorage.setItem('theme', 'light');
-          elements.themeToggle.textContent = '🌙';
-          elements.themeToggle.setAttribute('title', 'تغيير إلى المظهر الداكن');
+          if (elements.themeToggle) {
+            elements.themeToggle.textContent = '🌙';
+            elements.themeToggle.setAttribute('title', 'تغيير إلى المظهر الداكن');
+          }
         }
       }
     };
@@ -790,10 +772,12 @@
     /********** Network Selection **********/
     const networkManager = {
       init() {
+        if (!elements.networkButtons.length) return;
+        
         elements.networkButtons.forEach(btn => {
           btn.addEventListener('click', (e) => {
             e.preventDefault();
-            selectedNetwork = btn.dataset.net;
+            selectedNetwork = btn.dataset.net || 'vodafone';
             this.updateUI();
           });
         });
@@ -804,53 +788,54 @@
         elements.networkButtons.forEach(btn => {
           const isActive = btn.dataset.net === selectedNetwork;
           btn.classList.toggle('network-active', isActive);
-          btn.setAttribute('aria-checked', isActive);
+          btn.setAttribute('aria-checked', isActive.toString());
         });
       }
     };
 
-    /********** Input Validation - محسن للغة العربية **********/
+    /********** Input Validation **********/
     const inputValidator = {
       init() {
-        elements.phoneInput.addEventListener('input', (e) => {
-          // Only allow digits - مناسب للأرقام العربية والإنجليزية
-          let value = e.target.value.replace(/[^\u0660-\u06690-9]/g, '');
-          // تحويل الأرقام العربية إلى إنجليزية
-          value = this.convertArabicToEnglish(value);
-          if (value.length > 11) value = value.slice(0, 11);
-          e.target.value = value;
-        });
+        if (elements.phoneInput) {
+          elements.phoneInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/[^\u0660-\u06690-9]/g, '');
+            value = this.convertArabicToEnglish(value);
+            if (value.length > 11) value = value.slice(0, 11);
+            e.target.value = value;
+          });
+        }
 
-        elements.amountInput.addEventListener('input', (e) => {
-          let value = this.convertArabicToEnglish(e.target.value);
-          value = parseInt(value);
-          if (value < 1) e.target.value = 1;
-          if (value > 999999) e.target.value = 999999;
-        });
+        if (elements.amountInput) {
+          elements.amountInput.addEventListener('input', (e) => {
+            let value = this.convertArabicToEnglish(e.target.value);
+            const numValue = parseInt(value);
+            if (numValue < 1) e.target.value = 1;
+            if (numValue > 999999) e.target.value = 999999;
+          });
+        }
       },
       
-      // تحويل الأرقام العربية إلى إنجليزية
       convertArabicToEnglish(str) {
         const arabicNumbers = '٠١٢٣٤٥٦٧٨٩';
         const englishNumbers = '0123456789';
-        return str.replace(/[٠-٩]/g, (match) => {
-          return englishNumbers[arabicNumbers.indexOf(match)];
+        return String(str).replace(/[٠-٩]/g, (match) => {
+          return englishNumbers[arabicNumbers.indexOf(match)] || match;
         });
       },
       
       validateForm() {
-        const phone = elements.phoneInput.value.trim();
-        const amount = elements.amountInput.value.trim();
+        const phone = elements.phoneInput ? elements.phoneInput.value.trim() : '';
+        const amount = elements.amountInput ? elements.amountInput.value.trim() : '';
         
         if (!phone || phone.length < 10 || phone.length > 11) {
-          showNotification('⚠️ رقم الهاتف غير صحيح. يجب أن يكون 10 أو 11 رقم', 'error');
-          elements.phoneInput.focus();
+          showNotification('⚠️ رقم الهاتف غير صحيح. يجب أن يكون 10 أو 11 رقماً', 'error');
+          if (elements.phoneInput) elements.phoneInput.focus();
           return false;
         }
         
         if (!amount || parseInt(amount) < 1) {
           showNotification('⚠️ المبلغ يجب أن يكون أكبر من صفر', 'error');
-          elements.amountInput.focus();
+          if (elements.amountInput) elements.amountInput.focus();
           return false;
         }
         
@@ -885,6 +870,8 @@
     /********** Contact Picker **********/
     const contactPicker = {
       init() {
+        if (!elements.pickContactBtn) return;
+        
         elements.pickContactBtn.addEventListener('click', async (e) => {
           e.preventDefault();
           setLoading(elements.pickContactBtn, true);
@@ -892,18 +879,18 @@
           try {
             if (navigator.contacts && navigator.contacts.select) {
               const contacts = await navigator.contacts.select(['tel', 'name'], { multiple: false });
-              if (contacts && contacts.length && contacts.tel && contacts.tel) {
+              if (contacts && contacts.length && contacts.tel && contacts.tel.length) {
                 const tel = contacts.tel.replace(/\s|-|\(|\)/g, '');
-                elements.phoneInput.value = tel;
+                if (elements.phoneInput) elements.phoneInput.value = tel;
                 showNotification('✅ تم اختيار جهة الاتصال بنجاح');
               }
             } else {
-              elements.phoneInput.focus();
+              if (elements.phoneInput) elements.phoneInput.focus();
               showNotification('⚠️ اختيار جهات الاتصال غير مدعوم في هذا المتصفح', 'error');
             }
           } catch (err) {
-            console.error(err);
-            elements.phoneInput.focus();
+            console.error('خطأ في اختيار جهة الاتصال:', err);
+            if (elements.phoneInput) elements.phoneInput.focus();
             showNotification('⚠️ حدث خطأ في اختيار جهة الاتصال', 'error');
           } finally {
             setLoading(elements.pickContactBtn, false);
@@ -934,7 +921,10 @@
           };
         }
 
-        const code = templates[network](local, amount);
+        const templateFunc = templates[network];
+        if (!templateFunc) return null;
+        
+        const code = templateFunc(local, amount);
         return { 
           type: 'ussd', 
           url: 'tel:' + encodeURIComponent(code), 
@@ -948,7 +938,7 @@
 
     /********** History Manager **********/
     const historyManager = {
-      STORAGE_KEY: 'ban_cash_transactions_v2', // إصدار محسن
+      STORAGE_KEY: 'ban_cash_transactions_v2',
       
       load() {
         try {
@@ -973,7 +963,7 @@
         arr.unshift({
           ...item,
           id: Date.now(),
-          date: new Date().toLocaleString('ar-EG-u-ca-islamic', {
+          date: new Date().toLocaleString('ar-EG', {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit',
@@ -981,7 +971,7 @@
             minute: '2-digit'
           })
         });
-        if (arr.length > 1000) arr.pop(); // زيادة الحد الأقصى
+        if (arr.length > 1000) arr.pop();
         this.save(arr);
       },
       
@@ -1022,39 +1012,59 @@
       },
       
       show(obj) {
+        if (!elements.resultBox) return;
+        
         elements.resultBox.classList.remove('hidden');
         elements.resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         
         if (obj.type === 'instapay') {
-          elements.resultText.textContent = obj.web;
-          elements.openLinkBtn.href = obj.deep;
-          elements.openLinkBtn.setAttribute('data-fallback', obj.web);
+          if (elements.resultText) elements.resultText.textContent = obj.web;
+          if (elements.openLinkBtn) {
+            elements.openLinkBtn.href = obj.deep;
+            elements.openLinkBtn.setAttribute('data-fallback', obj.web);
+          }
         } else {
-          elements.resultText.textContent = obj.code;
-          elements.openLinkBtn.href = obj.url;
-          elements.openLinkBtn.removeAttribute('data-fallback');
+          if (elements.resultText) elements.resultText.textContent = obj.code;
+          if (elements.openLinkBtn) {
+            elements.openLinkBtn.href = obj.url;
+            elements.openLinkBtn.removeAttribute('data-fallback');
+          }
         }
         
-        elements.showNetwork.textContent = this.networkNames[selectedNetwork] || selectedNetwork;
-        elements.whatsappBtn.href = 'https://wa.me/' + obj.intl;
+        if (elements.showNetwork) {
+          elements.showNetwork.textContent = this.networkNames[selectedNetwork] || selectedNetwork;
+        }
+        if (elements.whatsappBtn) {
+          elements.whatsappBtn.href = 'https://wa.me/' + obj.intl;
+        }
         this.updateTotals();
       },
       
       updateTotals() {
         const arr = historyManager.load();
         const total = arr.filter(x => x.confirmed).reduce((s, x) => s + Number(x.amount || 0), 0);
-        elements.totalConfirmedSpan.textContent = total.toLocaleString('ar-EG');
-        elements.modalTotalConfirmed.textContent = total.toLocaleString('ar-EG');
+        const formattedTotal = total.toLocaleString('ar-EG');
+        
+        if (elements.totalConfirmedSpan) elements.totalConfirmedSpan.textContent = formattedTotal;
+        if (elements.modalTotalConfirmed) elements.modalTotalConfirmed.textContent = formattedTotal;
       }
     };
 
     /********** Main Actions **********/
     const actions = {
       init() {
-        elements.generateBtn.addEventListener('click', this.generate.bind(this));
-        elements.previewBtn.addEventListener('click', this.preview.bind(this));
-        elements.copyBtn.addEventListener('click', this.copy.bind(this));
-        elements.openLinkBtn.addEventListener('click', this.openLink.bind(this));
+        if (elements.generateBtn) {
+          elements.generateBtn.addEventListener('click', this.generate.bind(this));
+        }
+        if (elements.previewBtn) {
+          elements.previewBtn.addEventListener('click', this.preview.bind(this));
+        }
+        if (elements.copyBtn) {
+          elements.copyBtn.addEventListener('click', this.copy.bind(this));
+        }
+        if (elements.openLinkBtn) {
+          elements.openLinkBtn.addEventListener('click', this.openLink.bind(this));
+        }
       },
       
       async generate(e) {
@@ -1065,8 +1075,8 @@
         setLoading(elements.generateBtn, true);
         
         try {
-          const phone = elements.phoneInput.value.trim();
-          const amount = elements.amountInput.value.trim();
+          const phone = elements.phoneInput ? elements.phoneInput.value.trim() : '';
+          const amount = elements.amountInput ? elements.amountInput.value.trim() : '';
           const obj = codeGenerator.build(selectedNetwork, phone, amount);
           
           if (!obj) {
@@ -1074,7 +1084,6 @@
             return;
           }
 
-          // Add to history
           historyManager.add({
             number: phoneUtils.onlyDigits(phone),
             local: obj.local,
@@ -1087,7 +1096,6 @@
           resultDisplay.show(obj);
           showNotification('✅ تم توليد الكود بنجاح وحفظه في السجل');
 
-          // Auto-open مع تأخير للسماح للمستخدم برؤية النتيجة
           await new Promise(resolve => setTimeout(resolve, 1000));
           
           if (obj.type === 'instapay') {
@@ -1119,8 +1127,8 @@
         
         if (!inputValidator.validateForm()) return;
         
-        const phone = elements.phoneInput.value.trim();
-        const amount = elements.amountInput.value.trim();
+        const phone = elements.phoneInput ? elements.phoneInput.value.trim() : '';
+        const amount = elements.amountInput ? elements.amountInput.value.trim() : '';
         const obj = codeGenerator.build(selectedNetwork, phone, amount);
         
         if (!obj) {
@@ -1135,7 +1143,7 @@
       async copy(e) {
         e.preventDefault();
         
-        const txt = elements.resultText.textContent || '';
+        const txt = elements.resultText ? elements.resultText.textContent || '' : '';
         if (!txt) {
           showNotification('⚠️ لا يوجد كود للنسخ', 'error');
           return;
@@ -1143,17 +1151,20 @@
         
         try {
           await navigator.clipboard.writeText(txt);
-          elements.copyBtn.textContent = '✅ تم النسخ';
-          elements.copyBtn.style.background = 'var(--success)';
+          if (elements.copyBtn) {
+            elements.copyBtn.textContent = '✅ تم النسخ';
+            elements.copyBtn.style.background = 'var(--success)';
+          }
           showNotification('📋 تم نسخ الكود بنجاح');
           
           setTimeout(() => {
-            elements.copyBtn.textContent = '📋 نسخ';
-            elements.copyBtn.style.background = '#0ea5e9';
+            if (elements.copyBtn) {
+              elements.copyBtn.textContent = '📋 نسخ';
+              elements.copyBtn.style.background = '#0ea5e9';
+            }
           }, 2500);
         } catch (err) {
           console.error('خطأ في النسخ:', err);
-          // Fallback للمتصفحات القديمة
           try {
             const textArea = document.createElement('textarea');
             textArea.value = txt;
@@ -1169,16 +1180,16 @@
       },
       
       openLink(e) {
-        const fallback = elements.openLinkBtn.getAttribute('data-fallback');
-        if (!fallback) return true; // دع الرابط يُفتح طبيعياً
+        const fallback = elements.openLinkBtn ? elements.openLinkBtn.getAttribute('data-fallback') : null;
+        if (!fallback) return true;
         
         e.preventDefault();
-        const href = elements.openLinkBtn.href;
+        const href = elements.openLinkBtn ? elements.openLinkBtn.href : '';
         
         try {
           window.location.href = href;
           setTimeout(() => { 
-            if (!document.hidden) { // إذا لم يغادر المستخدم الصفحة
+            if (!document.hidden) {
               window.location.href = fallback; 
             }
           }, 1500);
@@ -1189,20 +1200,30 @@
       }
     };
 
-    /********** History Modal - محسن لدعم RTL **********/
+    /********** History Modal **********/
     const historyModal = {
       init() {
-        elements.historyBtn.addEventListener('click', this.open.bind(this));
-        elements.closeHistoryBtn.addEventListener('click', this.close.bind(this));
-        elements.clearHistoryBtn.addEventListener('click', this.clear.bind(this));
-        elements.downloadCsvBtn.addEventListener('click', this.download.bind(this));
+        if (elements.historyBtn) {
+          elements.historyBtn.addEventListener('click', this.open.bind(this));
+        }
+        if (elements.closeHistoryBtn) {
+          elements.closeHistoryBtn.addEventListener('click', this.close.bind(this));
+        }
+        if (elements.clearHistoryBtn) {
+          elements.clearHistoryBtn.addEventListener('click', this.clear.bind(this));
+        }
+        if (elements.downloadCsvBtn) {
+          elements.downloadCsvBtn.addEventListener('click', this.download.bind(this));
+        }
         
-        elements.historyBackdrop.addEventListener('click', (e) => {
-          if (e.target === elements.historyBackdrop) this.close();
-        });
+        if (elements.historyBackdrop) {
+          elements.historyBackdrop.addEventListener('click', (e) => {
+            if (e.target === elements.historyBackdrop) this.close();
+          });
+        }
         
         document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape' && elements.historyBackdrop.classList.contains('show')) {
+          if (e.key === 'Escape' && elements.historyBackdrop && elements.historyBackdrop.classList.contains('show')) {
             e.preventDefault();
             this.close();
           }
@@ -1211,129 +1232,126 @@
       
       open() {
         this.render();
-        elements.historyBackdrop.classList.add('show');
-        elements.closeHistoryBtn.focus(); // تحسين إمكانية الوصول
+        if (elements.historyBackdrop) elements.historyBackdrop.classList.add('show');
+        if (elements.closeHistoryBtn) elements.closeHistoryBtn.focus();
       },
       
       close() {
-        elements.historyBackdrop.classList.remove('show');
-        elements.historyBtn.focus(); // إعادة التركيز للزر الأصلي
+        if (elements.historyBackdrop) elements.historyBackdrop.classList.remove('show');
+        if (elements.historyBtn) elements.historyBtn.focus();
       },
       
       render() {
         const arr = historyManager.load();
-        elements.historyTbody.innerHTML = '';
+        if (elements.historyTbody) elements.historyTbody.innerHTML = '';
         
         if (!arr.length) {
-          elements.historyStats.innerHTML = '<p style="color: var(--text-muted);" class="text-center">📋 لا توجد معاملات محفوظة بعد.<br><small>ستظهر هنا المعاملات بعد إجراء أول تحويل</small></p>';
-          elements.modalTotalConfirmed.textContent = '0';
+          if (elements.historyStats) {
+            elements.historyStats.innerHTML = '<p style="color: var(--text-muted);" class="text-center">📋 لا توجد معاملات محفوظة بعد.<br><small>ستظهر هنا المعاملات بعد إجراء أول تحويل</small></p>';
+          }
+          if (elements.modalTotalConfirmed) elements.modalTotalConfirmed.textContent = '0';
           return;
         }
 
-        // Statistics with better Arabic formatting
         const totalAmount = arr.reduce((s, t) => s + Number(t.amount || 0), 0);
         const confirmedAmount = arr.filter(t => t.confirmed).reduce((s, t) => s + Number(t.amount || 0), 0);
         const totalCount = arr.length;
         const confirmedCount = arr.filter(t => t.confirmed).length;
 
-        elements.historyStats.innerHTML = `
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div class="text-rtl">
-              <div class="text-2xl font-bold" style="color: #0d9488;">${totalCount.toLocaleString('ar-EG')}</div>
-              <div class="text-sm">إجمالي العمليات</div>
+        if (elements.historyStats) {
+          elements.historyStats.innerHTML = `
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div class="text-rtl">
+                <div class="text-2xl font-bold" style="color: #0d9488;">${totalCount.toLocaleString('ar-EG')}</div>
+                <div class="text-sm">إجمالي العمليات</div>
+              </div>
+              <div class="text-rtl">
+                <div class="text-2xl font-bold" style="color: #0d9488;">${totalAmount.toLocaleString('ar-EG')}</div>
+                <div class="text-sm">إجمالي المبالغ (ج)</div>
+              </div>
+              <div class="text-rtl">
+                <div class="text-2xl font-bold" style="color: #059669;">${confirmedCount.toLocaleString('ar-EG')}</div>
+                <div class="text-sm">العمليات المؤكدة</div>
+              </div>
+              <div class="text-rtl">
+                <div class="text-2xl font-bold" style="color: #059669;">${confirmedAmount.toLocaleString('ar-EG')}</div>
+                <div class="text-sm">المبلغ المؤكد (ج)</div>
+              </div>
             </div>
-            <div class="text-rtl">
-              <div class="text-2xl font-bold" style="color: #0d9488;">${totalAmount.toLocaleString('ar-EG')}</div>
-              <div class="text-sm">إجمالي المبالغ (ج)</div>
-            </div>
-            <div class="text-rtl">
-              <div class="text-2xl font-bold" style="color: #059669;">${confirmedCount.toLocaleString('ar-EG')}</div>
-              <div class="text-sm">العمليات المؤكدة</div>
-            </div>
-            <div class="text-rtl">
-              <div class="text-2xl font-bold" style="color: #059669;">${confirmedAmount.toLocaleString('ar-EG')}</div>
-              <div class="text-sm">المبلغ المؤكد (ج)</div>
-            </div>
-          </div>
-        `;
-
-        // Render rows with better Arabic support
-        arr.forEach((t, idx) => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td style="white-space:nowrap; font-size: 13px; direction: rtl;">${t.date || '-'}</td>
-            <td style="font-weight: 600; direction: ltr; text-align: center;">${t.local || t.number || '-'}</td>
-            <td style="font-weight: 600; color: var(--primary); text-align: center;">${Number(t.amount || 0).toLocaleString('ar-EG')} ج</td>
-            <td class="text-center">${resultDisplay.networkNames[t.network] || t.network}</td>
-            <td class="text-center">
-              ${t.confirmed 
-                ? '<span class="badge confirmed">✓ مؤكد</span>' 
-                : '<span class="badge pending">⏳ في الانتظار</span>'
-              }
-            </td>
-            <td class="text-center">
-              ${!t.confirmed 
-                ? `<button type="button" data-idx="${idx}" class="confirm-row table-btn" style="background: var(--success); color: white; margin-left: 4px;" title="تأكيد المعاملة">✓</button>` 
-                : ''
-              }
-              <button type="button" data-del="${idx}" class="delete-row table-btn" style="background: #fee2e2; color: var(--danger);" title="حذف المعاملة">🗑️</button>
-            </td>
           `;
-          elements.historyTbody.appendChild(tr);
-        });
+        }
 
-        // Attach event handlers with improved UX
-        elements.historyTbody.querySelectorAll('.confirm-row').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const idx = Number(btn.getAttribute('data-idx'));
-            if (historyManager.confirm(idx)) {
-              this.render();
-              resultDisplay.updateTotals();
-              showNotification('✅ تم تأكيد المعاملة بنجاح');
-            }
+        if (elements.historyTbody) {
+          arr.forEach((t, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td style="white-space:nowrap; font-size: 13px; direction: rtl;">${t.date || '-'}</td>
+              <td style="font-weight: 600; direction: ltr; text-align: center;">${t.local || t.number || '-'}</td>
+              <td style="font-weight: 600; color: var(--primary); text-align: center;">${Number(t.amount || 0).toLocaleString('ar-EG')} ج</td>
+              <td class="text-center">${resultDisplay.networkNames[t.network] || t.network}</td>
+              <td class="text-center">
+                ${t.confirmed 
+                  ? '<span class="badge confirmed">✓ مؤكد</span>' 
+                  : '<span class="badge pending">⏳ في الانتظار</span>'
+                }
+              </td>
+              <td class="text-center">
+                ${!t.confirmed 
+                  ? `<button type="button" data-idx="${idx}" class="confirm-row table-btn" style="background: var(--success); color: white; margin-left: 4px;" title="تأكيد المعاملة">✓</button>` 
+                  : ''
+                }
+                <button type="button" data-del="${idx}" class="delete-row table-btn" style="background: #fee2e2; color: var(--danger);" title="حذف المعاملة">🗑️</button>
+              </td>
+            `;
+            elements.historyTbody.appendChild(tr);
           });
-        });
-        
-        elements.historyTbody.querySelectorAll('.delete-row').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            
-            const transaction = arr[Number(btn.getAttribute('data-del'))];
-            const confirmMsg = `⚠️ هل تريد حذف هذه المعاملة نهائياً؟
-` +
-                             `الرقم: ${transaction.local || transaction.number}
-` +
-                             `المبلغ: ${transaction.amount} جنيه
-` +
-                             `الشبكة: ${transaction.network}
-` +
-                             `لا يمكن التراجع عن هذا الإجراء.`;
-            
-            if (!confirm(confirmMsg)) return;
-            
-            const idx = Number(btn.getAttribute('data-del'));
-            if (historyManager.delete(idx)) {
-              this.render();
-              resultDisplay.updateTotals();
-              showNotification('🗑️ تم حذف المعاملة بنجاح');
-            }
-          });
-        });
 
-        elements.modalTotalConfirmed.textContent = confirmedAmount.toLocaleString('ar-EG');
+          elements.historyTbody.querySelectorAll('.confirm-row').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.preventDefault();
+              const idx = Number(btn.getAttribute('data-idx'));
+              if (historyManager.confirm(idx)) {
+                this.render();
+                resultDisplay.updateTotals();
+                showNotification('✅ تم تأكيد المعاملة بنجاح');
+              }
+            });
+          });
+          
+          elements.historyTbody.querySelectorAll('.delete-row').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.preventDefault();
+              
+              const transaction = arr[Number(btn.getAttribute('data-del'))];
+              const confirmMsg = `⚠️ هل تريد حذف هذه المعاملة نهائياً؟
+الرقم: ${transaction.local || transaction.number}
+المبلغ: ${transaction.amount} جنيه
+الشبكة: ${transaction.network}
+لا يمكن التراجع عن هذا الإجراء.`;
+              
+              if (!confirm(confirmMsg)) return;
+              
+              const idx = Number(btn.getAttribute('data-del'));
+              if (historyManager.delete(idx)) {
+                this.render();
+                resultDisplay.updateTotals();
+                showNotification('🗑️ تم حذف المعاملة بنجاح');
+              }
+            });
+          });
+        }
+
+        if (elements.modalTotalConfirmed) {
+          elements.modalTotalConfirmed.textContent = confirmedAmount.toLocaleString('ar-EG');
+        }
       },
       
       clear() {
         const confirmMsg = '⚠️ هل أنت متأكد من حذف جميع المعاملات؟
-' +
-                          '• سيتم حذف جميع البيانات نهائياً
-' +
-                          '• لن تتمكن من استرداد هذه البيانات
-' +
-                          '• سيتم إعادة تعيين الإجماليات إلى الصفر
-' +
-                          'هذا الإجراء لا يمكن التراجع عنه.';
+• سيتم حذف جميع البيانات نهائياً
+• لن تتمكن من استرداد هذه البيانات
+• سيتم إعادة تعيين الإجماليات إلى الصفر
+هذا الإجراء لا يمكن التراجع عنه.';
         
         if (!confirm(confirmMsg)) return;
         
@@ -1350,9 +1368,8 @@
           return;
         }
         
-        // إنشاء CSV مع دعم أفضل للعربية
         let csv = '\ufeffالتاريخ,رقم المستلم,المبلغ (جنيه),الشبكة,الحالة,تاريخ التأكيد
-'; // BOM للـ UTF-8
+';
         arr.forEach(t => {
           const confirmedDate = t.confirmed && t.confirmedAt ? 
             new Date(t.confirmedAt).toLocaleString('ar-EG') : 'لم يتم التأكيد';
@@ -1383,73 +1400,13 @@
       }
     };
 
-    /********** Keyboard Shortcuts - محسن للعربية **********/
-    const keyboardManager = {
-      init() {
-        document.addEventListener('keydown', (e) => {
-          // تجاهل الاختصارات عند الكتابة في الحقول
-          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-          
-          switch(e.key) {
-            case 'Enter':
-              if (!elements.historyBackdrop.classList.contains('show')) {
-                e.preventDefault();
-                elements.generateBtn.click();
-              }
-              break;
-              
-            case 'Escape':
-              if (elements.historyBackdrop.classList.contains('show')) {
-                e.preventDefault();
-                historyModal.close();
-              } else if (!elements.resultBox.classList.contains('hidden')) {
-                e.preventDefault();
-                elements.resultBox.classList.add('hidden');
-              }
-              break;
-              
-            case 'h':
-            case 'H':
-            case 'ه': // الحرف العربي
-              if (e.ctrlKey || e.metaKey) {
-                e.preventDefault();
-                historyModal.open();
-              }
-              break;
-              
-            case 'c':
-            case 'C':
-            case 'س': // الحرف العربي
-              if ((e.ctrlKey || e.metaKey) && !elements.resultBox.classList.contains('hidden')) {
-                e.preventDefault();
-                elements.copyBtn.click();
-              }
-              break;
-              
-            case 'p':
-            case 'P':
-            case 'ف': // الحرف العربي  
-              if (e.ctrlKey || e.metaKey) {
-                e.preventDefault();
-                elements.previewBtn.click();
-              }
-              break;
-          }
-        });
-      }
-    };
-
     /********** Service Worker **********/
     const serviceWorkerManager = {
       init() {
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.register('/Ban/firebase-messaging-sw.js')
-            .then(registration => {
-              console.log('✅ تم تسجيل Service Worker بنجاح');
-            })
-            .catch(err => {
-              console.log('❌ فشل في تسجيل Service Worker:', err);
-            });
+            .then(() => console.log('✅ تم تسجيل Service Worker بنجاح'))
+            .catch(err => console.log('❌ فشل في تسجيل Service Worker:', err));
         }
       }
     };
@@ -1458,36 +1415,25 @@
     const app = {
       init() {
         try {
-          // Initialize all modules
           themeManager.init();
           networkManager.init();
           inputValidator.init();
           contactPicker.init();
           actions.init();
           historyModal.init();
-          keyboardManager.init();
           serviceWorkerManager.init();
           
-          // Update display
           resultDisplay.updateTotals();
           
-          // Focus phone input with delay
           setTimeout(() => {
-            if (elements.phoneInput) {
-              elements.phoneInput.focus();
-            }
+            if (elements.phoneInput) elements.phoneInput.focus();
           }, 300);
           
-          // تحسين إمكانية الوصول
           document.documentElement.setAttribute('lang', 'ar');
           document.documentElement.setAttribute('dir', 'rtl');
           
-          // إضافة معلومات المطور
           console.log('✅ تطبيق مولد أكواد الكاش جاهز للاستخدام');
-          console.log('🔧 تطوير: بان للإعلانات');
-          console.log('📱 دعم RTL والعربية: مُفعّل');
           
-          // إظهار رسالة ترحيب
           setTimeout(() => {
             showNotification('🎉 مرحباً بك في مولد أكواد تحويل الكاش');
           }, 1000);
@@ -1499,7 +1445,7 @@
       }
     };
 
-    // بدء التطبيق عند تحميل DOM
+    // بدء التطبيق
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', app.init);
     } else {
@@ -1512,7 +1458,6 @@
       showNotification('⚠️ حدث خطأ غير متوقع', 'error');
     });
 
-    // معالجة رفض Promise
     window.addEventListener('unhandledrejection', (e) => {
       console.error('Promise مرفوض:', e.reason);
       e.preventDefault();
