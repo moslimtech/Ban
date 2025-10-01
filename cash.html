@@ -8,249 +8,469 @@
   <link rel="icon" href="/Ban/icons/icon-192.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { font-family: 'Tajawal', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+    body { font-family: 'Tajawal', system-ui, -apple-system, 'Segoe UI', Roboto, Arial; }
     .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(6px); }
     .btn-anim { transition: transform .12s ease, box-shadow .12s ease; }
     .btn-anim:active { transform: translateY(2px) scale(.995); }
+    /* modal */
+    .modal-backdrop { position: fixed; inset:0; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:60; }
+    .modal-card { width:95%; max-width:760px; max-height:85vh; overflow:auto; border-radius:12px; padding:16px; background:var(--card-bg); }
+    /* light/dark colors with CSS variables */
+    :root {
+      --bg: linear-gradient(180deg,#f0f9ff,#ecfdf5);
+      --card-bg: rgba(255,255,255,0.85);
+      --text: #0f172a;
+      --muted: #475569;
+    }
+    .dark {
+      --bg: linear-gradient(180deg,#0f172a,#052f2f);
+      --card-bg: rgba(2,6,23,0.7);
+      --text: #e6eef0;
+      --muted: #94a3b8;
+    }
+    body { background: var(--bg); color: var(--text); }
+    .muted { color: var(--muted); }
+    .chip { display:inline-flex; gap:8px; align-items:center; padding:8px 10px; border-radius:10px; background: rgba(0,0,0,0.04); }
+    .network-active { background: rgba(34,197,94,0.12); border-color: rgba(34,197,94,0.25); }
+    pre.code { background: rgba(0,0,0,0.03); padding:8px; border-radius:8px; overflow:auto; }
   </style>
 
-  <!-- load manifest according to user language -->
+  <!-- manifest by language -->
   <script>
-    const userLang = navigator.language || navigator.userLanguage;
+    const userLang = navigator.language || navigator.userLanguage || 'ar';
     const manifest = document.createElement('link');
     manifest.rel = 'manifest';
-
-    if (userLang && userLang.startsWith && userLang.startsWith('ar')) {
-      manifest.href = '/Ban/manifest-ar.json?v=1';
-    } else {
-      manifest.href = '/Ban/manifest-en.json?v=1';
-    }
-
+    if (userLang.startsWith('ar')) manifest.href = '/Ban/manifest-ar.json?v=1';
+    else manifest.href = '/Ban/manifest-en.json?v=1';
     document.head.appendChild(manifest);
   </script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-sky-50 via-white to-emerald-50 flex items-center justify-center p-6">
+<body class="min-h-screen flex items-center justify-center p-6">
   <div class="max-w-3xl w-full">
-    <header class="flex items-center justify-between mb-6">
+    <header class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-4">
-        <img src="https://moslimtech.github.io/Ban/icons/icon-192.png" alt="logo" class="w-14 h-14 rounded-lg shadow" />
+        <img src="https://moslimtech.github.io/Ban/icons/icon-192.png" alt="logo" class="w-12 h-12 rounded-lg shadow" />
         <div>
-          <h1 class="text-xl font-bold">مولّد أكواد تحويل الكاش – بان للإعلانات</h1>
-          <p class="text-sm text-slate-600 mt-0.5">سهل • سريع • يفتح تطبيق التحويل مباشرة</p>
+          <h1 class="text-lg font-bold">مولّد أكواد تحويل الكاش – بان للإعلانات</h1>
+          <p class="text-sm muted">سهل • سريع • يفتح التطبيق أو الكود مباشرة</p>
         </div>
       </div>
-      <a href="https://moslimtech.github.io/Ban/" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow btn-anim hover:shadow-md">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M7.707 14.707a1 1 0 01-1.414 0L2.586 11l3.707-3.707a1 1 0 011.414 1.414L5.414 11l2.293 2.293a1 1 0 010 1.414zM13 5a1 1 0 100 2h.01A5.002 5.002 0 0118 12a1 1 0 102 0 7.002 7.002 0 00-7-7H13z" clip-rule="evenodd" />
-        </svg>
-        الرجوع
-      </a>
+
+      <div class="flex items-center gap-2">
+        <button id="themeToggle" class="px-3 py-2 rounded-lg border btn-anim">🌗 وضع</button>
+        <a href="https://moslimtech.github.io/Ban/" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow btn-anim hover:shadow-md">🔙 الرجوع</a>
+      </div>
     </header>
 
-    <main class="glass p-6 rounded-2xl shadow-lg">
+    <main class="modal-card glass p-5">
       <form id="cashForm" class="space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
           <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-slate-700 mb-1">رقم المستلم</label>
+            <label class="block text-sm font-medium muted mb-1">رقم المستلم</label>
             <div class="flex gap-2">
-              <input id="phoneInput" type="tel" inputmode="tel" placeholder="اختر من جهات الاتصال أو اكتب الرقم" class="flex-1 px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-sky-300" />
-              <button type="button" id="pickContactBtn" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-600 text-white btn-anim hover:bg-sky-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M8 9a3 3 0 100-6 3 3 0 000 6z"/><path fill-rule="evenodd" d="M2 13a6 6 0 1112 0v1H2v-1z" clip-rule="evenodd"/></svg>
-               
-              </button>
+              <input id="phoneInput" type="tel" inputmode="tel" placeholder="اختر جهة اتصال أو اكتب الرقم (مثال: 0100... أو 2010...)" class="flex-1 px-3 py-2 rounded-lg border focus:outline-none" />
+              <button type="button" id="pickContactBtn" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-600 text-white btn-anim hover:bg-sky-700">📇 اختيار</button>
             </div>
+            <p class="text-xs muted mt-1">يمكن اختيار جهة الاتصال لو كان المتصفح/PWA يدعم ذلك. عند التحويل سيزال مفتاح الدولة تلقائياً.</p>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">المبلغ (جنيه)</label>
-            <input id="amountInput" type="number" min="1" placeholder="25" class="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-emerald-300" />
+            <label class="block text-sm font-medium muted mb-1">المبلغ (جنيه)</label>
+            <input id="amountInput" type="number" min="1" placeholder="25" class="w-full px-3 py-2 rounded-lg border focus:outline-none" />
           </div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-2">اختر الشبكة</label>
+          <label class="block text-sm font-medium muted mb-2">اختر الشبكة</label>
           <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <button type="button" data-net="vodafone" class="network-btn px-3 py-2 rounded-lg border bg-white hover:shadow-md">فودافون</button>
-            <button type="button" data-net="etisalat" class="network-btn px-3 py-2 rounded-lg border bg-white hover:shadow-md">اتصالات</button>
-            <button type="button" data-net="orange" class="network-btn px-3 py-2 rounded-lg border bg-white hover:shadow-md">اورانج</button>
-            <button type="button" data-net="we" class="network-btn px-3 py-2 rounded-lg border bg-white hover:shadow-md">وي</button>
-            <button type="button" data-net="instapay" class="network-btn px-3 py-2 rounded-lg border bg-white hover:shadow-md">إنستاباي</button>
+            <button type="button" data-net="vodafone" class="network-btn px-3 py-2 rounded-lg border bg-white">فودافون</button>
+            <button type="button" data-net="etisalat" class="network-btn px-3 py-2 rounded-lg border bg-white">اتصالات</button>
+            <button type="button" data-net="orange" class="network-btn px-3 py-2 rounded-lg border bg-white">اورانج</button>
+            <button type="button" data-net="we" class="network-btn px-3 py-2 rounded-lg border bg-white">وي</button>
+            <button type="button" data-net="instapay" class="network-btn px-3 py-2 rounded-lg border bg-white">إنستاباي</button>
           </div>
         </div>
 
         <div class="flex items-center gap-3">
           <button id="generateBtn" type="button" class="ml-auto px-4 py-2 rounded-xl bg-emerald-500 text-white font-semibold shadow-lg btn-anim hover:bg-emerald-600">🔁 تحويل الآن</button>
-          <button id="previewBtn" type="button" class="px-4 py-2 rounded-xl bg-white border font-medium btn-anim hover:shadow">👁️ معاينة الكود</button>
+          <button id="previewBtn" type="button" class="px-4 py-2 rounded-xl bg-white border font-medium btn-anim hover:shadow">👁️ معاينة</button>
+          <button id="historyBtn" type="button" class="px-4 py-2 rounded-xl bg-amber-500 text-white btn-anim hover:bg-amber-600">📜 المعاملات السابقة</button>
         </div>
 
         <div id="resultBox" class="mt-4 hidden p-4 rounded-lg bg-white border">
-          <p class="text-sm text-slate-700">تم توليد الرابط/الكود — اضغط "تحويل الآن" لفتحه مباشرة على جهازك أو انسخ الكود:</p>
-          <pre id="resultText" class="mt-2 bg-slate-50 p-3 rounded text-sm overflow-auto"></pre>
-          <div class="mt-3 flex gap-2">
-            <button id="copyBtn" class="px-3 py-2 rounded bg-sky-600 text-white">نسخ</button>
-            <a id="openLinkBtn" class="px-3 py-2 rounded bg-emerald-500 text-white" href="#" target="_blank" rel="noopener">فتح</a>
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-sm muted">تم توليد الرابط/الكود — افتح التطبيق أو انسخ الكود:</p>
+              <pre id="resultText" class="code mt-2 text-sm"></pre>
+              <div class="mt-3 flex gap-2">
+                <button id="copyBtn" class="px-3 py-2 rounded bg-sky-600 text-white">نسخ</button>
+                <a id="openLinkBtn" class="px-3 py-2 rounded bg-emerald-500 text-white" href="#" target="_blank" rel="noopener">فتح</a>
+                <a id="whatsappBtn" class="px-3 py-2 rounded bg-green-600 text-white" href="#" target="_blank" rel="noopener">💬 واتساب</a>
+              </div>
+            </div>
+            <div class="text-sm muted text-right">
+              <div>الشبكة: <span id="showNetwork">-</span></div>
+              <div class="mt-2">الإجمالي المؤكد: <strong id="totalConfirmed">0</strong> ج</div>
+            </div>
           </div>
         </div>
 
       </form>
-
-      <p class="mt-5 text-xs text-slate-600">ملاحظة: قد لا يعمل اختيار جهات الاتصال , يمكنك إدخال الرقم يدويًا.</p>
     </main>
 
-    <footer class="mt-6 text-center text-xs text-slate-500">© بان للإعلانات</footer>
+    <footer class="mt-4 text-center text-xs muted">© بان للإعلانات</footer>
+  </div>
+
+  <!-- modal for history -->
+  <div id="historyModal" class="hidden">
+    <div class="modal-backdrop" id="historyBackdrop" style="display:none;">
+      <div class="modal-card" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold">📜 المعاملات السابقة</h3>
+          <div class="flex gap-2">
+            <button id="clearHistoryBtn" class="px-3 py-1 rounded bg-red-500 text-white">🗑️ مسح الكل</button>
+            <button id="closeHistoryBtn" class="px-3 py-1 rounded bg-gray-200">إغلاق</button>
+          </div>
+        </div>
+
+        <div id="historyContent" style="max-height:60vh; overflow:auto;">
+          <!-- list populated by JS -->
+        </div>
+
+        <div class="mt-3 text-right">
+          <strong>إجمالي المؤكد: <span id="modalTotal">0</span> ج</strong>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
-    // Configuration: templates for USSD / deep links
+    /********** Configuration **********/
     const templates = {
-      vodafone: (phone, amount) => `*9*7*${phone}*${amount}#`,
-      etisalat: (phone, amount) => `*777*${phone}*${amount}#`,
-      orange: (phone, amount) => `*115*1*${phone}*${amount}#`,
-      we: (phone, amount) => `*322*${phone}*${amount}#`,
-      // instapay uses your provided ipn link (web) and appends params (if needed)
-      instapay: (phone, amount) => `https://ipn.eg/S/ibrahimmabroukeldeeb/instapay/4ZCmRA?recipient=${phone}&amount=${amount}`
+      vodafone: (localPhone, amount) => `*9*7*${localPhone}*${amount}#`,
+      etisalat: (localPhone, amount) => `*777*${localPhone}*${amount}#`,
+      orange: (localPhone, amount) => `*115*1*${localPhone}*${amount}#`,
+      we: (localPhone, amount) => `*322*${localPhone}*${amount}#`,
+      // instapay deep link (attempt) and web fallback; web base removed specific username
+      instapayDeep: (phone, amount) => `instapay://pay?recipient=${phone}&amount=${amount}`,
+      instapayWeb: (phone, amount) => `https://ipn.eg/S/instapay?recipient=${phone}&amount=${amount}`
     };
 
-    // Elements
-    const pickContactBtn = document.getElementById('pickContactBtn');
+    /********** Elements **********/
     const phoneInput = document.getElementById('phoneInput');
     const amountInput = document.getElementById('amountInput');
     const networkButtons = document.querySelectorAll('.network-btn');
     const generateBtn = document.getElementById('generateBtn');
     const previewBtn = document.getElementById('previewBtn');
+    const historyBtn = document.getElementById('historyBtn');
     const resultBox = document.getElementById('resultBox');
     const resultText = document.getElementById('resultText');
     const copyBtn = document.getElementById('copyBtn');
     const openLinkBtn = document.getElementById('openLinkBtn');
+    const whatsappBtn = document.getElementById('whatsappBtn');
+    const showNetwork = document.getElementById('showNetwork');
+    const totalConfirmedSpan = document.getElementById('totalConfirmed');
+
+    const pickContactBtn = document.getElementById('pickContactBtn');
+    const historyModal = document.getElementById('historyModal');
+    const historyBackdrop = document.getElementById('historyBackdrop');
+    const historyContent = document.getElementById('historyContent');
+    const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    const modalTotal = document.getElementById('modalTotal');
+    const themeToggle = document.getElementById('themeToggle');
 
     let selectedNetwork = 'vodafone';
 
-    // select default network visual
-    function markSelected() {
-      networkButtons.forEach(b => {
-        if (b.dataset.net === selectedNetwork) {
-          b.classList.add('bg-emerald-50', 'border-emerald-300');
-        } else {
-          b.classList.remove('bg-emerald-50', 'border-emerald-300');
-        }
-      });
+    /********** Theme (light/dark) **********/
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    function applyTheme(t) {
+      if (t === 'dark') document.documentElement.classList.add('dark'), localStorage.setItem('theme','dark');
+      else document.documentElement.classList.remove('dark'), localStorage.setItem('theme','light');
     }
-    markSelected();
-
-    networkButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        selectedNetwork = btn.dataset.net;
-        markSelected();
-      });
+    const saved = localStorage.getItem('theme') || (prefersDark ? 'dark' : 'light');
+    applyTheme(saved);
+    themeToggle.textContent = saved === 'dark' ? '☀️ وضع فاتح' : '🌙 وضع داكن';
+    themeToggle.addEventListener('click', () => {
+      const now = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+      applyTheme(now);
+      themeToggle.textContent = now === 'dark' ? '☀️ وضع فاتح' : '🌙 وضع داكن';
     });
 
-    // Contact picker (only available in some browsers / PWA)
+    /********** Network selection visuals **********/
+    function markSelected() {
+      networkButtons.forEach(b => {
+        if (b.dataset.net === selectedNetwork) b.classList.add('network-active');
+        else b.classList.remove('network-active');
+      });
+    }
+    networkButtons.forEach(btn => btn.addEventListener('click', () => { selectedNetwork = btn.dataset.net; markSelected(); }));
+    markSelected();
+
+    /********** Contact picker (best-effort) **********/
     pickContactBtn.addEventListener('click', async () => {
       try {
-        // New Contacts API (experimental) - Chrome on Android (PWA) supports it behind flags in some versions
         if (navigator.contacts && navigator.contacts.select) {
-          const props = ['tel', 'name'];
-          const opts = { multiple: false };
+          const props = ['tel','name'];
+          const opts = { multiple:false };
           const contacts = await navigator.contacts.select(props, opts);
           if (contacts && contacts.length) {
             const tel = (contacts[0].tel && contacts[0].tel[0]) || '';
-            phoneInput.value = tel.replace(/\s|\-/g, '');
+            phoneInput.value = tel.replace(/\s|-|\(|\)/g,'');
             return;
           }
         }
-
-        // Fallback: try generic contact picker or notify user
         phoneInput.focus();
-        alert('جاري محاولة فتح جهات الاتصال... إذا لم يعمل المتصفح الخاص بك، الرجاء إدخال الرقم يدوياً.');
-      } catch (e) {
+        alert('إذا لم يعمل اختيار جهات الاتصال في متصفحك، الرجاء لصق أو كتابة الرقم يدوياً.');
+      } catch(e) {
         console.error(e);
         phoneInput.focus();
-        alert('حدث خطأ أثناء محاولة الوصول إلى جهات الاتصال. الرجاء إدخال الرقم يدوياً.');
+        alert('حدث خطأ أثناء الوصول لجهات الاتصال — الرجاء إدخال الرقم يدوياً.');
       }
     });
 
-    // Utility: clean phone number (remove non-digits)
-    function cleanPhone(p) {
-      if (!p) return '';
-      return p.replace(/[^0-9]/g, '');
+    /********** Helpers: clean and convert numbers **********/
+    function onlyDigits(s=''){ return String(s||'').replace(/[^0-9]/g,''); }
+    function toLocal(cleaned) {
+      // Remove country code for Egypt if present (20 or 2)
+      if (!cleaned) return '';
+      if (cleaned.startsWith('20')) return '0' + cleaned.slice(2); // 2010... -> 010...
+      if (cleaned.startsWith('2') && cleaned.length===11) return '0' + cleaned.slice(1); // 2010xxxx -> fallback
+      // If already local starting with 0, keep
+      if (cleaned.startsWith('0')) return cleaned;
+      // If starts with country-less local without 0 and length 9 -> add 0
+      if (cleaned.length === 9) return '0' + cleaned;
+      return cleaned;
+    }
+    function toInternational(cleaned) {
+      // produce wa.me style (no +) eg for Egypt -> 2XXXXXXXXXX
+      if (!cleaned) return '';
+      if (cleaned.startsWith('0')) return '2' + cleaned.slice(1);
+      if (cleaned.startsWith('20')) return cleaned; // already 20...
+      if (cleaned.startsWith('2') && cleaned.length>2) return cleaned; // already with 2
+      // fallback: return cleaned
+      return cleaned;
     }
 
-    function buildAction(network, phone, amount) {
-      const cleaned = cleanPhone(phone);
-      if (!cleaned) return null;
-      if (!amount || Number(amount) <= 0) return null;
+    /********** Build action links **********/
+    function buildActionLink(network, phoneRaw, amountRaw) {
+      const cleaned = onlyDigits(phoneRaw);
+      const amount = Number(amountRaw) || 0;
+      if (!cleaned || amount <= 0) return null;
+
+      const local = toLocal(cleaned);       // used for USSD codes (local with leading 0)
+      const intl = toInternational(cleaned); // used for whatsapp and instapay recipient param
 
       if (network === 'instapay') {
-        return templates.instapay(cleaned, amount);
+        // we'll attempt deep link first, actual handler tries deep then fallback to web
+        return { type:'instapay', deep: templates.instapayDeep(intl, amount), web: templates.instapayWeb(intl, amount), local, intl, amount };
       }
 
-      const code = templates[network](cleaned, amount);
-      return 'tel:' + encodeURIComponent(code);
+      // USSD codes
+      const code = templates[network](local, amount);
+      // tel:encoded for dialing USSD (keeps '#')
+      return { type:'ussd', url: 'tel:' + encodeURIComponent(code), code: code, local, intl, amount };
     }
 
-    // Generate and open
+    /********** History (localStorage) **********/
+    const STORAGE_KEY = 'ban_cash_transactions_v1';
+
+    function loadHistory() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+      catch(e){ return []; }
+    }
+    function saveHistory(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
+    function addHistoryItem(item) {
+      const arr = loadHistory();
+      arr.unshift(item); // newest first
+      // keep reasonable length
+      if (arr.length > 200) arr.pop();
+      saveHistory(arr);
+    }
+    function updateHistoryItem(index, patch) {
+      const arr = loadHistory();
+      if (!arr[index]) return;
+      Object.assign(arr[index], patch);
+      saveHistory(arr);
+    }
+    function clearHistory() { localStorage.removeItem(STORAGE_KEY); }
+
+    /********** UI: show preview & open **********/
+    function showResult(obj) {
+      resultBox.classList.remove('hidden');
+      if (obj.type === 'instapay') {
+        resultText.textContent = obj.web;
+        openLinkBtn.href = obj.deep; // we try deep first
+        openLinkBtn.setAttribute('data-fallback', obj.web);
+        showNetwork.textContent = 'إنستاباي';
+      } else {
+        resultText.textContent = obj.code;
+        openLinkBtn.href = obj.url;
+        openLinkBtn.removeAttribute('data-fallback');
+        showNetwork.textContent = (selectedNetwork === 'vodafone' ? 'فودافون' : selectedNetwork === 'etisalat' ? 'اتصالات' : selectedNetwork === 'orange' ? 'اورانج' : 'وي');
+      }
+      // whatsapp link (use intl)
+      const wa = 'https://wa.me/' + obj.intl;
+      whatsappBtn.href = wa;
+      // update confirmed total display
+      updateTotalsDisplay();
+    }
+
     generateBtn.addEventListener('click', () => {
       const phone = phoneInput.value.trim();
       const amount = amountInput.value.trim();
-      const link = buildAction(selectedNetwork, phone, amount);
-      if (!link) {
-        alert('من فضلك تأكد من إدخال رقم صالح والمبلغ.');
-        return;
-      }
+      const obj = buildActionLink(selectedNetwork, phone, amount);
+      if (!obj) { alert('من فضلك تأكد من إدخال رقم صالح والمبلغ.'); return; }
 
-      // Show preview (show actual USSD code for copy, or full instapay URL)
-      resultBox.classList.remove('hidden');
-      resultText.textContent = selectedNetwork === 'instapay' ? link : decodeURIComponent(link.replace(/^tel:/, ''));
-      openLinkBtn.href = link;
+      // Save to history with confirmed=false initially
+      const now = new Date();
+      addHistoryItem({ phone: onlyDigits(phone), local: obj.local, intl: obj.intl, amount: obj.amount, network: selectedNetwork, date: now.toISOString(), confirmed: false });
+      showResult(obj);
 
-      // Try to open directly
-      try {
-        if (selectedNetwork === 'instapay') {
-          window.location.href = link;
-          return;
-        }
-        window.location.href = link;
-      } catch (e) {
-        console.error(e);
+      // Try to open automatically:
+      if (obj.type === 'instapay') {
+        // try deep link first, fallback to web after 1.2s
+        try {
+          window.location.href = obj.deep;
+        } catch(_) {}
+        setTimeout(() => { window.location.href = obj.web; }, 1200);
+      } else {
+        // Open USSD directly
+        try { window.location.href = obj.url; }
+        catch(e){ console.error(e); }
       }
+    });
+
+    // Open button: try deep then fallback if data-fallback exists
+    openLinkBtn.addEventListener('click', (e) => {
+      const href = openLinkBtn.href;
+      const fallback = openLinkBtn.getAttribute('data-fallback');
+      if (!fallback) return; // normal open
+      e.preventDefault();
+      try { window.location.href = href; } catch(e){ console.error(e); }
+      // fallback after small delay
+      setTimeout(() => { window.location.href = fallback; }, 1200);
     });
 
     previewBtn.addEventListener('click', () => {
       const phone = phoneInput.value.trim();
       const amount = amountInput.value.trim();
-      const link = buildAction(selectedNetwork, phone, amount);
-      if (!link) {
-        alert('من فضلك تأكد من إدخال رقم صالح والمبلغ.');
-        return;
-      }
-      resultBox.classList.remove('hidden');
-      resultText.textContent = selectedNetwork === 'instapay' ? link : decodeURIComponent(link.replace(/^tel:/, ''));
-      openLinkBtn.href = link;
+      const obj = buildActionLink(selectedNetwork, phone, amount);
+      if (!obj) { alert('من فضلك تأكد من إدخال رقم صالح والمبلغ.'); return; }
+      showResult(obj);
     });
 
     copyBtn.addEventListener('click', async () => {
-      const txt = resultText.textContent;
+      const txt = resultText.textContent || '';
       try {
         await navigator.clipboard.writeText(txt);
         copyBtn.textContent = 'تم النسخ ✓';
         setTimeout(() => copyBtn.textContent = 'نسخ', 1500);
       } catch (e) {
-        alert('لم نتمكن من نسخ النص. انسخه يدويًا من المربع.');
+        alert('نسخ غير مدعوم. انسخ النص يدويًا.');
       }
     });
 
-    // prevent form submit
-    document.getElementById('cashForm').addEventListener('submit', (e) => e.preventDefault());
+    /********** History modal UI **********/
+    historyBtn.addEventListener('click', () => {
+      renderHistory();
+      historyBackdrop.style.display = 'flex';
+    });
+    closeHistoryBtn.addEventListener('click', () => { historyBackdrop.style.display = 'none'; });
+    clearHistoryBtn.addEventListener('click', () => {
+      if (!confirm('هل متأكد من مسح كل المعاملات؟')) return;
+      clearHistory();
+      renderHistory();
+      updateTotalsDisplay();
+    });
 
-    // default amount
-    amountInput.value = 25;
+    function renderHistory() {
+      const arr = loadHistory();
+      if (!arr.length) {
+        historyContent.innerHTML = '<p class="muted">لا توجد معاملات محفوظة بعد.</p>';
+        modalTotal.textContent = '0';
+        return;
+      }
+      let html = '<div class="space-y-2">';
+      arr.forEach((t, i) => {
+        const dt = new Date(t.date).toLocaleString();
+        html += `
+          <div class="p-3 rounded border flex items-center justify-between">
+            <div>
+              <div class="text-sm"><strong>${t.amount} ج</strong> — ${t.network}</div>
+              <div class="text-xs muted">${t.local || t.phone} — ${dt}</div>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+              <div>
+                ${t.confirmed ? '<span class="px-2 py-1 rounded bg-green-100">✔️ تم التأكيد</span>' : '<button data-index="${i}" class="confirm-btn px-3 py-1 rounded bg-emerald-500 text-white">تأكيد</button>'}
+              </div>
+              <div>
+                <button data-del="${i}" class="del-btn px-3 py-1 rounded bg-red-100">حذف</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      historyContent.innerHTML = html;
 
-    // Register Service Worker for PWA and Firebase Messaging
+      // attach confirm and delete handlers
+      historyContent.querySelectorAll('.confirm-btn').forEach(b => {
+        b.addEventListener('click', (e) => {
+          const idx = Number(b.getAttribute('data-index'));
+          confirmTransaction(idx);
+        });
+      });
+      historyContent.querySelectorAll('.del-btn').forEach(b => {
+        b.addEventListener('click', (e) => {
+          const idx = Number(b.getAttribute('data-del'));
+          deleteTransaction(idx);
+        });
+      });
+
+      // compute modal total
+      const total = arr.filter(x => x.confirmed).reduce((s,x)=>s+Number(x.amount),0);
+      modalTotal.textContent = total;
+    }
+
+    function confirmTransaction(index) {
+      const arr = loadHistory();
+      if (!arr[index]) return;
+      arr[index].confirmed = true;
+      saveHistory(arr);
+      renderHistory();
+      updateTotalsDisplay();
+    }
+
+    function deleteTransaction(index) {
+      let arr = loadHistory();
+      if (!arr[index]) return;
+      if (!confirm('مسح هذه المعاملة؟')) return;
+      arr.splice(index,1);
+      saveHistory(arr);
+      renderHistory();
+      updateTotalsDisplay();
+    }
+
+    function updateTotalsDisplay() {
+      const arr = loadHistory();
+      const total = arr.filter(x => x.confirmed).reduce((s,x)=>s+Number(x.amount),0);
+      totalConfirmedSpan.textContent = total;
+      modalTotal.textContent = total;
+    }
+
+    // initial totals
+    updateTotalsDisplay();
+
+    /********** Register Service Worker (PWA) **********/
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/Ban/firebase-messaging-sw.js')
         .then(() => console.log('✅ Firebase Messaging SW Registered'))
         .catch(err => console.log('❌ SW registration failed:', err));
     }
+
+    // default amount
+    amountInput.value = 25;
   </script>
 </body>
 </html>
