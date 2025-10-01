@@ -81,7 +81,7 @@
     let selectedNetwork = 'vodafone';
   </script>
 
-    /********** Templates & Phone Utilities **********/
+    <!-- /********** Templates & Phone Utilities **********/
     const templates = {
       vodafone: (localPhone, amount) => `*9*7*${localPhone}*${amount}#`,
       etisalat: (localPhone, amount) => `*777*${localPhone}*${amount}#`,
@@ -461,7 +461,7 @@
     window.addEventListener('unhandledrejection', (e) => {
       console.error('Promise مرفوض:', e.reason);
       e.preventDefault();
-    });
+    }); -->
   </script>
 </body>
 </html>
