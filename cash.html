@@ -58,8 +58,8 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <button id="themeToggle" class="px-3 py-2 rounded-lg border btn-anim">🌗 وضع</button>
-        <a href="https://moslimtech.github.io/Ban/" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow btn-anim hover:shadow-md">🔙 الرجوع</a>
+        <button id="themeToggle" class="px-3 py-2 rounded-lg border btn-anim">🌗</button>
+        <a href="https://moslimtech.github.io/Ban/" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow btn-anim hover:shadow-md">📢</a>
       </div>
     </header>
 
@@ -70,10 +70,7 @@
             <label class="block text-sm font-medium muted mb-1">رقم المستلم</label>
             <div class="flex gap-2">
               <input id="phoneInput" type="tel" inputmode="tel" placeholder="اختر جهة اتصال أو اكتب الرقم (مثال: 0100... أو 2010...)" class="flex-1 px-3 py-2 rounded-lg border focus:outline-none" />
-              <button type="button" id="pickContactBtn" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-600 text-white btn-anim hover:bg-sky-700">📇 اختيار</button>
-            </div>
-            <p class="text-xs muted mt-1">يمكن اختيار جهة الاتصال لو كان المتصفح/PWA يدعم ذلك. عند التحويل سيزال مفتاح الدولة تلقائياً.</p>
-          </div>
+              <button type="button" id="pickContactBtn" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-600 text-white btn-anim hover:bg-sky-700">👤</button
 
           <div>
             <label class="block text-sm font-medium muted mb-1">المبلغ (جنيه)</label>
@@ -93,7 +90,7 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <button id="generateBtn" type="button" class="ml-auto px-4 py-2 rounded-xl bg-emerald-500 text-white font-semibold shadow-lg btn-anim hover:bg-emerald-600">🔁 تحويل الآن</button>
+          <button id="generateBtn" type="button" class="ml-auto px-4 py-2 rounded-xl bg-emerald-500 text-white font-semibold shadow-lg btn-anim hover:bg-emerald-600">⛳ تحويل</button>
           <button id="previewBtn" type="button" class="px-4 py-2 rounded-xl bg-white border font-medium btn-anim hover:shadow">👁️ معاينة</button>
           <button id="historyBtn" type="button" class="px-4 py-2 rounded-xl bg-amber-500 text-white btn-anim hover:bg-amber-600">📜 المعاملات السابقة</button>
         </div>
@@ -106,7 +103,7 @@
               <div class="mt-3 flex gap-2">
                 <button id="copyBtn" class="px-3 py-2 rounded bg-sky-600 text-white">نسخ</button>
                 <a id="openLinkBtn" class="px-3 py-2 rounded bg-emerald-500 text-white" href="#" target="_blank" rel="noopener">فتح</a>
-                <a id="whatsappBtn" class="px-3 py-2 rounded bg-green-600 text-white" href="#" target="_blank" rel="noopener">💬 واتساب</a>
+                <a id="whatsappBtn" class="px-3 py-2 rounded bg-green-600 text-white" href="#" target="_blank" rel="noopener">واتساب</a>
               </div>
             </div>
             <div class="text-sm muted text-right">
@@ -141,7 +138,7 @@
           <thead>
             <tr>
               <th>📅 التاريخ</th>
-              <th>📱 رقم المستلم</th>
+              <th>📱 الرقم</th>
               <th>💰 المبلغ</th>
               <th>📶 الشبكة</th>
               <th>الحالة</th>
@@ -206,11 +203,11 @@
     }
     const saved = localStorage.getItem('theme') || (prefersDark ? 'dark' : 'light');
     applyTheme(saved);
-    themeToggle.textContent = saved === 'dark' ? '☀️ وضع فاتح' : '🌙 وضع داكن';
+    themeToggle.textContent = saved === 'dark' ? '☀️' : '🌙';
     themeToggle.addEventListener('click', () => {
       const now = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
       applyTheme(now);
-      themeToggle.textContent = now === 'dark' ? '☀️ وضع فاتح' : '🌙 وضع داكن';
+      themeToggle.textContent = now === 'dark' ? '☀️' : '🌙';
     });
 
     /********** Network selection visuals **********/
