@@ -485,7 +485,6 @@
 
 
 
-
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
@@ -500,10 +499,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
   
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+    
     body { 
       font-family: 'Cairo', 'Tajawal', system-ui, -apple-system, sans-serif;
       transition: background 0.3s ease, color 0.3s ease;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
     
     :root {
@@ -516,6 +522,9 @@
       --primary: #0d9488;
       --primary-hover: #0f766e;
       --shadow: rgba(0, 0, 0, 0.1);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
     }
     
     .dark {
@@ -539,6 +548,7 @@
       border-radius: 20px;
       box-shadow: 0 10px 40px var(--shadow);
       border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
     }
     
     .btn {
@@ -548,10 +558,21 @@
       font-weight: 600;
       font-size: 15px;
       user-select: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      white-space: nowrap;
     }
     
-    .btn:active {
-      transform: translateY(2px) scale(0.98);
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    .btn:not(:disabled):active {
+      transform: translateY(1px) scale(0.98);
     }
     
     .btn-primary {
@@ -560,8 +581,9 @@
       box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
     }
     
-    .btn-primary:hover {
+    .btn-primary:not(:disabled):hover {
       box-shadow: 0 6px 16px rgba(13, 148, 136, 0.4);
+      transform: translateY(-1px);
     }
     
     .network-btn {
@@ -600,6 +622,7 @@
       background: linear-gradient(135deg, rgba(20, 184, 166, 0.15) 0%, rgba(13, 148, 136, 0.15) 100%) !important;
       color: #0d9488 !important;
       box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
+      position: relative;
     }
     
     .network-active::after {
@@ -631,10 +654,19 @@
       font-family: 'Cairo', sans-serif;
     }
     
+    input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.8;
+    }
+    
     input:focus, select:focus {
       outline: none;
       border-color: #14b8a6;
       box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+    }
+    
+    input:invalid {
+      border-color: var(--danger);
     }
     
     .modal-backdrop {
@@ -646,16 +678,13 @@
       align-items: center;
       justify-content: center;
       z-index: 1000;
-      animation: fadeIn 0.2s ease;
+      opacity: 0;
+      transition: opacity 0.2s ease;
     }
     
     .modal-backdrop.show {
       display: flex !important;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      opacity: 1;
     }
     
     .modal-card {
@@ -667,18 +696,14 @@
       max-height: 85vh;
       overflow-y: auto;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      animation: slideUp 0.3s ease;
+      transform: translateY(20px);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      opacity: 0;
     }
     
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .modal-backdrop.show .modal-card {
+      transform: translateY(0);
+      opacity: 1;
     }
     
     table {
@@ -694,24 +719,29 @@
       font-weight: 700;
       color: var(--text);
       border-radius: 8px;
+      white-space: nowrap;
     }
     
     td {
       padding: 12px 16px;
       background: var(--card-bg);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
+      border: 1px solid var(--border);
+      vertical-align: middle;
     }
     
-    td:first-child {
-      border-right: 1px solid var(--border);
+    tr:first-child td:first-child {
       border-top-right-radius: 8px;
+    }
+    
+    tr:first-child td:last-child {
+      border-top-left-radius: 8px;
+    }
+    
+    tr:last-child td:first-child {
       border-bottom-right-radius: 8px;
     }
     
-    td:last-child {
-      border-left: 1px solid var(--border);
-      border-top-left-radius: 8px;
+    tr:last-child td:last-child {
       border-bottom-left-radius: 8px;
     }
     
@@ -721,6 +751,7 @@
       font-size: 13px;
       font-weight: 600;
       display: inline-block;
+      white-space: nowrap;
     }
     
     .confirmed {
@@ -739,6 +770,18 @@
       border-radius: 16px;
       padding: 20px;
       margin-top: 20px;
+      animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     
     .code-display {
@@ -753,6 +796,8 @@
       text-align: center;
       letter-spacing: 1px;
       margin: 12px 0;
+      word-break: break-all;
+      direction: ltr;
     }
     
     .icon-btn {
@@ -768,6 +813,8 @@
       cursor: pointer;
       transition: all 0.2s ease;
       user-select: none;
+      text-decoration: none;
+      color: var(--text);
     }
     
     .icon-btn:hover {
@@ -783,10 +830,56 @@
       cursor: pointer;
       border: none;
       transition: all 0.2s ease;
+      margin: 2px;
     }
     
     .table-btn:active {
       transform: scale(0.95);
+    }
+    
+    .loading {
+      position: relative;
+      pointer-events: none;
+    }
+    
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--success);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      z-index: 9999;
+      opacity: 0;
+      transform: translateX(-50%) translateY(-20px);
+      transition: all 0.3s ease;
+    }
+    
+    .notification.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
     }
     
     @media (max-width: 768px) {
@@ -801,6 +894,10 @@
       
       th, td {
         padding: 8px;
+      }
+      
+      .btn {
+        font-size: 14px;
       }
     }
   </style>
@@ -827,8 +924,8 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <button id="themeToggle" class="icon-btn">🌗</button>
-        <a href="https://moslimtech.github.io/Ban/" class="icon-btn" style="text-decoration: none;">📢</a>
+        <button id="themeToggle" class="icon-btn" title="تغيير المظهر">🌗</button>
+        <a href="https://moslimtech.github.io/Ban/" class="icon-btn" title="الرئيسية">📢</a>
       </div>
     </header>
 
@@ -840,16 +937,18 @@
           <div>
             <label class="block text-sm font-semibold mb-2" style="color: var(--text-muted)">📱 رقم المستلم</label>
             <div class="flex gap-2">
-              <input id="phoneInput" type="tel" inputmode="tel" placeholder="01xxxxxxxxx" class="flex-1" />
-              <button type="button" id="pickContactBtn" class="btn btn-primary px-4 rounded-xl">
+              <input id="phoneInput" type="tel" inputmode="tel" placeholder="01xxxxxxxxx" class="flex-1" maxlength="11" />
+              <button type="button" id="pickContactBtn" class="btn btn-primary px-4 rounded-xl" title="اختيار من جهات الاتصال">
                 👤
               </button>
             </div>
+            <small style="color: var(--text-muted); font-size: 12px;" class="mt-1 block">مثال: 01012345678</small>
           </div>
 
           <div>
             <label class="block text-sm font-semibold mb-2" style="color: var(--text-muted)">💰 المبلغ (جنيه)</label>
-            <input id="amountInput" type="number" min="1" placeholder="25" value="25" />
+            <input id="amountInput" type="number" min="1" max="999999" placeholder="25" value="25" />
+            <small style="color: var(--text-muted); font-size: 12px;" class="mt-1 block">الحد الأدنى: 1 جنيه</small>
           </div>
         </div>
 
@@ -887,8 +986,8 @@
               
               <div class="flex flex-wrap gap-2 mt-4">
                 <button id="copyBtn" type="button" class="btn px-4 py-2 rounded-lg" style="background: #0ea5e9; color: white;">📋 نسخ</button>
-                <a id="openLinkBtn" class="btn px-4 py-2 rounded-lg" href="#" style="background: #10b981; color: white; text-decoration: none;">🔗 فتح</a>
-                <a id="whatsappBtn" class="btn px-4 py-2 rounded-lg" href="#" target="_blank" rel="noopener" style="background: #25d366; color: white; text-decoration: none;">💬 واتساب</a>
+                <a id="openLinkBtn" class="btn px-4 py-2 rounded-lg" href="#" style="background: #10b981; color: white;">🔗 فتح</a>
+                <a id="whatsappBtn" class="btn px-4 py-2 rounded-lg" href="#" target="_blank" rel="noopener" style="background: #25d366; color: white;">💬 واتساب</a>
               </div>
             </div>
             
@@ -944,6 +1043,9 @@
     </div>
   </div>
 
+  <!-- Notification -->
+  <div id="notification" class="notification"></div>
+
   <script>
     /********** Configuration **********/
     const templates = {
@@ -956,448 +1058,658 @@
     };
 
     /********** Elements **********/
-    const phoneInput = document.getElementById('phoneInput');
-    const amountInput = document.getElementById('amountInput');
-    const networkButtons = document.querySelectorAll('.network-btn');
-    const generateBtn = document.getElementById('generateBtn');
-    const previewBtn = document.getElementById('previewBtn');
-    const historyBtn = document.getElementById('historyBtn');
-    const resultBox = document.getElementById('resultBox');
-    const resultText = document.getElementById('resultText');
-    const copyBtn = document.getElementById('copyBtn');
-    const openLinkBtn = document.getElementById('openLinkBtn');
-    const whatsappBtn = document.getElementById('whatsappBtn');
-    const showNetwork = document.getElementById('showNetwork');
-    const totalConfirmedSpan = document.getElementById('totalConfirmed');
-    const pickContactBtn = document.getElementById('pickContactBtn');
-    const historyBackdrop = document.getElementById('historyBackdrop');
-    const historyTbody = document.getElementById('historyTbody');
-    const historyStats = document.getElementById('historyStats');
-    const closeHistoryBtn = document.getElementById('closeHistoryBtn');
-    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
-    const downloadCsvBtn = document.getElementById('downloadCsvBtn');
-    const modalTotalConfirmed = document.getElementById('modalTotalConfirmed');
-    const themeToggle = document.getElementById('themeToggle');
+    const elements = {
+      phoneInput: document.getElementById('phoneInput'),
+      amountInput: document.getElementById('amountInput'),
+      networkButtons: document.querySelectorAll('.network-btn'),
+      generateBtn: document.getElementById('generateBtn'),
+      previewBtn: document.getElementById('previewBtn'),
+      historyBtn: document.getElementById('historyBtn'),
+      resultBox: document.getElementById('resultBox'),
+      resultText: document.getElementById('resultText'),
+      copyBtn: document.getElementById('copyBtn'),
+      openLinkBtn: document.getElementById('openLinkBtn'),
+      whatsappBtn: document.getElementById('whatsappBtn'),
+      showNetwork: document.getElementById('showNetwork'),
+      totalConfirmedSpan: document.getElementById('totalConfirmed'),
+      pickContactBtn: document.getElementById('pickContactBtn'),
+      historyBackdrop: document.getElementById('historyBackdrop'),
+      historyTbody: document.getElementById('historyTbody'),
+      historyStats: document.getElementById('historyStats'),
+      closeHistoryBtn: document.getElementById('closeHistoryBtn'),
+      clearHistoryBtn: document.getElementById('clearHistoryBtn'),
+      downloadCsvBtn: document.getElementById('downloadCsvBtn'),
+      modalTotalConfirmed: document.getElementById('modalTotalConfirmed'),
+      themeToggle: document.getElementById('themeToggle'),
+      notification: document.getElementById('notification')
+    };
 
     let selectedNetwork = 'vodafone';
 
-    /********** Theme **********/
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    function applyTheme(t) {
-      if (t === 'dark') {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('theme','dark');
-        themeToggle.textContent = '☀️';
+    /********** Utility Functions **********/
+    function showNotification(message, type = 'success') {
+      const notification = elements.notification;
+      notification.textContent = message;
+      notification.style.background = type === 'error' ? 'var(--danger)' : 'var(--success)';
+      notification.classList.add('show');
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+
+    function setLoading(button, loading) {
+      if (loading) {
+        button.disabled = true;
+        button.classList.add('loading');
+        button.style.color = 'transparent';
       } else {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('theme','light');
-        themeToggle.textContent = '🌙';
+        button.disabled = false;
+        button.classList.remove('loading');
+        button.style.color = '';
       }
     }
-    const saved = localStorage.getItem('theme') || (prefersDark ? 'dark' : 'light');
-    applyTheme(saved);
-    
-    themeToggle.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const now = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-      applyTheme(now);
-    });
 
-    /********** Network selection **********/
-    function markSelected() {
-      networkButtons.forEach(b => {
-        b.classList.remove('network-active');
-        if (b.dataset.net === selectedNetwork) {
-          b.classList.add('network-active');
+    /********** Theme Management **********/
+    const themeManager = {
+      init() {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const saved = localStorage.getItem('theme') || (prefersDark ? 'dark' : 'light');
+        this.apply(saved);
+        
+        elements.themeToggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          const current = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+          this.apply(current === 'dark' ? 'light' : 'dark');
+        });
+      },
+      
+      apply(theme) {
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+          elements.themeToggle.textContent = '☀️';
+        } else {
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('theme', 'light');
+          elements.themeToggle.textContent = '🌙';
         }
-      });
-    }
-    
-    networkButtons.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        selectedNetwork = btn.dataset.net;
-        markSelected();
-      });
-    });
-    markSelected();
+      }
+    };
 
-    /********** Contact picker **********/
-    pickContactBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      try {
-        if (navigator.contacts && navigator.contacts.select) {
-          const props = ['tel','name'];
-          const opts = { multiple:false };
-          const contacts = await navigator.contacts.select(props, opts);
-          if (contacts && contacts.length) {
-            const tel = (contacts[0].tel && contacts[0].tel[0]) || '';
-            phoneInput.value = tel.replace(/\s|-|\(|\)/g,'');
-            return;
+    /********** Network Selection **********/
+    const networkManager = {
+      init() {
+        elements.networkButtons.forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            selectedNetwork = btn.dataset.net;
+            this.updateUI();
+          });
+        });
+        this.updateUI();
+      },
+      
+      updateUI() {
+        elements.networkButtons.forEach(btn => {
+          btn.classList.toggle('network-active', btn.dataset.net === selectedNetwork);
+        });
+      }
+    };
+
+    /********** Input Validation **********/
+    const inputValidator = {
+      init() {
+        elements.phoneInput.addEventListener('input', (e) => {
+          // Only allow digits
+          let value = e.target.value.replace(/[^0-9]/g, '');
+          // Limit to 11 digits
+          if (value.length > 11) value = value.slice(0, 11);
+          e.target.value = value;
+        });
+
+        elements.amountInput.addEventListener('input', (e) => {
+          let value = parseInt(e.target.value);
+          if (value < 1) e.target.value = 1;
+          if (value > 999999) e.target.value = 999999;
+        });
+      },
+      
+      validateForm() {
+        const phone = elements.phoneInput.value.trim();
+        const amount = elements.amountInput.value.trim();
+        
+        if (!phone || phone.length < 10 || phone.length > 11) {
+          showNotification('⚠️ رقم الهاتف غير صحيح', 'error');
+          elements.phoneInput.focus();
+          return false;
+        }
+        
+        if (!amount || parseInt(amount) < 1) {
+          showNotification('⚠️ المبلغ يجب أن يكون أكبر من صفر', 'error');
+          elements.amountInput.focus();
+          return false;
+        }
+        
+        return true;
+      }
+    };
+
+    /********** Phone Number Utilities **********/
+    const phoneUtils = {
+      onlyDigits(s = '') {
+        return String(s || '').replace(/[^0-9]/g, '');
+      },
+      
+      toLocal(cleaned) {
+        if (!cleaned) return '';
+        if (cleaned.startsWith('20')) return '0' + cleaned.slice(2);
+        if (cleaned.startsWith('2') && cleaned.length === 11) return '0' + cleaned.slice(1);
+        if (cleaned.startsWith('0')) return cleaned;
+        if (cleaned.length === 9) return '0' + cleaned;
+        return cleaned;
+      },
+      
+      toInternational(cleaned) {
+        if (!cleaned) return '';
+        if (cleaned.startsWith('0')) return '2' + cleaned.slice(1);
+        if (cleaned.startsWith('20')) return cleaned;
+        if (cleaned.startsWith('2') && cleaned.length > 2) return cleaned;
+        return cleaned;
+      }
+    };
+
+    /********** Contact Picker **********/
+    const contactPicker = {
+      init() {
+        elements.pickContactBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          setLoading(elements.pickContactBtn, true);
+          
+          try {
+            if (navigator.contacts && navigator.contacts.select) {
+              const contacts = await navigator.contacts.select(['tel', 'name'], { multiple: false });
+              if (contacts && contacts.length && contacts.tel && contacts.tel) {
+                const tel = contacts.tel.replace(/\s|-|\(|\)/g, '');
+                elements.phoneInput.value = tel;
+                showNotification('✅ تم اختيار جهة الاتصال بنجاح');
+              }
+            } else {
+              elements.phoneInput.focus();
+              showNotification('⚠️ اختيار جهات الاتصال غير مدعوم', 'error');
+            }
+          } catch (err) {
+            console.error(err);
+            elements.phoneInput.focus();
+            showNotification('⚠️ حدث خطأ في اختيار جهة الاتصال', 'error');
+          } finally {
+            setLoading(elements.pickContactBtn, false);
           }
-        }
-        phoneInput.focus();
-        alert('اختيار جهات الاتصال غير مدعوم. الرجاء إدخال الرقم يدوياً.');
-      } catch(err) {
-        console.error(err);
-        phoneInput.focus();
-        alert('حدث خطأ. الرجاء إدخال الرقم يدوياً.');
+        });
       }
-    });
+    };
 
-    /********** Helpers **********/
-    function onlyDigits(s=''){ return String(s||'').replace(/[^0-9]/g,''); }
-    function toLocal(cleaned) {
-      if (!cleaned) return '';
-      if (cleaned.startsWith('20')) return '0' + cleaned.slice(2);
-      if (cleaned.startsWith('2') && cleaned.length===11) return '0' + cleaned.slice(1);
-      if (cleaned.startsWith('0')) return cleaned;
-      if (cleaned.length === 9) return '0' + cleaned;
-      return cleaned;
-    }
-    function toInternational(cleaned) {
-      if (!cleaned) return '';
-      if (cleaned.startsWith('0')) return '2' + cleaned.slice(1);
-      if (cleaned.startsWith('20')) return cleaned;
-      if (cleaned.startsWith('2') && cleaned.length>2) return cleaned;
-      return cleaned;
-    }
+    /********** Code Generator **********/
+    const codeGenerator = {
+      build(network, phoneRaw, amountRaw) {
+        const cleaned = phoneUtils.onlyDigits(phoneRaw);
+        const amount = Number(amountRaw) || 0;
+        
+        if (!cleaned || amount <= 0) return null;
 
-    /********** Build action links **********/
-    function buildActionLink(network, phoneRaw, amountRaw) {
-      const cleaned = onlyDigits(phoneRaw);
-      const amount = Number(amountRaw) || 0;
-      if (!cleaned || amount <= 0) return null;
+        const local = phoneUtils.toLocal(cleaned);
+        const intl = phoneUtils.toInternational(cleaned);
 
-      const local = toLocal(cleaned);
-      const intl = toInternational(cleaned);
+        if (network === 'instapay') {
+          return { 
+            type: 'instapay', 
+            deep: templates.instapayDeep(intl, amount), 
+            web: templates.instapayWeb(intl, amount), 
+            local, 
+            intl, 
+            amount 
+          };
+        }
 
-      if (network === 'instapay') {
+        const code = templates[network](local, amount);
         return { 
-          type:'instapay', 
-          deep: templates.instapayDeep(intl, amount), 
-          web: templates.instapayWeb(intl, amount), 
+          type: 'ussd', 
+          url: 'tel:' + encodeURIComponent(code), 
+          code: code, 
           local, 
           intl, 
           amount 
         };
       }
+    };
 
-      const code = templates[network](local, amount);
-      return { 
-        type:'ussd', 
-        url: 'tel:' + encodeURIComponent(code), 
-        code: code, 
-        local, 
-        intl, 
-        amount 
-      };
-    }
-
-    /********** History **********/
-    const STORAGE_KEY = 'ban_cash_transactions_v1';
-    function loadHistory() {
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-      catch(e){ return []; }
-    }
-    function saveHistory(arr) { 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); 
-    }
-    function addHistoryItem(item) {
-      const arr = loadHistory();
-      arr.unshift(item);
-      if (arr.length > 500) arr.pop();
-      saveHistory(arr);
-    }
-    function clearHistory() { 
-      localStorage.removeItem(STORAGE_KEY); 
-    }
-
-    /********** UI: show result **********/
-    function showResult(obj) {
-      resultBox.classList.remove('hidden');
+    /********** History Manager **********/
+    const historyManager = {
+      STORAGE_KEY: 'ban_cash_transactions_v1',
       
-      const networkNames = {
+      load() {
+        try {
+          return JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '[]');
+        } catch (e) {
+          return [];
+        }
+      },
+      
+      save(arr) {
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(arr));
+      },
+      
+      add(item) {
+        const arr = this.load();
+        arr.unshift({
+          ...item,
+          id: Date.now(),
+          date: new Date().toLocaleString('ar-EG')
+        });
+        if (arr.length > 500) arr.pop();
+        this.save(arr);
+      },
+      
+      clear() {
+        localStorage.removeItem(this.STORAGE_KEY);
+      },
+      
+      confirm(index) {
+        const arr = this.load();
+        if (arr[index]) {
+          arr[index].confirmed = true;
+          this.save(arr);
+          return true;
+        }
+        return false;
+      },
+      
+      delete(index) {
+        const arr = this.load();
+        if (arr[index]) {
+          arr.splice(index, 1);
+          this.save(arr);
+          return true;
+        }
+        return false;
+      }
+    };
+
+    /********** Result Display **********/
+    const resultDisplay = {
+      networkNames: {
         vodafone: 'فودافون 🔴',
         etisalat: 'اتصالات 🟢',
         orange: 'أورانج 🟠',
         we: 'وي 🟣',
         instapay: 'إنستاباي 💳'
-      };
+      },
       
-      if (obj.type === 'instapay') {
-        resultText.textContent = obj.web;
-        openLinkBtn.href = obj.deep;
-        openLinkBtn.setAttribute('data-fallback', obj.web);
-      } else {
-        resultText.textContent = obj.code;
-        openLinkBtn.href = obj.url;
-        openLinkBtn.removeAttribute('data-fallback');
-      }
-      
-      showNetwork.textContent = networkNames[selectedNetwork] || selectedNetwork;
-      whatsappBtn.href = 'https://wa.me/' + obj.intl;
-      updateTotalsDisplay();
-    }
-
-    generateBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      const phone = phoneInput.value.trim();
-      const amount = amountInput.value.trim();
-      const obj = buildActionLink(selectedNetwork, phone, amount);
-      
-      if (!obj) { 
-        alert('⚠️ من فضلك تأكد من إدخال رقم صالح والمبلغ.'); 
-        return; 
-      }
-
-      const now = new Date();
-      addHistoryItem({ 
-        number: onlyDigits(phone), 
-        local: obj.local, 
-        intl: obj.intl, 
-        amount: obj.amount, 
-        network: selectedNetwork, 
-        date: now.toLocaleString('ar-EG'), 
-        confirmed: false 
-      });
-
-      showResult(obj);
-
-      if (obj.type === 'instapay') {
-        try { window.location.href = obj.deep; } catch(_) {}
-        setTimeout(() => { window.location.href = obj.web; }, 1200);
-      } else {
-        try { window.location.href = obj.url; } catch(err){ console.error(err); }
-      }
-    });
-
-    openLinkBtn.addEventListener('click', (e) => {
-      const href = openLinkBtn.href;
-      const fallback = openLinkBtn.getAttribute('data-fallback');
-      if (!fallback) return;
-      e.preventDefault();
-      try { window.location.href = href; } catch(err){ console.error(err); }
-      setTimeout(() => { window.location.href = fallback; }, 1200);
-    });
-
-    previewBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      const phone = phoneInput.value.trim();
-      const amount = amountInput.value
-          previewBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      const phone = phoneInput.value.trim();
-      const amount = amountInput.value.trim();
-      const obj = buildActionLink(selectedNetwork, phone, amount);
-      
-      if (!obj) { 
-        alert('⚠️ من فضلك تأكد من إدخال رقم صالح والمبلغ.'); 
-        return; 
-      }
-      showResult(obj);
-    });
-
-    copyBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      const txt = resultText.textContent || '';
-      try {
-        await navigator.clipboard.writeText(txt);
-        copyBtn.textContent = '✅ تم النسخ';
-        copyBtn.style.background = '#10b981';
-        setTimeout(() => {
-          copyBtn.textContent = '📋 نسخ';
-          copyBtn.style.background = '#0ea5e9';
-        }, 2000);
-      } catch (err) {
-        alert('نسخ غير مدعوم. انسخ النص يدوياً.');
-      }
-    });
-
-    /********** History modal **********/
-    historyBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      renderHistory(); 
-      historyBackdrop.classList.add('show');
-    });
-    
-    closeHistoryBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      historyBackdrop.classList.remove('show');
-    });
-
-    historyBackdrop.addEventListener('click', (e) => {
-      if (e.target === historyBackdrop) {
-        historyBackdrop.classList.remove('show');
-      }
-    });
-
-    clearHistoryBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      if (!confirm('⚠️ هل متأكد من حذف كل المعاملات؟')) return;
-      clearHistory();
-      renderHistory();
-      updateTotalsDisplay();
-    });
-
-    downloadCsvBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      downloadHistoryCSV();
-    });
-
-    function renderHistory() {
-      const arr = loadHistory();
-      historyTbody.innerHTML = '';
-      
-      if (!arr.length) {
-        historyStats.innerHTML = `<p style="color: var(--text-muted)">لا توجد معاملات محفوظة بعد.</p>`;
-        modalTotalConfirmed.textContent = '0';
-        return;
-      }
-
-      // stats
-      const totalAmount = arr.reduce((s,t)=>s+Number(t.amount||0),0);
-      const confirmedAmount = arr.filter(t=>t.confirmed).reduce((s,t)=>s+Number(t.amount||0),0);
-      const totalCount = arr.length;
-      const confirmedCount = arr.filter(t=>t.confirmed).length;
-
-      historyStats.innerHTML = `
-        📊 عدد العمليات: <strong>${totalCount}</strong> — 
-        مجموع المبالغ: <strong>${totalAmount}</strong> ج — 
-        تم التأكيد: <strong>${confirmedCount}</strong> (${confirmedAmount} ج)
-      `;
-
-      arr.forEach((t, idx) => {
-        const tr = document.createElement('tr');
+      show(obj) {
+        elements.resultBox.classList.remove('hidden');
         
-        const networkNames = {
-          vodafone: 'فودافون 🔴',
-          etisalat: 'اتصالات 🟢',
-          orange: 'أورانج 🟠',
-          we: 'وي 🟣',
-          instapay: 'إنستاباي 💳'
-        };
+        if (obj.type === 'instapay') {
+          elements.resultText.textContent = obj.web;
+          elements.openLinkBtn.href = obj.deep;
+          elements.openLinkBtn.setAttribute('data-fallback', obj.web);
+        } else {
+          elements.resultText.textContent = obj.code;
+          elements.openLinkBtn.href = obj.url;
+          elements.openLinkBtn.removeAttribute('data-fallback');
+        }
         
-        tr.innerHTML = `
-          <td style="white-space:nowrap; font-size: 13px;">${t.date || '-'}</td>
-          <td style="font-weight: 600;">${t.local || t.number || '-'}</td>
-          <td style="font-weight: 600; color: #0d9488;">${t.amount || 0} ج</td>
-          <td>${networkNames[t.network] || t.network}</td>
-          <td>
-            ${t.confirmed 
-              ? '<span class="badge confirmed">✓ تم التحويل</span>' 
-              : '<span class="badge pending">⏳ قيد التنفيذ</span>'
-            }
-          </td>
-          <td>
-            ${!t.confirmed 
-              ? `<button type="button" data-idx="${idx}" class="confirm-row table-btn" style="background: #10b981; color: white;">✓ تأكيد</button>` 
-              : ''
-            }
-            <button type="button" data-del="${idx}" class="delete-row table-btn" style="background: #fee; color: #b91c1c; margin-right: 4px;">🗑️</button>
-          </td>
+        elements.showNetwork.textContent = this.networkNames[selectedNetwork] || selectedNetwork;
+        elements.whatsappBtn.href = 'https://wa.me/' + obj.intl;
+        this.updateTotals();
+      },
+      
+      updateTotals() {
+        const arr = historyManager.load();
+        const total = arr.filter(x => x.confirmed).reduce((s, x) => s + Number(x.amount || 0), 0);
+        elements.totalConfirmedSpan.textContent = total;
+        elements.modalTotalConfirmed.textContent = total;
+      }
+    };
+
+    /********** Main Actions **********/
+    const actions = {
+      init() {
+        elements.generateBtn.addEventListener('click', this.generate.bind(this));
+        elements.previewBtn.addEventListener('click', this.preview.bind(this));
+        elements.copyBtn.addEventListener('click', this.copy.bind(this));
+        elements.openLinkBtn.addEventListener('click', this.openLink.bind(this));
+      },
+      
+      async generate(e) {
+        e.preventDefault();
+        
+        if (!inputValidator.validateForm()) return;
+        
+        setLoading(elements.generateBtn, true);
+        
+        try {
+          const phone = elements.phoneInput.value.trim();
+          const amount = elements.amountInput.value.trim();
+          const obj = codeGenerator.build(selectedNetwork, phone, amount);
+          
+          if (!obj) {
+            showNotification('⚠️ حدث خطأ في توليد الكود', 'error');
+            return;
+          }
+
+          // Add to history
+          historyManager.add({
+            number: phoneUtils.onlyDigits(phone),
+            local: obj.local,
+            intl: obj.intl,
+            amount: obj.amount,
+            network: selectedNetwork,
+            confirmed: false
+          });
+
+          resultDisplay.show(obj);
+          showNotification('✅ تم توليد الكود بنجاح');
+
+          // Auto-open
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          if (obj.type === 'instapay') {
+            window.location.href = obj.deep;
+            setTimeout(() => { window.location.href = obj.web; }, 1200);
+          } else {
+            window.location.href = obj.url;
+          }
+        } catch (err) {
+          console.error(err);
+          showNotification('⚠️ حدث خطأ غير متوقع', 'error');
+        } finally {
+          setLoading(elements.generateBtn, false);
+        }
+      },
+      
+      preview(e) {
+        e.preventDefault();
+        
+        if (!inputValidator.validateForm()) return;
+        
+        const phone = elements.phoneInput.value.trim();
+        const amount = elements.amountInput.value.trim();
+        const obj = codeGenerator.build(selectedNetwork, phone, amount);
+        
+        if (!obj) {
+          showNotification('⚠️ حدث خطأ في توليد الكود', 'error');
+          return;
+        }
+        
+        resultDisplay.show(obj);
+        showNotification('👁️ معاينة الكود');
+      },
+      
+      async copy(e) {
+        e.preventDefault();
+        
+        const txt = elements.resultText.textContent || '';
+        if (!txt) return;
+        
+        try {
+          await navigator.clipboard.writeText(txt);
+          elements.copyBtn.textContent = '✅ تم النسخ';
+          elements.copyBtn.style.background = 'var(--success)';
+          showNotification('📋 تم نسخ الكود');
+          
+          setTimeout(() => {
+            elements.copyBtn.textContent = '📋 نسخ';
+            elements.copyBtn.style.background = '#0ea5e9';
+          }, 2000);
+        } catch (err) {
+          showNotification('⚠️ فشل في نسخ النص', 'error');
+        }
+      },
+      
+      openLink(e) {
+        const fallback = elements.openLinkBtn.getAttribute('data-fallback');
+        if (!fallback) return;
+        
+        e.preventDefault();
+        const href = elements.openLinkBtn.href;
+        
+        try {
+          window.location.href = href;
+          setTimeout(() => { window.location.href = fallback; }, 1200);
+        } catch (err) {
+          console.error(err);
+          window.location.href = fallback;
+        }
+      }
+    };
+
+    /********** History Modal **********/
+    const historyModal = {
+      init() {
+        elements.historyBtn.addEventListener('click', this.open.bind(this));
+        elements.closeHistoryBtn.addEventListener('click', this.close.bind(this));
+        elements.clearHistoryBtn.addEventListener('click', this.clear.bind(this));
+        elements.downloadCsvBtn.addEventListener('click', this.download.bind(this));
+        
+        elements.historyBackdrop.addEventListener('click', (e) => {
+          if (e.target === elements.historyBackdrop) this.close();
+        });
+        
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && elements.historyBackdrop.classList.contains('show')) {
+            this.close();
+          }
+        });
+      },
+      
+      open() {
+        this.render();
+        elements.historyBackdrop.classList.add('show');
+      },
+      
+      close() {
+        elements.historyBackdrop.classList.remove('show');
+      },
+      
+      render() {
+        const arr = historyManager.load();
+        elements.historyTbody.innerHTML = '';
+        
+        if (!arr.length) {
+          elements.historyStats.innerHTML = '<p style="color: var(--text-muted);">📋 لا توجد معاملات محفوظة بعد.</p>';
+          elements.modalTotalConfirmed.textContent = '0';
+          return;
+        }
+
+        // Statistics
+        const totalAmount = arr.reduce((s, t) => s + Number(t.amount || 0), 0);
+        const confirmedAmount = arr.filter(t => t.confirmed).reduce((s, t) => s + Number(t.amount || 0), 0);
+        const totalCount = arr.length;
+        const confirmedCount = arr.filter(t => t.confirmed).length;
+
+        elements.historyStats.innerHTML = `
+          📊 عدد العمليات: <strong>${totalCount}</strong> — 
+          مجموع المبالغ: <strong>${totalAmount}</strong> ج — 
+          تم التأكيد: <strong>${confirmedCount}</strong> (${confirmedAmount} ج)
         `;
-        historyTbody.appendChild(tr);
-      });
 
-      // attach handlers
-      document.querySelectorAll('.confirm-row').forEach(b => {
-        b.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const idx = Number(b.getAttribute('data-idx'));
-          confirmFromHistory(idx);
+        // Render rows
+        arr.forEach((t, idx) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td style="white-space:nowrap; font-size: 13px;">${t.date || '-'}</td>
+            <td style="font-weight: 600;">${t.local || t.number || '-'}</td>
+            <td style="font-weight: 600; color: var(--primary);">${t.amount || 0} ج</td>
+            <td>${resultDisplay.networkNames[t.network] || t.network}</td>
+            <td>
+              ${t.confirmed 
+                ? '<span class="badge confirmed">✓ تم التحويل</span>' 
+                : '<span class="badge pending">⏳ قيد التنفيذ</span>'
+              }
+            </td>
+            <td>
+              ${!t.confirmed 
+                ? `<button type="button" data-idx="${idx}" class="confirm-row table-btn" style="background: var(--success); color: white;">✓ تأكيد</button>` 
+                : ''
+              }
+              <button type="button" data-del="${idx}" class="delete-row table-btn" style="background: #fee2e2; color: var(--danger);">🗑️</button>
+            </td>
+          `;
+          elements.historyTbody.appendChild(tr);
         });
-      });
-      
-      document.querySelectorAll('.delete-row').forEach(b => {
-        b.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const idx = Number(b.getAttribute('data-del'));
-          deleteFromHistory(idx);
+
+        // Attach event handlers
+        elements.historyTbody.querySelectorAll('.confirm-row').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const idx = Number(btn.getAttribute('data-idx'));
+            if (historyManager.confirm(idx)) {
+              this.render();
+              resultDisplay.updateTotals();
+              showNotification('✅ تم تأكيد المعاملة');
+            }
+          });
         });
-      });
+        
+        elements.historyTbody.querySelectorAll('.delete-row').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!confirm('⚠️ حذف هذه المعاملة نهائياً؟')) return;
+            
+            const idx = Number(btn.getAttribute('data-del'));
+            if (historyManager.delete(idx)) {
+              this.render();
+              resultDisplay.updateTotals();
+              showNotification('🗑️ تم حذف المعاملة');
+            }
+          });
+        });
 
-      modalTotalConfirmed.textContent = confirmedAmount;
-    }
-
-    function confirmFromHistory(index) {
-      const arr = loadHistory();
-      if (!arr[index]) return;
-      arr[index].confirmed = true;
-      saveHistory(arr);
-      renderHistory();
-      updateTotalsDisplay();
-    }
-
-    function deleteFromHistory(index) {
-      const arr = loadHistory();
-      if (!arr[index]) return;
-      if (!confirm('⚠️ حذف هذه المعاملة؟')) return;
-      arr.splice(index, 1);
-      saveHistory(arr);
-      renderHistory();
-      updateTotalsDisplay();
-    }
-
-    function updateTotalsDisplay() {
-      const arr = loadHistory();
-      const total = arr.filter(x=>x.confirmed).reduce((s,x)=>s+Number(x.amount||0), 0);
-      totalConfirmedSpan.textContent = total;
-      modalTotalConfirmed.textContent = total;
-    }
-
-    /********** Download CSV **********/
-    function downloadHistoryCSV() {
-      const arr = loadHistory();
-      if (!arr.length) { 
-        alert('⚠️ لا توجد معاملات لتحميلها.'); 
-        return; 
-      }
+        elements.modalTotalConfirmed.textContent = confirmedAmount;
+      },
       
-      let csv = 'التاريخ,رقم المستلم,المبلغ,الشبكة,تم التأكيد
+      clear() {
+        if (!confirm('⚠️ هل متأكد من حذف جميع المعاملات؟
+هذا الإجراء لا يمكن التراجع عنه.')) return;
+        
+        historyManager.clear();
+        this.render();
+        resultDisplay.updateTotals();
+        showNotification('🗑️ تم حذف جميع المعاملات');
+      },
+      
+      download() {
+        const arr = historyManager.load();
+        if (!arr.length) {
+          showNotification('⚠️ لا توجد معاملات لتحميلها', 'error');
+          return;
+        }
+        
+        let csv = 'التاريخ,رقم المستلم,المبلغ,الشبكة,تم التأكيد
 ';
-      arr.forEach(t => {
-        csv += `"${t.date || '-'}","${t.number || t.local || '-'}","${t.amount || 0}","${t.network || '-'}","${t.confirmed ? 'نعم':'لا'}"
+        arr.forEach(t => {
+          csv += `"${t.date || '-'}","${t.number || t.local || '-'}","${t.amount || 0}","${t.network || '-'}","${t.confirmed ? 'نعم' : 'لا'}"
 `;
-      });
-      
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'ban_transactions_' + new Date().getTime() + '.csv';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        
+        a.href = url;
+        a.download = `ban_transactions_${new Date().getTime()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showNotification('📥 تم تحميل الملف بنجاح');
+      }
+    };
 
-    /********** Initialize **********/
-    updateTotalsDisplay();
+    /********** Keyboard Shortcuts **********/
+    const keyboardManager = {
+      init() {
+        document.addEventListener('keydown', (e) => {
+          // Only when not typing in inputs
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+          
+          switch(e.key) {
+            case 'Enter':
+              if (!elements.historyBackdrop.classList.contains('show')) {
+                e.preventDefault();
+                elements.generateBtn.click();
+              }
+              break;
+              
+            case 'Escape':
+              if (elements.historyBackdrop.classList.contains('show')) {
+                historyModal.close();
+              } else if (!elements.resultBox.classList.contains('hidden')) {
+                elements.resultBox.classList.add('hidden');
+              }
+              break;
+              
+            case 'h':
+            case 'H':
+              if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                historyModal.open();
+              }
+              break;
+              
+            case 'c':
+            case 'C':
+              if ((e.ctrlKey || e.metaKey) && !elements.resultBox.classList.contains('hidden')) {
+                e.preventDefault();
+                elements.copyBtn.click();
+              }
+              break;
+          }
+        });
+      }
+    };
 
-    /********** Register Service Worker (PWA) **********/
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/Ban/firebase-messaging-sw.js')
-        .then(() => console.log('✅ Service Worker Registered'))
-        .catch(err => console.log('❌ SW registration failed:', err));
+    /********** Service Worker **********/
+    const serviceWorkerManager = {
+      init() {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('/Ban/firebase-messaging-sw.js')
+            .then(() => console.log('✅ Service Worker registered'))
+            .catch(err => console.log('❌ SW registration failed:', err));
+        }
+      }
+    };
+
+    /********** Application Initialization **********/
+    const app = {
+      init() {
+        // Initialize all modules
+        themeManager.init();
+        networkManager.init();
+        inputValidator.init();
+        contactPicker.init();
+        actions.init();
+        historyModal.init();
+        keyboardManager.init();
+        serviceWorkerManager.init();
+        
+        // Update display
+        resultDisplay.updateTotals();
+        
+        // Focus phone input
+        setTimeout(() => {
+          elements.phoneInput.focus();
+        }, 500);
+        
+        console.log('✅ تطبيق مولد أكواد الكاش جاهز للاستخدام');
+      }
+    };
+
+    // Start the application when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', app.init);
+    } else {
+      app.init();
     }
   </script>
 </body>
