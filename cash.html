@@ -8,7 +8,7 @@
   <link rel="icon" href="https://moslimtech.github.io/Ban/icons/icon-192.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* --- CSS Section --- */
+    /* --- CSS Section (No major changes) --- */
     body { font-family: 'Tajawal', system-ui, -apple-system, 'Segoe UI', Roboto, Arial; }
     .btn-anim { transition: transform .12s ease, box-shadow .12s ease, background-color .2s ease, border-color .2s ease; }
     .btn-anim:active { transform: translateY(1px) scale(.995); }
@@ -61,69 +61,133 @@
       <div class="flex items-center gap-2">
         <a href="https://moslimtech.github.io/Ban/" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-orange-100 dark:bg-slate-700 shadow btn-anim hover:shadow-md text-xl">🏠</a>
         <button id="themeToggle" class="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-600 btn-anim flex items-center justify-center text-xl">🌗</button>
-        <!-- زر الإعدادات الجديد -->
         <button id="settingsBtn" class="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-600 btn-anim flex items-center justify-center text-xl">⚙️</button>
       </div>
     </header>
 
     <main class="main-card">
-        <!-- الكود هنا كما هو حالياً... سنقوم بتعديله في الخطوة التالية -->
-        <div class="flex border-b" style="border-color: var(--border-color);">
-            <button id="sendTabBtn" class="tab-btn flex-1 py-3 px-4 text-sm font-semibold transition-colors duration-200">تحويل أموال</button>
-            <button id="receiveTabBtn" class="tab-btn flex-1 py-3 px-4 text-sm font-semibold transition-colors duration-200">تسجيل استلام</button>
-        </div>
-        <div class="p-5 sm:p-6">
-            <div id="sendPanel" class="tab-panel space-y-6">
-                <!-- محتوى التحويل سيتم تحديثه لاحقاً -->
-                <p class="muted text-center py-8">قم بإعداد المحافظ ونسبة الربح أولاً من قائمة الإعدادات ⚙️.</p>
+      <div class="flex border-b" style="border-color: var(--border-color);">
+        <button id="sendTabBtn" class="tab-btn flex-1 py-3 px-4 text-sm font-semibold transition-colors duration-200">تحويل أموال</button>
+        <button id="receiveTabBtn" class="tab-btn flex-1 py-3 px-4 text-sm font-semibold transition-colors duration-200">تسجيل استلام</button>
+      </div>
+      <div class="p-5 sm:p-6">
+        <!-- لوحة تحويل الأموال (مُحدثة) -->
+        <div id="sendPanel" class="tab-panel space-y-6">
+          <div>
+              <label for="sendWalletSelector" class="block text-sm font-medium muted mb-1">التحويل من محفظة:</label>
+              <select id="sendWalletSelector" class="w-full px-3 py-2 rounded-lg border focus:outline-none"></select>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium muted mb-1">إلى رقم (المستلم):</label>
+              <div class="flex gap-2 items-center">
+                <button type="button" id="pickContactBtn" class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500 text-white btn-anim hover:bg-emerald-600 text-lg">👤</button>
+                <input id="phoneInput" type="tel" inputmode="tel" placeholder="01xxxxxxxxx" class="flex-1 px-3 py-2 rounded-lg border focus:outline-none" />
+              </div>
             </div>
-            <div id="receivePanel" class="tab-panel hidden">
-                <!-- محتوى الاستلام سيتم تحديثه لاحقاً -->
-                <p class="muted text-center py-8">قم بإعداد المحافظ ونسبة الربح أولاً من قائمة الإعدادات ⚙️.</p>
+            <div>
+              <label class="block text-sm font-medium muted mb-1">المبلغ (جنيه)</label>
+              <input id="amountInput" type="number" min="1" placeholder="25" class="w-full px-3 py-2 rounded-lg border focus:outline-none" />
             </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium muted mb-2">عبر شبكة:</label>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <button type="button" data-net="vodafone" class="network-btn px-3 py-2 rounded-lg border bg-white dark:bg-transparent flex items-center justify-center btn-anim">
+                  <span class="color-dot" style="background-color: #ef4444;"></span>فودافون
+              </button>
+              <button type="button" data-net="etisalat" class="network-btn px-3 py-2 rounded-lg border bg-white dark:bg-transparent flex items-center justify-center btn-anim">
+                <span class="color-dot" style="background-color: #22c55e;"></span>اتصالات
+              </button>
+              <button type="button" data-net="orange" class="network-btn px-3 py-2 rounded-lg border bg-white dark:bg-transparent flex items-center justify-center btn-anim">
+                  <span class="color-dot" style="background-color: #f97316;"></span>اورانج
+              </button>
+              <button type="button" data-net="we" class="network-btn px-3 py-2 rounded-lg border bg-white dark:bg-transparent flex items-center justify-center btn-anim">
+                  <span class="color-dot" style="background-color: #8b5cf6;"></span>وي
+              </button>
+              <button type="button" data-net="instapay" class="network-btn px-3 py-2 rounded-lg border bg-white dark:bg-transparent flex items-center justify-center btn-anim">
+                  <span class="instapay-icon"><span class="instapay-stripe"></span><span class="instapay-stripe"></span></span>إنستاباي
+              </button>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-3 justify-end pt-2">
+            <button id="previewBtn" type="button" class="px-4 py-2 rounded-xl bg-white dark:bg-slate-700 border dark:border-slate-600 font-medium btn-anim hover:shadow flex items-center gap-2">👁️ معاينة</button>
+            <button id="generateBtn" type="button" class="px-4 py-2 rounded-xl bg-teal-500 text-white font-semibold shadow-lg btn-anim hover:bg-teal-600 flex items-center gap-2">🚀 تحويل الآن</button>
+          </div>
         </div>
-        <div class="text-center p-4 border-t" style="border-color: var(--border-color);">
-            <button id="historyBtn" type="button" class="px-4 py-2 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-medium btn-anim hover:shadow flex items-center gap-2 mx-auto">
-            <span class="text-lg">📜</span> عرض سجل المعاملات
-            </button>
+
+        <!-- لوحة تسجيل الاستلام (مُحدثة) -->
+        <div id="receivePanel" class="tab-panel hidden space-y-4">
+            <div>
+              <label for="receiveWalletSelector" class="block text-sm font-medium muted mb-1">الاستلام في محفظة:</label>
+              <select id="receiveWalletSelector" class="w-full px-3 py-2 rounded-lg border focus:outline-none"></select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium muted mb-1">المبلغ المستلم (جنيه)</label>
+              <input id="receivedAmountInput" type="number" min="1" placeholder="مثال: 100" class="w-full px-3 py-2 text-lg rounded-lg border focus:outline-none" />
+            </div>
+            <button id="recordReceivedBtn" type="button" class="w-full px-4 py-2 rounded-xl bg-blue-500 text-white font-semibold shadow-lg btn-anim hover:bg-blue-600 flex items-center justify-center gap-2">📥 تسجيل استلام</button>
         </div>
+      </div>
+      
+      <div class="text-center p-4 border-t" style="border-color: var(--border-color);">
+        <button id="historyBtn" type="button" class="px-4 py-2 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-medium btn-anim hover:shadow flex items-center gap-2 mx-auto">
+          <span class="text-lg">📜</span> عرض سجل المعاملات
+        </button>
+      </div>
     </main>
 
     <footer class="mt-4 text-center text-xs muted">© 2025 بان للإعلانات • جميع الحقوق محفوظة</footer>
   </div>
 
-  <!-- نافذة السجل (لم تتغير) -->
+  <!-- نافذة السجل (مُحدثة) -->
   <div id="historyBackdrop" class="modal-backdrop hidden">
-    <!-- ... -->
+    <div class="modal-card" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-lg">📜 سجل المعاملات</h3>
+            <button id="closeHistoryBtn" class="px-3 py-2 bg-gray-200 dark:bg-slate-600 rounded-lg text-sm">إغلاق</button>
+        </div>
+        <div id="historyStats" class="mb-3 text-sm muted"></div>
+        <div id="historyTableWrapper" class="overflow-auto">
+            <table id="historyTable">
+              <thead>
+                <tr>
+                  <th>📅 التاريخ</th>
+                  <th>المحفظة</th>
+                  <th>📱 إلى/من</th>
+                  <th>💰 المبلغ</th>
+                  <th>الربح</th>
+                  <th>📶 الشبكة</th>
+                  <th>الحالة</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="historyTbody"></tbody>
+            </table>
+        </div>
+        <div class="mt-4 text-right">
+            <strong>إجمالي الأرباح: <span id="modalTotalProfit">0</span> جنيه</strong>
+        </div>
+    </div>
   </div>
 
-  <!-- نافذة الإعدادات الجديدة -->
+  <!-- نافذة الإعدادات (لم تتغير) -->
   <div id="settingsBackdrop" class="modal-backdrop hidden">
     <div class="modal-card" role="dialog" aria-modal="true">
       <div class="flex items-center justify-between mb-4">
         <h3 class="font-bold text-lg">⚙️ الإعدادات العامة</h3>
         <button id="closeSettingsBtn" class="px-3 py-2 bg-gray-200 dark:bg-slate-600 rounded-lg text-sm">إغلاق</button>
       </div>
-
-      <!-- قسم نسبة الربح -->
       <div class="space-y-4">
         <div>
           <label for="profitMarginInput" class="block text-sm font-medium muted mb-1">نسبة الربح (%)</label>
           <input id="profitMarginInput" type="number" step="0.1" min="0" placeholder="مثال: 2" class="w-full px-3 py-2 rounded-lg border focus:outline-none" />
           <p class="text-xs muted mt-1">سيتم تطبيق هذه النسبة على كل المعاملات لحساب الربح.</p>
         </div>
-
         <hr class="dark:border-slate-700"/>
-
-        <!-- قسم إدارة المحافظ -->
         <div>
           <h4 class="font-semibold mb-2">إدارة المحافظ (أرقامك)</h4>
-          <!-- قائمة المحافظ الحالية -->
-          <div id="walletsList" class="space-y-2 mb-4">
-            <!-- سيتم ملء هذه القائمة بواسطة الجافاسكريبت -->
-          </div>
-          
-          <!-- نموذج إضافة محفظة جديدة -->
+          <div id="walletsList" class="space-y-2 mb-4"></div>
           <div class="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border dark:border-slate-700">
             <h5 class="font-semibold mb-3">إضافة محفظة جديدة</h5>
             <form id="addWalletForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -155,195 +219,228 @@
     </div>
   </div>
 
-
   <script>
-    // --- JavaScript Logic ---
+    // --- JavaScript Logic (Updated) ---
 
-    // تعريف كل العناصر المستخدمة في الصفحة
-    const settingsBtn = document.getElementById('settingsBtn');
-    const settingsBackdrop = document.getElementById('settingsBackdrop');
-    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-    const profitMarginInput = document.getElementById('profitMarginInput');
-    const addWalletForm = document.getElementById('addWalletForm');
-    const walletsList = document.getElementById('walletsList');
-    
-    // باقي العناصر القديمة (سنستخدمها لاحقاً)
-    const sendTabBtn = document.getElementById('sendTabBtn');
-    const receiveTabBtn = document.getElementById('receiveTabBtn');
-    const sendPanel = document.getElementById('sendPanel');
-    const receivePanel = document.getElementById('receivePanel');
-    const historyBtn = document.getElementById('historyBtn');
-    const themeToggle = document.getElementById('themeToggle');
+    // --- Element Definitions ---
+    const settingsBtn = document.getElementById('settingsBtn'), settingsBackdrop = document.getElementById('settingsBackdrop'), closeSettingsBtn = document.getElementById('closeSettingsBtn'), profitMarginInput = document.getElementById('profitMarginInput'), addWalletForm = document.getElementById('addWalletForm'), walletsList = document.getElementById('walletsList');
+    const sendTabBtn = document.getElementById('sendTabBtn'), receiveTabBtn = document.getElementById('receiveTabBtn'), sendPanel = document.getElementById('sendPanel'), receivePanel = document.getElementById('receivePanel');
+    const historyBtn = document.getElementById('historyBtn'), themeToggle = document.getElementById('themeToggle');
+    const sendWalletSelector = document.getElementById('sendWalletSelector'), receiveWalletSelector = document.getElementById('receiveWalletSelector'), phoneInput = document.getElementById('phoneInput'), amountInput = document.getElementById('amountInput'), networkButtons = document.querySelectorAll('.network-btn');
+    const generateBtn = document.getElementById('generateBtn'), previewBtn = document.getElementById('previewBtn'), receivedAmountInput = document.getElementById('receivedAmountInput'), recordReceivedBtn = document.getElementById('recordReceivedBtn'), pickContactBtn = document.getElementById('pickContactBtn');
+    const historyBackdrop = document.getElementById('historyBackdrop'), historyTbody = document.getElementById('historyTbody'), historyStats = document.getElementById('historyStats'), closeHistoryBtn = document.getElementById('closeHistoryBtn'), modalTotalProfit = document.getElementById('modalTotalProfit');
+    let selectedNetwork = 'vodafone';
 
-    // --- النظام الجديد لإدارة البيانات ---
+    // --- Database Management ---
     const DB_KEY = 'ban_pos_database_v1';
-
-    // هيكل البيانات الافتراضي
-    const defaultDB = {
-        settings: {
-            profitMargin: 2.0 // نسبة ربح افتراضية 2%
-        },
-        wallets: [
-            // مثال على شكل المحفظة
-            // { id: '01012345678', alias: 'فودافون شخصي', openingBalance: 5000, limit: 100 }
-        ],
-        transactions: []
-    };
-
-    // وظيفة لتحميل قاعدة البيانات من localStorage
-    function loadDB() {
-        const data = localStorage.getItem(DB_KEY);
-        // إذا لم توجد بيانات، نستخدم البيانات الافتراضية
-        return data ? JSON.parse(data) : defaultDB;
-    }
-
-    // وظيفة لحفظ قاعدة البيانات في localStorage
-    function saveDB(db) {
-        localStorage.setItem(DB_KEY, JSON.stringify(db));
-    }
-
-
-    // --- وظائف إدارة الإعدادات والمحافظ ---
-
-    // عرض نافذة الإعدادات
-    settingsBtn.addEventListener('click', () => {
-        settingsBackdrop.classList.remove('hidden');
-        loadSettingsIntoUI(); // تحميل الإعدادات الحالية في الواجهة
-    });
-
-    // إغلاق نافذة الإعدادات
-    closeSettingsBtn.addEventListener('click', () => {
-        settingsBackdrop.classList.add('hidden');
-    });
-
-    // تحميل الإعدادات والمحافظ وعرضها في الواجهة
-    function loadSettingsIntoUI() {
-        const db = loadDB();
-        // تحميل نسبة الربح
-        profitMarginInput.value = db.settings.profitMargin;
-        // عرض قائمة المحافظ
-        renderWalletsList(db.wallets);
-    }
+    const defaultDB = { settings: { profitMargin: 2.0 }, wallets: [], transactions: [] };
+    function loadDB() { return JSON.parse(localStorage.getItem(DB_KEY) || JSON.stringify(defaultDB)); }
+    function saveDB(db) { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
     
-    // حفظ نسبة الربح عند تغييرها
+    // --- Utility Functions ---
+    function getWalletCalculations(wallet, allTransactions) {
+        const walletTransactions = allTransactions.filter(t => t.sourceWalletId === wallet.id);
+        const sent = walletTransactions.filter(t => t.type === 'sent').reduce((sum, t) => sum + t.amount, 0);
+        const received = walletTransactions.filter(t => t.type === 'received').reduce((sum, t) => sum + t.amount, 0);
+        const currentBalance = wallet.openingBalance - sent + received;
+        return { txCount: walletTransactions.length, currentBalance };
+    }
+    function onlyDigits(value = '') { return String(value || '').replace(/[^0-9]/g, ''); }
+    const templates = { vodafone: (p, a) => `*9*7*${p}*${a}#`, etisalat: (p, a) => `*777*${p}*${a}#`, orange: (p, a) => `*115*1*${p}*${a}#`, we: (p, a) => `*322*${p}*${a}#` };
+    const networkLabels = { vodafone: 'فودافون', etisalat: 'اتصالات', orange: 'أورانج', we: 'وي', instapay: 'إنستاباي', received_cash: 'استلام نقدي' };
+    
+    // --- Settings Modal Logic ---
+    settingsBtn.addEventListener('click', () => { settingsBackdrop.classList.remove('hidden'); loadSettingsIntoUI(); });
+    closeSettingsBtn.addEventListener('click', () => { settingsBackdrop.classList.add('hidden'); populateWalletSelectors(); });
     profitMarginInput.addEventListener('change', () => {
         const db = loadDB();
         const newMargin = parseFloat(profitMarginInput.value);
-        if (!isNaN(newMargin) && newMargin >= 0) {
-            db.settings.profitMargin = newMargin;
-            saveDB(db);
-            // يمكن إضافة رسالة تأكيد هنا
-        } else {
-            alert('الرجاء إدخال نسبة ربح صالحة.');
-            profitMarginInput.value = db.settings.profitMargin; // إعادة القيمة القديمة
-        }
+        if (!isNaN(newMargin) && newMargin >= 0) { db.settings.profitMargin = newMargin; saveDB(db); } 
+        else { alert('الرجاء إدخال نسبة ربح صالحة.'); profitMarginInput.value = db.settings.profitMargin; }
     });
-
-    // عرض قائمة المحافظ في واجهة الإعدادات
-    function renderWalletsList(wallets) {
-        walletsList.innerHTML = ''; // تفريغ القائمة
-        if (wallets.length === 0) {
-            walletsList.innerHTML = `<p class="text-sm muted text-center">لم تقم بإضافة أي محافظ بعد.</p>`;
-            return;
-        }
-
-        wallets.forEach(wallet => {
+    addWalletForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const number = document.getElementById('walletNumber').value.trim(), alias = document.getElementById('walletAlias').value.trim(), balance = parseFloat(document.getElementById('walletBalance').value), limit = parseInt(document.getElementById('walletLimit').value);
+        if (!number || isNaN(balance) || isNaN(limit)) { alert('الرجاء ملء جميع الحقول المطلوبة بشكل صحيح.'); return; }
+        const db = loadDB();
+        if (db.wallets.some(w => w.id === number)) { alert('هذه المحفظة (الرقم) موجودة بالفعل.'); return; }
+        db.wallets.push({ id: number, alias: alias, openingBalance: balance, limit: limit });
+        saveDB(db);
+        addWalletForm.reset();
+        renderWalletsList();
+    });
+    function loadSettingsIntoUI() { const db = loadDB(); profitMarginInput.value = db.settings.profitMargin; renderWalletsList(); }
+    function renderWalletsList() {
+        const db = loadDB();
+        walletsList.innerHTML = '';
+        if (db.wallets.length === 0) { walletsList.innerHTML = `<p class="text-sm muted text-center">لم تقم بإضافة أي محافظ بعد.</p>`; return; }
+        db.wallets.forEach(wallet => {
+            const { currentBalance, txCount } = getWalletCalculations(wallet, db.transactions);
             const walletEl = document.createElement('div');
             walletEl.className = 'flex items-center justify-between p-2 rounded-lg bg-slate-100 dark:bg-slate-800';
             walletEl.innerHTML = `
                 <div>
                     <p class="font-semibold">${wallet.alias || wallet.id}</p>
-                    <p class="text-xs muted">الرصيد: ${wallet.openingBalance} ج | الحد: ${wallet.limit} معاملة</p>
+                    <p class="text-xs muted">الرصيد الحالي: ${currentBalance.toFixed(2)} ج | المعاملات: ${txCount}/${wallet.limit}</p>
                 </div>
-                <button data-id="${wallet.id}" class="delete-wallet-btn px-2 py-1 text-xs text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 rounded">حذف</button>
-            `;
+                <button data-id="${wallet.id}" class="delete-wallet-btn px-2 py-1 text-xs text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 rounded">حذف</button>`;
             walletsList.appendChild(walletEl);
         });
-
-        // إضافة مستمعي الأحداث لأزرار الحذف
-        document.querySelectorAll('.delete-wallet-btn').forEach(btn => {
-            btn.addEventListener('click', handleDeleteWallet);
+        walletsList.querySelectorAll('.delete-wallet-btn').forEach(btn => btn.addEventListener('click', handleDeleteWallet));
+    }
+    function handleDeleteWallet(e) {
+        const walletId = e.target.dataset.id;
+        if (confirm(`هل أنت متأكد من حذف المحفظة ${walletId}؟ سيتم حذفها وجميع معاملاتها نهائياً.`)) {
+            const db = loadDB();
+            db.wallets = db.wallets.filter(w => w.id !== walletId);
+            db.transactions = db.transactions.filter(t => t.sourceWalletId !== walletId);
+            saveDB(db);
+            renderWalletsList();
+        }
+    }
+    
+    // --- Main UI Logic ---
+    function populateWalletSelectors() {
+        const db = loadDB();
+        [sendWalletSelector, receiveWalletSelector].forEach(selector => selector.innerHTML = '');
+        if (db.wallets.length === 0) {
+            const defaultOption = `<option value="" disabled>الرجاء إضافة محفظة من الإعدادات ⚙️</option>`;
+            [sendWalletSelector, receiveWalletSelector].forEach(selector => selector.innerHTML = defaultOption);
+            return;
+        }
+        db.wallets.forEach(wallet => {
+            const { currentBalance, txCount } = getWalletCalculations(wallet, db.transactions);
+            const optionText = `${wallet.alias || wallet.id} (رصيد: ${currentBalance.toFixed(2)} ج | ${txCount}/${wallet.limit})`;
+            const optionHTML = `<option value="${wallet.id}">${optionText}</option>`;
+            [sendWalletSelector, receiveWalletSelector].forEach(selector => selector.innerHTML += optionHTML);
         });
     }
 
-    // إضافة محفظة جديدة
-    addWalletForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const number = document.getElementById('walletNumber').value.trim();
-        const alias = document.getElementById('walletAlias').value.trim();
-        const balance = parseFloat(document.getElementById('walletBalance').value);
-        const limit = parseInt(document.getElementById('walletLimit').value);
-
-        if (!number || isNaN(balance) || isNaN(limit)) {
-            alert('الرجاء ملء جميع الحقول المطلوبة بشكل صحيح.');
-            return;
-        }
-
+    generateBtn.addEventListener('click', () => {
         const db = loadDB();
-
-        // التحقق من أن الرقم غير موجود بالفعل
-        if (db.wallets.some(w => w.id === number)) {
-            alert('هذه المحفظة (الرقم) موجودة بالفعل.');
-            return;
-        }
-
-        db.wallets.push({ id: number, alias: alias, openingBalance: balance, limit: limit });
-        saveDB(db);
+        const sourceWalletId = sendWalletSelector.value, recipientPhone = phoneInput.value.trim(), amount = parseFloat(amountInput.value);
+        if (!sourceWalletId) { alert('الرجاء اختيار محفظة للتحويل منها.'); return; }
+        if (!recipientPhone || isNaN(amount) || amount <= 0) { alert('الرجاء إدخال رقم مستلم ومبلغ صحيحين.'); return; }
+        const sourceWallet = db.wallets.find(w => w.id === sourceWalletId);
+        const { currentBalance, txCount } = getWalletCalculations(sourceWallet, db.transactions);
+        if (txCount >= sourceWallet.limit) { alert(`لقد وصلت للحد الأقصى للمعاملات لهذه المحفظة (${sourceWallet.limit}).`); return; }
+        if (currentBalance < amount) { alert(`الرصيد في هذه المحفظة (${currentBalance.toFixed(2)} ج) غير كافٍ لإتمام هذه العملية.`); return; }
         
-        addWalletForm.reset(); // تفريغ النموذج
-        renderWalletsList(db.wallets); // إعادة عرض القائمة
+        const profit = amount * (db.settings.profitMargin / 100);
+        const newTransaction = {
+            id: Date.now(), type: 'sent', sourceWalletId: sourceWallet.id, recipient: onlyDigits(recipientPhone), amount: amount, profit: profit, network: selectedNetwork, date: new Date().toLocaleString('ar-EG'), confirmed: false
+        };
+        db.transactions.unshift(newTransaction);
+        saveDB(db);
+        populateWalletSelectors();
+        
+        const link = `tel:${encodeURIComponent(templates[selectedNetwork](onlyDigits(recipientPhone), amount))}`;
+        if (confirm('تم تسجيل المعاملة بنجاح. هل تريد فتح تطبيق الاتصال الآن لإتمام التحويل؟')) {
+            try { window.location.href = link; } catch (e) { console.error(e); alert('فشل فتح تطبيق الاتصال تلقائياً.'); }
+        }
+        phoneInput.value = ''; amountInput.value = '';
     });
 
-    // حذف محفظة
-    function handleDeleteWallet(e) {
-        const walletId = e.target.dataset.id;
-        if (confirm(`هل أنت متأكد من حذف المحفظة ${walletId}؟ سيتم حذفها نهائياً.`)) {
-            const db = loadDB();
-            db.wallets = db.wallets.filter(w => w.id !== walletId);
-            saveDB(db);
-            renderWalletsList(db.wallets); // إعادة عرض القائمة
+    recordReceivedBtn.addEventListener('click', () => {
+        const db = loadDB();
+        const targetWalletId = receiveWalletSelector.value, amount = parseFloat(receivedAmountInput.value);
+        if (!targetWalletId) { alert('الرجاء اختيار محفظة للاستلام فيها.'); return; }
+        if (isNaN(amount) || amount <= 0) { alert('الرجاء إدخال مبلغ صحيح.'); return; }
+        
+        const profit = amount * (db.settings.profitMargin / 100);
+        const newTransaction = {
+            id: Date.now(), type: 'received', sourceWalletId: targetWalletId, recipient: '', amount: amount, profit: profit, network: 'received_cash', date: new Date().toLocaleString('ar-EG'), confirmed: true
+        };
+        db.transactions.unshift(newTransaction);
+        saveDB(db);
+        populateWalletSelectors();
+        receivedAmountInput.value = '';
+        alert(`تم تسجيل استلام مبلغ ${amount} جنيه في المحفظة.`);
+    });
+    
+    // --- History Modal Logic ---
+    historyBtn.addEventListener('click', () => { renderHistory(); historyBackdrop.classList.remove('hidden'); });
+    closeHistoryBtn.addEventListener('click', () => { historyBackdrop.classList.add('hidden'); });
+    function renderHistory() {
+        const db = loadDB();
+        historyTbody.innerHTML = '';
+        const totalProfit = db.transactions.reduce((sum, tx) => sum + tx.profit, 0);
+        modalTotalProfit.textContent = totalProfit.toFixed(2);
+        historyStats.innerHTML = `📊 إجمالي المعاملات: <strong>${db.transactions.length}</strong>`;
+
+        if (db.transactions.length === 0) { historyTbody.innerHTML = `<tr><td colspan="8" class="text-center muted">لا توجد معاملات بعد.</td></tr>`; return; }
+        db.transactions.forEach(tx => {
+            const tr = document.createElement('tr');
+            if (tx.type === 'received') tr.classList.add('received-item');
+            const sourceWallet = db.wallets.find(w => w.id === tx.sourceWalletId);
+            const statusBadge = tx.type === 'received' ? '<span class="badge received">تم الاستلام</span>' : (tx.confirmed ? '<span class="badge confirmed">تم التحويل</span>' : '<span class="badge pending">قيد التنفيذ</span>');
+            const actions = `${tx.type === 'sent' && !tx.confirmed ? `<button data-id="${tx.id}" class="confirm-tx-btn px-2 py-1 text-xs rounded bg-emerald-500 text-white btn-anim">تأكيد</button>` : ''} <button data-id="${tx.id}" class="delete-tx-btn px-2 py-1 text-xs rounded bg-red-100 dark:bg-red-900/50 dark:text-red-300 ml-2 btn-anim">حذف</button>`;
+
+            tr.innerHTML = `
+                <td>${tx.date}</td>
+                <td>${sourceWallet ? (sourceWallet.alias || sourceWallet.id) : 'محذوفة'}</td>
+                <td>${tx.recipient || '-'}</td>
+                <td>${tx.amount.toFixed(2)}</td>
+                <td>${tx.profit.toFixed(2)}</td>
+                <td>${networkLabels[tx.network] || tx.network}</td>
+                <td>${statusBadge}</td>
+                <td class="whitespace-nowrap">${actions}</td>`;
+            historyTbody.appendChild(tr);
+        });
+        historyTbody.querySelectorAll('.confirm-tx-btn').forEach(btn => btn.addEventListener('click', (e) => handleTxAction(e.target.dataset.id, 'confirm')));
+        historyTbody.querySelectorAll('.delete-tx-btn').forEach(btn => btn.addEventListener('click', (e) => handleTxAction(e.target.dataset.id, 'delete')));
+    }
+    function handleTxAction(txId, action) {
+        const db = loadDB();
+        const txIndex = db.transactions.findIndex(t => t.id == txId);
+        if (txIndex === -1) return;
+        if (action === 'confirm') {
+            db.transactions[txIndex].confirmed = true;
+        } else if (action === 'delete') {
+            if (confirm('هل أنت متأكد من حذف هذه المعاملة؟ لا يمكن التراجع عن هذا الإجراء.')) {
+                db.transactions.splice(txIndex, 1);
+            }
         }
+        saveDB(db);
+        renderHistory();
+        populateWalletSelectors(); // Update balances after action
     }
 
-
-    // --- الوظائف القديمة (مؤقتاً) ---
+    // --- Theme & Tabs & Other Initializers ---
     function switchTab(activeTab) {
-      if (activeTab === 'send') {
-        sendPanel.classList.remove('hidden'); receivePanel.classList.add('hidden');
-        sendTabBtn.style.backgroundColor = 'var(--tab-active-bg)'; sendTabBtn.style.color = 'var(--text)';
-        receiveTabBtn.style.backgroundColor = 'transparent'; receiveTabBtn.style.color = 'var(--tab-inactive-text)';
-      } else {
-        sendPanel.classList.add('hidden'); receivePanel.classList.remove('hidden');
-        receiveTabBtn.style.backgroundColor = 'var(--tab-active-bg)'; receiveTabBtn.style.color = 'var(--text)';
-        sendTabBtn.style.backgroundColor = 'transparent'; sendTabBtn.style.color = 'var(--tab-inactive-text)';
-      }
+        const isSend = activeTab === 'send';
+        sendPanel.classList.toggle('hidden', !isSend);
+        receivePanel.classList.toggle('hidden', isSend);
+        sendTabBtn.style.backgroundColor = isSend ? 'var(--tab-active-bg)' : 'transparent';
+        sendTabBtn.style.color = isSend ? 'var(--text)' : 'var(--tab-inactive-text)';
+        receiveTabBtn.style.backgroundColor = !isSend ? 'var(--tab-active-bg)' : 'transparent';
+        receiveTabBtn.style.color = !isSend ? 'var(--text)' : 'var(--tab-inactive-text)';
     }
     sendTabBtn.addEventListener('click', () => switchTab('send'));
     receiveTabBtn.addEventListener('click', () => switchTab('receive'));
-
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     function applyTheme(mode) {
-      if (mode === 'dark') {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('theme','dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('theme','light');
-      }
-      switchTab(sendPanel.classList.contains('hidden') ? 'receive' : 'send');
+        document.documentElement.classList.toggle('dark', mode === 'dark');
+        localStorage.setItem('theme', mode);
+        switchTab(sendPanel.classList.contains('hidden') ? 'receive' : 'send');
     }
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     const savedTheme = localStorage.getItem('theme') || (prefersDark ? 'dark' : 'light');
     applyTheme(savedTheme);
-    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
     themeToggle.addEventListener('click', () => {
-      const now = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-      applyTheme(now);
-      themeToggle.textContent = now === 'dark' ? '☀️' : '🌙';
+        const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+        applyTheme(newTheme);
+        themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
     });
-    
-    // Initial setup
-    switchTab('send'); // تفعيل تبويب التحويل عند تحميل الصفحة
-    
+    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    function markSelected() { networkButtons.forEach(btn => btn.classList.toggle('network-active', btn.dataset.net === selectedNetwork)); }
+    networkButtons.forEach(btn => btn.addEventListener('click', () => { selectedNetwork = btn.dataset.net; markSelected(); }));
+
+    // Initial App Load
+    document.addEventListener('DOMContentLoaded', () => {
+      markSelected();
+      switchTab('send');
+      populateWalletSelectors();
+    });
   </script>
 </body>
 </html>
