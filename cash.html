@@ -4,221 +4,208 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>مولّد أكواد تحويل الكاش – بان للإعلانات</title>
-  <meta name="theme-color" content="#0d9488" />
-  <!-- أيقونة الموقع، تأكد من أن المسار صحيح أو استخدم مسار مطلق -->
+  <meta name="theme-color" content="#1e293b" />
   <link rel="icon" href="https://moslimtech.github.io/Ban/icons/icon-192.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     /* الخطوط */
     body { font-family: 'Tajawal', system-ui, -apple-system, 'Segoe UI', Roboto, Arial; }
 
-    /* تأثيرات Glassmorphism */
-    .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(6px); }
-
     /* تأثير حركة الأزرار */
-    .btn-anim { transition: transform .12s ease, box-shadow .12s ease; }
-    .btn-anim:active { transform: translateY(2px) scale(.995); }
+    .btn-anim { transition: transform .12s ease, box-shadow .12s ease, background-color .2s ease, border-color .2s ease; }
+    .btn-anim:active { transform: translateY(1px) scale(.995); }
 
     /* تصميم الـ Modal */
-    .modal-backdrop { position: fixed; inset:0; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:60; }
+    .modal-backdrop { position: fixed; inset:0; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:60; backdrop-filter: blur(4px); }
     .modal-card { width:95%; max-width:880px; max-height:85vh; overflow:auto; border-radius:12px; padding:16px; background:var(--card-bg); }
 
-    /* متغيرات الثيم (فاتح/داكن) */
+    /* --- متغيرات الثيم --- */
     :root {
-      --bg: linear-gradient(180deg,#f0f9ff,#ecfdf5);
-      --card-bg: rgba(255,255,255,0.95);
+      /* الوضع الفاتح */
+      --bg: #f0f9ff;
+      --card-bg: rgba(255, 255, 255, 0.95);
       --text: #0f172a;
       --muted: #475569;
+      --border-color: #e5e7eb;
+      --input-bg: #ffffff;
+      --input-border: #d1d5db;
+      --focus-border: #3b82f6;
+      --tab-active-bg: #ffffff;
+      --tab-inactive-text: #6b7280;
     }
     .dark {
-      --bg: linear-gradient(180deg,#071627,#042f2f);
-      --card-bg: rgba(2,6,23,0.75);
-      --text: #e6eef0;
+      /* الوضع المظلم المحسن */
+      --bg: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --text: #e2e8f0;
       --muted: #94a3b8;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --input-bg: rgba(51, 65, 85, 0.5);
+      --input-border: rgba(255, 255, 255, 0.15);
+      --focus-border: #38bdf8;
+      --tab-active-bg: rgba(51, 65, 85, 0.6);
+      --tab-inactive-text: #94a3b8;
     }
+
+    /* تطبيق الألوان */
     body { background: var(--bg); color: var(--text); }
     .muted { color: var(--muted); }
-
-    /* ستايل زر الشبكة النشط (مطابق للصورة) */
-    .network-active {
-        background: rgba(34,197,94,0.12); /* خلفية خضراء فاتحة */
-        border-color: #22c55e; /* حدود خضراء صلبة */
-        color: #166534; /* نص أخضر داكن */
+    .main-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
     }
+    input { background-color: var(--input-bg); border-color: var(--input-border); color: var(--text); }
+    input:focus { border-color: var(--focus-border); box-shadow: 0 0 0 3px var(--focus-border-shadow, rgba(59, 130, 246, 0.2)); }
+    .dark input:focus { --focus-border-shadow: rgba(56, 189, 248, 0.2); }
 
-    /* ستايل النقاط الملونة داخل أزرار الشبكات */
-    .color-dot {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        margin-left: 8px; /* المسافة بين النقطة والنص (للاتجاه من اليمين لليسار) */
-        vertical-align: middle;
-    }
+    /* ألوان الشبكات والأزرار */
+    .dark .network-btn { background-color: rgba(51, 65, 85, 0.3); }
+    .network-active { background: rgba(34, 197, 94, 0.12); border-color: #22c55e; }
+    .dark .network-active { background: rgba(56, 189, 248, 0.1); border-color: var(--focus-border); box-shadow: 0 0 12px rgba(56, 189, 248, 0.3); }
 
-    /* ستايل أيقونة إنستاباي المخططة */
-    .instapay-icon {
-        display: inline-flex;
-        align-items: center;
-        margin-left: 8px; /* المسافة بين الأيقونة والنص */
-        vertical-align: middle;
-    }
-    .instapay-stripe {
-        width: 8px;
-        height: 10px;
-    }
-    .instapay-stripe:first-child { background-color: #facc15; } /* أصفر */
-    .instapay-stripe:last-child { background-color: #0f172a; } /* داكن */
-
-    /* تعديل اتجاه الأيقونة والنص داخل أزرار الشبكات لتناسب RTL */
-    .network-btn {
-        flex-direction: row-reverse; /* لوضع الأيقونة قبل النص */
-    }
-
-    /* تصميم الجدول داخل الـ modal */
-    table { width:100%; border-collapse: collapse; }
-    th, td { padding:8px 10px; border-bottom:1px solid rgba(0,0,0,0.06); text-align:right; font-size:14px; }
+    /* ألوان الشارات في الوضع المظلم */
     .badge { padding:6px 8px; border-radius:8px; font-size:13px; }
     .confirmed { background: #dcfce7; color:#166534; }
     .pending { background: #fff7ed; color:#92400e; }
+    .received { background: #dbeafe; color:#1e40af; }
+    .dark .confirmed { background: rgba(74, 222, 128, 0.15); color: #a7f3d0; }
+    .dark .pending { background: rgba(251, 191, 36, 0.15); color: #fde68a; }
+    .dark .received { background: rgba(96, 165, 250, 0.15); color: #bfdbfe; }
+    .dark .received-item { background-color: rgba(56, 189, 248, 0.05); }
 
-    /* إضافة ظل وحدود خفيفة للكارد الرئيسي (مطابق للصورة) */
-    .modal-card.glass {
-        border: 1px solid rgba(0,0,0,0.05);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
+    /* حدود الجدول */
+    th, td { border-bottom: 1px solid var(--border-color); }
+    table { width:100%; border-collapse: collapse; }
+    th, td { padding:8px 10px; text-align:right; font-size:14px; }
+    
+    /* أيقونات ملونة */
+    .color-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 8px; vertical-align: middle; }
+    .instapay-icon { display: inline-flex; align-items: center; margin-left: 8px; vertical-align: middle; }
+    .instapay-stripe { width: 8px; height: 10px; }
+    .instapay-stripe:first-child { background-color: #facc15; }
+    .instapay-stripe:last-child { background-color: #0f172a; }
+    .dark .instapay-stripe:last-child { background-color: #e2e8f0; }
+    .network-btn { flex-direction: row-reverse; }
+
   </style>
-
-  <!-- manifest by language (لتحويل التطبيق لـ PWA) -->
-  <script>
-    const userLang = navigator.language || navigator.userLanguage || 'ar';
-    const manifest = document.createElement('link');
-    manifest.rel = 'manifest';
-    // تأكد من وجود ملفات manifest-ar.json و manifest-en.json في المسار الصحيح
-    // هذا المسار افتراضي، قد تحتاج لتعديله ليناسب موقع ملفاتك
-    if (userLang.startsWith('ar')) manifest.href = '/Ban/manifest-ar.json?v=1';
-    else manifest.href = '/Ban/manifest-en.json?v=1';
-    document.head.appendChild(manifest);
-  </script>
 </head>
-<body class="min-h-screen flex items-center justify-center p-6">
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-6">
   <div class="max-w-4xl w-full">
     <header class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-4">
-        <!-- شعار التطبيق -->
         <img src="https://moslimtech.github.io/Ban/icons/icon-192.png" alt="logo" class="w-12 h-12 rounded-lg shadow" />
         <div>
-          <h1 class="text-lg font-bold">مولّد أكواد تحويل الكاش – بان للإعلانات</h1>
-          <p class="text-sm muted">سهل • سريع • آمن</p>
+          <h1 class="text-lg font-bold">تسجيل المعاملات المالية</h1>
+          <p class="text-sm muted">بان للإعلانات</p>
         </div>
       </div>
-
       <div class="flex items-center gap-2">
-        <!-- زر الصفحة الرئيسية (أيقونة المنزل) -->
-        <a href="https://moslimtech.github.io/Ban/" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-orange-100 shadow btn-anim hover:shadow-md text-xl">🏠</a>
-        <!-- زر تبديل الثيم (فاتح/داكن) -->
-        <button id="themeToggle" class="w-10 h-10 rounded-full border btn-anim flex items-center justify-center text-xl">🌗</button>
+        <a href="https://moslimtech.github.io/Ban/" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-orange-100 dark:bg-slate-700 shadow btn-anim hover:shadow-md text-xl">🏠</a>
+        <button id="themeToggle" class="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-600 btn-anim flex items-center justify-center text-xl">🌗</button>
       </div>
     </header>
 
-    <main class="modal-card glass p-5">
-      <form id="cashForm" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium muted mb-1 flex items-center gap-1">
-              <!-- أيقونة الهاتف -->
-              <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.774a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path></svg>
-              رقم المستلم
-            </label>
-            <div class="flex gap-2 items-center">
-              <!-- زر اختيار جهة اتصال -->
-              <button type="button" id="pickContactBtn" class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500 text-white btn-anim hover:bg-emerald-600 text-lg">👤</button>
-              <!-- حقل إدخال رقم الهاتف -->
-              <input id="phoneInput" type="tel" inputmode="tel" placeholder="01xxxxxxxxx" class="flex-1 px-3 py-2 rounded-lg border focus:outline-none" />
-            </div>
-            <p class="text-xs muted mt-1 mr-12 text-left">مثال: 01012345678</p>
-          </div>
+    <main class="main-card">
+      <!-- أزرار التبويبات -->
+      <div class="flex border-b" style="border-color: var(--border-color);">
+        <button id="sendTabBtn" class="tab-btn flex-1 py-3 px-4 text-sm font-semibold transition-colors duration-200">تحويل أموال</button>
+        <button id="receiveTabBtn" class="tab-btn flex-1 py-3 px-4 text-sm font-semibold transition-colors duration-200">تسجيل استلام</button>
+      </div>
 
-          <div>
-            <label class="block text-sm font-medium muted mb-1 flex items-center gap-1">
-              <!-- أيقونة المال -->
-              <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.457 4.907a1 1 0 01-.708 1.41l-2.008.402a1 1 0 01-1.127-.514L9.896 15.68a1 1 0 01.442-.319l2.25-.45a1 1 0 011.41.708zM15 11a1 1 0 100-2 1 1 0 000 2zm-5 6a1 1 0 110-2 1 1 0 010 2z" clip-rule="evenodd"></path></svg>
-              المبلغ (جنيه)
-            </label>
-            <!-- حقل إدخال المبلغ -->
-            <input id="amountInput" type="number" min="1" value="25" placeholder="25" class="w-full px-3 py-2 rounded-lg border focus:outline-none" />
-            <p class="text-xs muted mt-1">الحد الأدنى: 1 جنيه</p>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium muted mb-2 flex items-center gap-1">
-            <!-- أيقونة إشارة الشبكة -->
-            <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
-            اختر الشبكة
-          </label>
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-            <!-- أزرار اختيار الشبكة مع الأيقونات والنصوص -->
-            <button type="button" data-net="vodafone" class="network-btn px-3 py-2 rounded-lg border bg-white flex items-center justify-center btn-anim">
-                <span class="color-dot" style="background-color: #ef4444;"></span>فودافون
-            </button>
-            <button type="button" data-net="etisalat" class="network-btn px-3 py-2 rounded-lg border bg-white flex items-center justify-center btn-anim">
-                <span class="color-dot" style="background-color: #22c55e;"></span>اتصالات
-            </button>
-            <button type="button" data-net="orange" class="network-btn px-3 py-2 rounded-lg border bg-white flex items-center justify-center btn-anim">
-                <span class="color-dot" style="background-color: #f97316;"></span>اورانج
-            </button>
-            <button type="button" data-net="we" class="network-btn px-3 py-2 rounded-lg border bg-white flex items-center justify-center btn-anim">
-                <span class="color-dot" style="background-color: #8b5cf6;"></span>وي
-            </button>
-            <button type="button" data-net="instapay" class="network-btn px-3 py-2 rounded-lg border bg-white flex items-center justify-center btn-anim">
-                <span class="instapay-icon"><span class="instapay-stripe"></span><span class="instapay-stripe"></span></span>إنستاباي
-            </button>
-          </div>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-3 justify-end">
-          <!-- زر "تحويل الآن" -->
-          <button id="generateBtn" type="button" class="px-4 py-2 rounded-xl bg-teal-500 text-white font-semibold shadow-lg btn-anim hover:bg-teal-600 flex items-center gap-2">
-            <span class="text-lg">🚀</span> تحويل الآن
-          </button>
-          <!-- زر "معاينة" -->
-          <button id="previewBtn" type="button" class="px-4 py-2 rounded-xl bg-white border font-medium btn-anim hover:shadow flex items-center gap-2">
-            <span class="text-lg">👁️</span> معاينة
-          </button>
-          <!-- زر "السجل" -->
-          <button id="historyBtn" type="button" class="px-4 py-2 rounded-xl bg-amber-500 text-white btn-anim hover:bg-amber-600 flex items-center gap-2">
-            <span class="text-lg">📜</span> السجل
-          </button>
-        </div>
-
-        <!-- صندوق النتائج (يظهر بعد التوليد) -->
-        <div id="resultBox" class="mt-4 hidden p-4 rounded-lg bg-white border">
-          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div class="flex-1">
-              <p class="text-sm muted">تم توليد الرابط/الكود — افتح التطبيق أو انسخ الكود:</p>
-              <pre id="resultText" class="code mt-2 text-sm bg-gray-50 p-2 rounded overflow-x-auto"></pre>
-              <div class="mt-3 flex flex-wrap gap-2">
-                <button id="copyBtn" class="px-3 py-2 rounded bg-sky-600 text-white btn-anim hover:bg-sky-700">نسخ</button>
-                <a id="openLinkBtn" class="px-3 py-2 rounded bg-emerald-500 text-white btn-anim hover:bg-emerald-600" href="#" target="_blank" rel="noopener">فتح</a>
-                <a id="whatsappBtn" class="px-3 py-2 rounded bg-green-600 text-white btn-anim hover:bg-green-700" href="#" target="_blank" rel="noopener">واتساب</a>
+      <!-- لوحات المحتوى -->
+      <div class="p-5 sm:p-6">
+        <!-- لوحة تحويل الأموال -->
+        <div id="sendPanel" class="tab-panel space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium muted mb-1">رقم المستلم</label>
+              <div class="flex gap-2 items-center">
+                <button type="button" id="pickContactBtn" class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500 text-white btn-anim hover:bg-emerald-600 text-lg">👤</button>
+                <input id="phoneInput" type="tel" inputmode="tel" placeholder="01xxxxxxxxx" class="flex-1 px-3 py-2 rounded-lg border focus:outline-none" />
               </div>
             </div>
-            <div class="text-sm muted text-right">
-              <div>الشبكة: <span id="showNetwork">-</span></div>
-              <div class="mt-2">الإجمالي المؤكد: <strong id="totalConfirmed">0</strong> ج</div>
+            <div>
+              <label class="block text-sm font-medium muted mb-1">المبلغ (جنيه)</label>
+              <input id="amountInput" type="number" min="1" value="25" placeholder="25" class="w-full px-3 py-2 rounded-lg border focus:outline-none" />
             </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium muted mb-2">اختر الشبكة</label>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <button type="button" data-net="vodafone" class="network-btn px-3 py-2 rounded-lg border bg-white dark:bg-transparent flex items-center justify-center btn-anim">
+                  <span class="color-dot" style="background-color: #ef4444;"></span>فودافون
+              </button>
+              <button type="button" data-net="etisalat" class="network-btn px-3 py-2 rounded-lg border bg-white dark:bg-transparent flex items-center justify-center btn-anim">
+                  <span class="color-dot" style="background-color: #22c55e;"></span>اتصالات
+              </button>
+              <button type="button" data-net="orange" class="network-btn px-3 py-2 rounded-lg border bg-white dark:bg-transparent flex items-center justify-center btn-anim">
+                  <span class="color-dot" style="background-color: #f97316;"></span>اورانج
+              </button>
+              <button type="button" data-net="we" class="network-btn px-3 py-2 rounded-lg border bg-white dark:bg-transparent flex items-center justify-center btn-anim">
+                  <span class="color-dot" style="background-color: #8b5cf6;"></span>وي
+              </button>
+              <button type="button" data-net="instapay" class="network-btn px-3 py-2 rounded-lg border bg-white dark:bg-transparent flex items-center justify-center btn-anim">
+                  <span class="instapay-icon"><span class="instapay-stripe"></span><span class="instapay-stripe"></span></span>إنستاباي
+              </button>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-3 justify-end pt-2">
+            <button id="previewBtn" type="button" class="px-4 py-2 rounded-xl bg-white dark:bg-slate-700 border dark:border-slate-600 font-medium btn-anim hover:shadow flex items-center gap-2">
+              <span class="text-lg">👁️</span> معاينة
+            </button>
+            <button id="generateBtn" type="button" class="px-4 py-2 rounded-xl bg-teal-500 text-white font-semibold shadow-lg btn-anim hover:bg-teal-600 flex items-center gap-2">
+              <span class="text-lg">🚀</span> تحويل الآن
+            </button>
           </div>
         </div>
 
-      </form>
+        <!-- لوحة تسجيل الاستلام -->
+        <div id="receivePanel" class="tab-panel hidden">
+          <div class="space-y-4 max-w-sm mx-auto text-center">
+            <label class="block text-sm font-medium muted mb-1">المبلغ المستلم (جنيه)</label>
+            <input id="receivedAmountInput" type="number" min="1" placeholder="مثال: 100" class="w-full text-center px-3 py-2 text-lg rounded-lg border focus:outline-none" />
+            <button id="recordReceivedBtn" type="button" class="w-full px-4 py-2 rounded-xl bg-blue-500 text-white font-semibold shadow-lg btn-anim hover:bg-blue-600 flex items-center justify-center gap-2">
+              <span class="text-lg">📥</span> تسجيل استلام
+            </button>
+            <p class="text-xs muted">سيتم إضافة المبلغ للسجل بتاريخ اليوم.</p>
+          </div>
+        </div>
+        
+        <!-- صندوق النتائج (مشترك) -->
+        <div id="resultBox" class="mt-4 hidden p-4 rounded-lg bg-white dark:bg-slate-800 border dark:border-slate-700">
+            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+              <div class="flex-1">
+                <p class="text-sm muted">تم توليد الرابط/الكود:</p>
+                <pre id="resultText" class="code mt-2 text-sm bg-gray-50 dark:bg-slate-900 p-2 rounded overflow-x-auto"></pre>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <button id="copyBtn" class="px-3 py-2 rounded bg-sky-600 text-white btn-anim hover:bg-sky-700">نسخ</button>
+                  <a id="openLinkBtn" class="px-3 py-2 rounded bg-emerald-500 text-white btn-anim hover:bg-emerald-600" href="#" target="_blank" rel="noopener">فتح</a>
+                  <a id="whatsappBtn" class="px-3 py-2 rounded bg-green-600 text-white btn-anim hover:bg-green-700" href="#" target="_blank" rel="noopener">واتساب</a>
+                </div>
+              </div>
+              <div class="text-sm muted text-right">
+                <div>الشبكة: <span id="showNetwork">-</span></div>
+                <div class="mt-2">الإجمالي المؤكد: <strong id="totalConfirmed">0</strong> ج</div>
+              </div>
+            </div>
+        </div>
+      </div>
+      
+      <!-- زر السجل العام -->
+      <div class="text-center p-4 border-t" style="border-color: var(--border-color);">
+        <button id="historyBtn" type="button" class="px-4 py-2 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-medium btn-anim hover:shadow flex items-center gap-2 mx-auto">
+          <span class="text-lg">📜</span> عرض سجل المعاملات
+        </button>
+      </div>
     </main>
 
-    <!-- فوتر الصفحة -->
     <footer class="mt-4 text-center text-xs muted">© 2025 بان للإعلانات • جميع الحقوق محفوظة</footer>
   </div>
 
-  <!-- History Modal (يظهر عند الضغط على زر "السجل") -->
+  <!-- Modal and other hidden elements remain the same -->
   <div id="historyBackdrop" class="modal-backdrop hidden">
     <div class="modal-card" role="dialog" aria-modal="true">
       <div class="flex flex-wrap items-center justify-between mb-3 gap-2">
@@ -226,14 +213,12 @@
         <div class="flex flex-wrap gap-2">
           <button id="downloadCsvBtn" class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">💾 تحميل CSV</button>
           <button id="clearHistoryBtn" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm">🗑️ مسح الكل</button>
-          <button id="closeHistoryBtn" class="px-3 py-2 bg-gray-200 rounded-lg text-sm">إغلاق</button>
+          <button id="closeHistoryBtn" class="px-3 py-2 bg-gray-200 dark:bg-slate-600 rounded-lg text-sm">إغلاق</button>
         </div>
       </div>
-
       <div id="historyStats" class="mb-3 text-sm muted"></div>
-
       <div id="historyTableWrapper" class="overflow-auto">
-        <table id="historyTable" class="bg-transparent">
+        <table id="historyTable">
           <thead>
             <tr>
               <th>📅 التاريخ</th>
@@ -244,12 +229,9 @@
               <th>الإجراءات</th>
             </tr>
           </thead>
-          <tbody id="historyTbody">
-            <!-- سيتم توليد الصفوف هنا بواسطة JavaScript -->
-          </tbody>
+          <tbody id="historyTbody"></tbody>
         </table>
       </div>
-
       <div class="mt-4 text-right">
         <strong>إجمالي المبلغ المؤكد: <span id="modalTotalConfirmed">0</span> جنيه</strong>
       </div>
@@ -257,7 +239,61 @@
   </div>
 
   <script>
-    /********** إعدادات أكواد التحويل **********/
+    // --- JavaScript Logic ---
+    const sendTabBtn = document.getElementById('sendTabBtn');
+    const receiveTabBtn = document.getElementById('receiveTabBtn');
+    const sendPanel = document.getElementById('sendPanel');
+    const receivePanel = document.getElementById('receivePanel');
+    
+    // --- بقية تعريفات العناصر ---
+    const phoneInput = document.getElementById('phoneInput');
+    const amountInput = document.getElementById('amountInput');
+    const networkButtons = document.querySelectorAll('.network-btn');
+    const generateBtn = document.getElementById('generateBtn');
+    const previewBtn = document.getElementById('previewBtn');
+    const historyBtn = document.getElementById('historyBtn');
+    const resultBox = document.getElementById('resultBox');
+    const resultText = document.getElementById('resultText');
+    const copyBtn = document.getElementById('copyBtn');
+    const openLinkBtn = document.getElementById('openLinkBtn');
+    const whatsappBtn = document.getElementById('whatsappBtn');
+    const showNetwork = document.getElementById('showNetwork');
+    const totalConfirmedSpan = document.getElementById('totalConfirmed');
+    const pickContactBtn = document.getElementById('pickContactBtn');
+    const historyBackdrop = document.getElementById('historyBackdrop');
+    const historyTbody = document.getElementById('historyTbody');
+    const historyStats = document.getElementById('historyStats');
+    const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    const downloadCsvBtn = document.getElementById('downloadCsvBtn');
+    const modalTotalConfirmed = document.getElementById('modalTotalConfirmed');
+    const themeToggle = document.getElementById('themeToggle');
+    const receivedAmountInput = document.getElementById('receivedAmountInput');
+    const recordReceivedBtn = document.getElementById('recordReceivedBtn');
+
+    // وظيفة تبديل التبويبات
+    function switchTab(activeTab) {
+      if (activeTab === 'send') {
+        sendPanel.classList.remove('hidden');
+        receivePanel.classList.add('hidden');
+        sendTabBtn.style.backgroundColor = 'var(--tab-active-bg)';
+        sendTabBtn.style.color = 'var(--text)';
+        receiveTabBtn.style.backgroundColor = 'transparent';
+        receiveTabBtn.style.color = 'var(--tab-inactive-text)';
+      } else {
+        sendPanel.classList.add('hidden');
+        receivePanel.classList.remove('hidden');
+        receiveTabBtn.style.backgroundColor = 'var(--tab-active-bg)';
+        receiveTabBtn.style.color = 'var(--text)';
+        sendTabBtn.style.backgroundColor = 'transparent';
+        sendTabBtn.style.color = 'var(--tab-inactive-text)';
+      }
+    }
+
+    sendTabBtn.addEventListener('click', () => switchTab('send'));
+    receiveTabBtn.addEventListener('click', () => switchTab('receive'));
+
+    // --- بقية السكريبت بدون تغيير ---
     const templates = {
       vodafone: (localPhone, amount) => `*9*7*${localPhone}*${amount}#`,
       etisalat: (localPhone, amount) => `*777*${localPhone}*${amount}#`,
@@ -272,37 +308,12 @@
       etisalat: 'اتصالات',
       orange: 'أورانج',
       we: 'وي',
-      instapay: 'إنستاباي'
+      instapay: 'إنستاباي',
+      received_cash: 'استلام نقدي'
     };
+    
+    let selectedNetwork = 'vodafone';
 
-    /********** عناصر الصفحة (مربوطة بالـ HTML ID) **********/
-    const phoneInput = document.getElementById('phoneInput');
-    const amountInput = document.getElementById('amountInput');
-    const networkButtons = document.querySelectorAll('.network-btn');
-    const generateBtn = document.getElementById('generateBtn');
-    const previewBtn = document.getElementById('previewBtn');
-    const historyBtn = document.getElementById('historyBtn');
-    const resultBox = document.getElementById('resultBox');
-    const resultText = document.getElementById('resultText');
-    const copyBtn = document.getElementById('copyBtn');
-    const openLinkBtn = document.getElementById('openLinkBtn');
-    const whatsappBtn = document.getElementById('whatsappBtn');
-    const showNetwork = document.getElementById('showNetwork');
-    const totalConfirmedSpan = document.getElementById('totalConfirmed');
-
-    const pickContactBtn = document.getElementById('pickContactBtn');
-    const historyBackdrop = document.getElementById('historyBackdrop');
-    const historyTbody = document.getElementById('historyTbody');
-    const historyStats = document.getElementById('historyStats');
-    const closeHistoryBtn = document.getElementById('closeHistoryBtn');
-    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
-    const downloadCsvBtn = document.getElementById('downloadCsvBtn');
-    const modalTotalConfirmed = document.getElementById('modalTotalConfirmed');
-    const themeToggle = document.getElementById('themeToggle');
-
-    let selectedNetwork = 'vodafone'; // فودافون هي الشبكة الافتراضية المختارة
-
-    /********** وظيفة تبديل الثيم (فاتح/داكن) **********/
     const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     function applyTheme(mode) {
       if (mode === 'dark') {
@@ -312,17 +323,18 @@
         document.documentElement.classList.remove('dark');
         localStorage.setItem('theme','light');
       }
+      // إعادة تطبيق ستايل التبويب بعد تغيير الثيم
+      switchTab(sendPanel.classList.contains('hidden') ? 'receive' : 'send');
     }
     const savedTheme = localStorage.getItem('theme') || (prefersDark ? 'dark' : 'light');
     applyTheme(savedTheme);
-    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙'; // تحديث أيقونة الثيم
+    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
     themeToggle.addEventListener('click', () => {
       const now = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
       applyTheme(now);
-      themeToggle.textContent = now === 'dark' ? '☀️' : '🌙'; // تحديث أيقونة الثيم بعد التغيير
+      themeToggle.textContent = now === 'dark' ? '☀️' : '🌙';
     });
 
-    /********** تحديد الشبكة المختارة بصرياً **********/
     function markSelected() {
       networkButtons.forEach(btn => {
         btn.classList.toggle('network-active', btn.dataset.net === selectedNetwork);
@@ -332,155 +344,135 @@
       selectedNetwork = btn.dataset.net;
       markSelected();
     }));
-    markSelected(); // تحديد الشبكة الافتراضية عند تحميل الصفحة
+    markSelected();
 
-    /********** التقاط جهة اتصال (أفضل محاولة ممكنة) **********/
     pickContactBtn.addEventListener('click', async () => {
       try {
         if (navigator.contacts && navigator.contacts.select) {
           const contacts = await navigator.contacts.select(['tel','name'], { multiple:false });
           if (contacts && contacts.length) {
             const tel = (contacts[0].tel && contacts[0].tel[0]) || '';
-            phoneInput.value = tel.replace(/\s|-|\(|\)/g,''); // تنظيف الرقم
+            phoneInput.value = tel.replace(/\s|-|\(|\)/g,'');
             return;
           }
         }
-        phoneInput.focus(); // إذا فشل الاختيار، ركز على حقل الإدخال
+        phoneInput.focus();
         alert('إذا لم يعمل اختيار جهات الاتصال في متصفحك، الرجاء لصق أو كتابة الرقم يدوياً.');
       } catch (error) {
-        console.error("Error accessing contacts:", error); // تسجيل الخطأ للمساعدة في التتبع
+        console.error("Error accessing contacts:", error);
         phoneInput.focus();
         alert('حدث خطأ أثناء الوصول لجهات الاتصال — الرجاء إدخال الرقم يدوياً.');
       }
     });
 
-    /********** وظائف مساعدة: تنظيف وتحويل الأرقام **********/
     function onlyDigits(value=''){ return String(value||'').replace(/[^0-9]/g,''); }
     function toLocal(cleaned) {
       if (!cleaned) return '';
-      if (cleaned.startsWith('20')) return '0' + cleaned.slice(2); // 2010... -> 010...
-      if (cleaned.startsWith('2') && cleaned.length===11) return '0' + cleaned.slice(1); // 210... (مصر) -> 010...
-      if (cleaned.startsWith('0')) return cleaned; // 010...
-      if (cleaned.length === 9) return '0' + cleaned; // 10... (إذا كان 9 أرقام، افترض 0 قبلها)
+      if (cleaned.startsWith('20')) return '0' + cleaned.slice(2);
+      if (cleaned.startsWith('2') && cleaned.length===11) return '0' + cleaned.slice(1);
+      if (cleaned.startsWith('0')) return cleaned;
+      if (cleaned.length === 9) return '0' + cleaned;
       return cleaned;
     }
     function toInternational(cleaned) {
       if (!cleaned) return '';
-      if (cleaned.startsWith('0')) return '2' + cleaned.slice(1); // 010... -> 2010...
-      if (cleaned.startsWith('20')) return cleaned; // 2010...
-      if (cleaned.startsWith('2') && cleaned.length>2) return cleaned; // 2010...
+      if (cleaned.startsWith('0')) return '2' + cleaned.slice(1);
+      if (cleaned.startsWith('20')) return cleaned;
+      if (cleaned.startsWith('2') && cleaned.length>2) return cleaned;
       return cleaned;
     }
 
-    /********** بناء روابط الإجراء (كود USSD أو رابط إنستاباي) **********/
     function buildActionLink(network, phoneRaw, amountRaw) {
       const cleaned = onlyDigits(phoneRaw);
       const amount = Number(amountRaw) || 0;
-      if (!cleaned || amount <= 0) return null; // التحقق من صحة المدخلات
-
+      if (!cleaned || amount <= 0) return null;
       const local = toLocal(cleaned);
       const intl = toInternational(cleaned);
-
       if (network === 'instapay') {
-        // إنستاباي يستخدم رابط مباشر (Deep link) ورابط ويب احتياطي
         return { type:'instapay', deep: templates.instapayDeep(intl, amount), web: templates.instapayWeb(intl, amount), local, intl, amount };
       }
-
-      // الشبكات الأخرى تستخدم أكواد USSD
       const code = templates[network](local, amount);
       return { type:'ussd', url: 'tel:' + encodeURIComponent(code), code, local, intl, amount };
     }
 
-    /********** إدارة سجل المعاملات (LocalStorage) **********/
     const STORAGE_KEY = 'ban_cash_transactions_v1';
     function loadHistory() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-      catch (error) { console.error("Error loading history from localStorage:", error); return []; }
+      catch (error) { console.error("Error loading history:", error); return []; }
     }
     function saveHistory(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
     function addHistoryItem(item) {
       const arr = loadHistory();
-      arr.unshift(item); // إضافة العنصر الجديد في البداية
-      if (arr.length > 500) arr.pop(); // الحفاظ على عدد محدود من المعاملات
+      arr.unshift(item);
+      if (arr.length > 500) arr.pop();
       saveHistory(arr);
     }
     function clearHistory() {
-      if (confirm('هل أنت متأكد من حذف كل المعاملات؟ هذا الإجراء لا يمكن التراجع عنه.')) {
+      if (confirm('هل أنت متأكد من حذف كل المعاملات؟')) {
         localStorage.removeItem(STORAGE_KEY);
-        alert('تم مسح جميع المعاملات من السجل.');
       }
     }
 
-    /********** عرض النتائج وفتح الروابط/الأكواد **********/
     function showResult(result) {
-      resultBox.classList.remove('hidden'); // إظهار صندوق النتائج
+      resultBox.classList.remove('hidden');
       if (result.type === 'instapay') {
-        resultText.textContent = result.web; // عرض رابط الويب لإنستاباي
-        openLinkBtn.href = result.deep; // الرابط الرئيسي هو Deep link
-        openLinkBtn.setAttribute('data-fallback', result.web); // رابط الويب كاحتياطي
+        resultText.textContent = result.web;
+        openLinkBtn.href = result.deep;
+        openLinkBtn.setAttribute('data-fallback', result.web);
       } else {
-        resultText.textContent = result.code; // عرض كود USSD
-        openLinkBtn.href = result.url; // رابط 'tel:'
-        openLinkBtn.removeAttribute('data-fallback'); // لا يوجد fallback لـ USSD
+        resultText.textContent = result.code;
+        openLinkBtn.href = result.url;
+        openLinkBtn.removeAttribute('data-fallback');
       }
       showNetwork.textContent = networkLabels[selectedNetwork] || '-';
-      whatsappBtn.href = 'https://wa.me/' + result.intl; // رابط واتساب للرقم الدولي
-      updateTotalsDisplay(); // تحديث إجمالي المبلغ المؤكد
+      whatsappBtn.href = 'https://wa.me/' + result.intl;
+      updateTotalsDisplay();
     }
 
     generateBtn.addEventListener('click', () => {
       const phone = phoneInput.value.trim();
       const amount = amountInput.value.trim();
       const result = buildActionLink(selectedNetwork, phone, amount);
-      if (!result) {
-        alert('من فضلك تأكد من إدخال رقم صالح والمبلغ.');
-        return;
-      }
-
-      // حفظ المعاملة في السجل كـ "قيد التنفيذ"
+      if (!result) { alert('من فضلك تأكد من إدخال رقم صالح والمبلغ.'); return; }
       const now = new Date();
       addHistoryItem({
-        number: onlyDigits(phone),
-        local: result.local,
-        intl: result.intl,
-        amount: result.amount,
-        network: selectedNetwork,
-        networkLabel: networkLabels[selectedNetwork], // لحفظ الاسم المعروض للشبكة
-        date: now.toLocaleString('ar-EG'),
-        confirmed: false
+        type: 'sent', number: onlyDigits(phone), local: result.local, intl: result.intl, amount: result.amount, network: selectedNetwork, networkLabel: networkLabels[selectedNetwork], date: now.toLocaleString('ar-EG'), confirmed: false
       });
-
       showResult(result);
-
-      // محاولة الفتح التلقائي:
       if (result.type === 'instapay') {
-        // محاولة فتح الـ Deep link أولاً
-        try { window.location.href = result.deep; } catch(e) { console.error("Error opening deep link:", e); }
-        // بعد فترة قصيرة، إذا لم يفتح Deep link (لأن التطبيق غير مثبت مثلاً)، جرب رابط الويب
+        try { window.location.href = result.deep; } catch(e) { console.error(e); }
         setTimeout(() => { window.location.href = result.web; }, 1200);
       } else {
-        // لأكواد USSD، يتم الفتح مباشرة
-        try { window.location.href = result.url; } catch(e){ console.error("Error opening USSD link:", e); }
+        try { window.location.href = result.url; } catch(e){ console.error(e); }
       }
+    });
+
+    recordReceivedBtn.addEventListener('click', () => {
+      const amount = Number(receivedAmountInput.value.trim());
+      if (isNaN(amount) || amount <= 0) { alert('من فضلك أدخل مبلغاً صحيحاً وموجباً.'); return; }
+      const now = new Date();
+      addHistoryItem({
+        type: 'received', number: '', local: '', intl: '', amount: amount, network: 'received_cash', networkLabel: networkLabels['received_cash'], date: now.toLocaleString('ar-EG'), confirmed: true
+      });
+      receivedAmountInput.value = '';
+      alert(`تم تسجيل استلام مبلغ ${amount} جنيه.`);
+      updateTotalsDisplay();
     });
 
     openLinkBtn.addEventListener('click', (event) => {
       const fallback = openLinkBtn.getAttribute('data-fallback');
-      if (!fallback) return; // لا يوجد fallback لأكواد USSD، لذا نفذ الرابط مباشرة
-      event.preventDefault(); // منع سلوك الرابط الافتراضي مؤقتاً لنجرب الـ deep link أولاً
+      if (!fallback) return;
+      event.preventDefault();
       const href = openLinkBtn.href;
-      try { window.location.href = href; } catch (err) { console.error("Error opening deep link from button:", err); }
-      setTimeout(() => { window.location.href = fallback; }, 1200); // جرب رابط الويب كاحتياطي
+      try { window.location.href = href; } catch (err) { console.error(err); }
+      setTimeout(() => { window.location.href = fallback; }, 1200);
     });
 
     previewBtn.addEventListener('click', () => {
       const phone = phoneInput.value.trim();
       const amount = amountInput.value.trim();
       const result = buildActionLink(selectedNetwork, phone, amount);
-      if (!result) {
-        alert('من فضلك تأكد من إدخال رقم صالح والمبلغ.');
-        return;
-      }
+      if (!result) { alert('من فضلك تأكد من إدخال رقم صالح والمبلغ.'); return; }
       showResult(result);
     });
 
@@ -488,137 +480,97 @@
       const txt = resultText.textContent || '';
       try {
         await navigator.clipboard.writeText(txt);
-        copyBtn.textContent = 'تم النسخ ✓'; // رسالة تأكيد النسخ
-        setTimeout(() => (copyBtn.textContent = 'نسخ'), 1500); // إعادة النص الأصلي بعد فترة
+        copyBtn.textContent = 'تم النسخ ✓';
+        setTimeout(() => (copyBtn.textContent = 'نسخ'), 1500);
       } catch (error) {
-        console.error("Error copying to clipboard:", error);
+        console.error("Copy failed:", error);
         alert('نسخ غير مدعوم. انسخ النص يدوياً.');
       }
     });
 
-    /********** واجهة الـ Modal للسجل والجدول **********/
-    historyBtn.addEventListener('click', () => {
-      renderHistory();
-      historyBackdrop.classList.remove('hidden');
-      historyBackdrop.style.display = 'flex';
-    });
-    closeHistoryBtn.addEventListener('click', () => {
-      historyBackdrop.classList.add('hidden');
-      historyBackdrop.style.display = 'none';
-    });
-
-    // تم نقل رسالة التأكيد لـ clearHistory داخل الوظيفة نفسها
-    clearHistoryBtn.addEventListener('click', clearHistory);
+    historyBtn.addEventListener('click', () => { renderHistory(); historyBackdrop.classList.remove('hidden'); });
+    closeHistoryBtn.addEventListener('click', () => { historyBackdrop.classList.add('hidden'); });
+    clearHistoryBtn.addEventListener('click', () => { clearHistory(); renderHistory(); updateTotalsDisplay(); });
 
     function renderHistory() {
       const arr = loadHistory();
-      historyTbody.innerHTML = ''; // تفريغ الجدول قبل إعادة الرسم
-      if (!arr.length) {
-        historyStats.innerHTML = `<p class="muted">لا توجد معاملات محفوظة بعد.</p>`;
-        modalTotalConfirmed.textContent = '0';
-        return;
-      }
-
-      // حساب الإحصائيات لعرضها
-      const totalAmount = arr.reduce((sum,item)=>sum+Number(item.amount),0);
-      const confirmedAmount = arr.filter(item=>item.confirmed).reduce((sum,item)=>sum+Number(item.amount),0);
+      historyTbody.innerHTML = '';
+      if (!arr.length) { historyStats.innerHTML = `<p class="muted">لا توجد معاملات محفوظة بعد.</p>`; modalTotalConfirmed.textContent = '0'; return; }
+      const totalSentAmount = arr.filter(item => item.type === 'sent').reduce((sum,item)=>sum+Number(item.amount),0);
+      const totalReceivedAmount = arr.filter(item => item.type === 'received').reduce((sum,item)=>sum+Number(item.amount),0);
+      const confirmedSentAmount = arr.filter(item=>item.type === 'sent' && item.confirmed).reduce((sum,item)=>sum+Number(item.amount),0);
       const totalCount = arr.length;
-      const confirmedCount = arr.filter(item=>item.confirmed).length;
-
-      historyStats.innerHTML =
-        `📊 عدد العمليات: <strong>${totalCount}</strong> — مجموع المبالغ: <strong>${totalAmount}</strong> ج — تم التأكيد: <strong>${confirmedCount}</strong> (${confirmedAmount} ج)`;
-
+      historyStats.innerHTML = `📊 إجمالي العمليات: <strong>${totalCount}</strong> — التحويلات: <strong>${totalSentAmount}</strong> ج — الاستلامات: <strong>${totalReceivedAmount}</strong> ج — إجمالي المؤكد: <strong>${confirmedSentAmount + totalReceivedAmount}</strong> ج`;
       arr.forEach((item, idx) => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td style="white-space:nowrap">${item.date}</td>
-          <td>${item.local || item.number}</td>
-          <td>${item.amount}</td>
-          <td>${item.networkLabel || networkLabels[item.network] || item.network}</td>
-          <td>${item.confirmed ? '<span class="badge confirmed">تم التحويل</span>' : '<span class="badge pending">قيد التنفيذ</span>'}</td>
-          <td style="white-space:nowrap">
-            ${item.confirmed ? '' : `<button data-idx="${idx}" class="confirm-row px-2 py-1 rounded bg-emerald-500 text-white text-xs btn-anim">تأكيد</button>`}
-            <button data-del="${idx}" class="delete-row px-2 py-1 rounded bg-red-100 ml-2 text-xs btn-anim">حذف</button>
-          </td>
-        `;
+        if (item.type === 'received') tr.classList.add('received-item');
+        const networkDisplay = item.networkLabel || networkLabels[item.network] || item.network;
+        const statusBadge = item.type === 'received' ? '<span class="badge received">تم الاستلام</span>' : (item.confirmed ? '<span class="badge confirmed">تم التحويل</span>' : '<span class="badge pending">قيد التنفيذ</span>');
+        const actions = (item.type === 'received' ? '' : (item.confirmed ? '' : `<button data-idx="${idx}" class="confirm-row px-2 py-1 rounded bg-emerald-500 text-white text-xs btn-anim">تأكيد</button>`)) + `<button data-del="${idx}" class="delete-row px-2 py-1 rounded bg-red-100 dark:bg-red-900/50 dark:text-red-300 ml-2 text-xs btn-anim">حذف</button>`;
+        tr.innerHTML = `<td style="white-space:nowrap">${item.date}</td><td>${item.number || '-'}</td><td>${item.amount}</td><td>${networkDisplay}</td><td>${statusBadge}</td><td style="white-space:nowrap">${actions}</td>`;
         historyTbody.appendChild(tr);
       });
-
-      // إرفاق معالجات الأحداث (handlers) للأزرار الجديدة
-      historyTbody.querySelectorAll('.confirm-row').forEach(btn =>
-        btn.addEventListener('click', () => confirmFromHistory(Number(btn.getAttribute('data-idx'))))
-      );
-      historyTbody.querySelectorAll('.delete-row').forEach(btn =>
-        btn.addEventListener('click', () => deleteFromHistory(Number(btn.getAttribute('data-del'))))
-      );
-
-      modalTotalConfirmed.textContent = confirmedAmount; // تحديث إجمالي المبلغ المؤكد في الـ modal
+      historyTbody.querySelectorAll('.confirm-row').forEach(btn => btn.addEventListener('click', () => confirmFromHistory(Number(btn.getAttribute('data-idx')))));
+      historyTbody.querySelectorAll('.delete-row').forEach(btn => btn.addEventListener('click', () => deleteFromHistory(Number(btn.getAttribute('data-del')))));
+      modalTotalConfirmed.textContent = confirmedSentAmount + totalReceivedAmount;
     }
 
     function confirmFromHistory(index) {
       const arr = loadHistory();
       if (!arr[index]) return;
-      arr[index].confirmed = true; // تعيين حالة "تم التأكيد"
+      arr[index].confirmed = true;
       saveHistory(arr);
-      renderHistory(); // إعادة رسم السجل
-      updateTotalsDisplay(); // تحديث المجاميع
+      renderHistory();
+      updateTotalsDisplay();
     }
 
     function deleteFromHistory(index) {
       const arr = loadHistory();
       if (!arr[index]) return;
-      if (confirm('حذف هذه المعاملة؟ هذا الإجراء لا يمكن التراجع عنه.')) {
-        arr.splice(index,1); // حذف العنصر من المصفوفة
+      if (confirm('حذف هذه المعاملة؟')) {
+        arr.splice(index,1);
         saveHistory(arr);
-        renderHistory(); // إعادة رسم السجل
-        updateTotalsDisplay(); // تحديث المجاميع
+        renderHistory();
+        updateTotalsDisplay();
       }
     }
 
     function updateTotalsDisplay() {
       const arr = loadHistory();
-      const total = arr.filter(item=>item.confirmed).reduce((sum,item)=>sum+Number(item.amount),0);
-      totalConfirmedSpan.textContent = total; // تحديث إجمالي المؤكد في الواجهة الرئيسية
-      modalTotalConfirmed.textContent = total; // تحديث إجمالي المؤكد في الـ modal
+      const totalConfirmed = arr.filter(item => (item.type === 'sent' && item.confirmed) || item.type === 'received' ).reduce((sum,item)=>sum+Number(item.amount),0);
+      totalConfirmedSpan.textContent = totalConfirmed;
+      modalTotalConfirmed.textContent = totalConfirmed;
     }
 
-    /********** تحميل السجل كملف CSV **********/
     downloadCsvBtn.addEventListener('click', () => {
       const arr = loadHistory();
-      if (!arr.length) {
-        alert('لا توجد معاملات لتحميلها.');
-        return;
-      }
-      // تم إصلاح خطأ السطر الجديد في الـ String
-      let csv = `التاريخ,رقم المستلم,المبلغ,الشبكة,تم التأكيد
+      if (!arr.length) { alert('لا توجد معاملات لتحميلها.'); return; }
+      let csv = `التاريخ,النوع,رقم المستلم,المبلغ,الشبكة,الحالة
 `;
       arr.forEach(item=>{
-        const label = item.networkLabel || networkLabels[item.network] || item.network;
-        // التأكد من أن القيم محاطة بعلامات اقتباس لتجنب مشاكل الفواصل داخل البيانات
-        csv += `"${item.date || ''}","${item.number || item.local || ''}","${item.amount || 0}","${label || ''}","${item.confirmed ? 'نعم':'لا'}"
+        const typeDisplay = item.type === 'received' ? 'استلام' : 'تحويل';
+        const networkDisplay = item.networkLabel || networkLabels[item.network] || item.network;
+        const statusDisplay = item.type === 'received' ? 'تم الاستلام' : (item.confirmed ? 'تم التحويل' : 'قيد التنفيذ');
+        csv += `"${item.date || ''}","${typeDisplay}","${item.number || ''}","${item.amount || 0}","${networkDisplay || ''}","${statusDisplay || ''}"
 `;
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'transactions_history.csv'; // اسم الملف
+      a.download = 'transactions_history.csv';
       a.click();
-      URL.revokeObjectURL(url); // تحرير الـ URL بعد التحميل
+      URL.revokeObjectURL(url);
     });
 
-    /********** تسجيل Service Worker (لتحويل التطبيق لـ PWA) **********/
-    // هذا الجزء اختياري ويهدف لتحويل التطبيق إلى تطبيق ويب تقدمي (PWA)
-    // إذا كنت لا تستخدم Firebase Cloud Messaging، يمكنك استبدال المسار أو حذف هذا الجزء
     if ('serviceWorker' in navigator) {
-      // تأكد من أن مسار firebase-messaging-sw.js صحيح إذا كنت تستخدم Firebase Cloud Messaging
-      navigator.serviceWorker.register('/Ban/firebase-messaging-sw.js')
-        .then(()=>console.log('✅ Firebase Messaging SW Registered'))
-        .catch(err=>console.log('❌ SW registration failed:', err));
+      navigator.serviceWorker.register('/Ban/firebase-messaging-sw.js').then(()=>console.log('✅ SW Registered')).catch(err=>console.log('❌ SW failed:', err));
     }
-
-    // تعيين المبلغ الافتراضي عند تحميل الصفحة
+    
+    // Initial state setup
     amountInput.value = 25;
+    switchTab('send'); // تفعيل تبويب التحويل عند تحميل الصفحة
+
   </script>
 </body>
 </html>
