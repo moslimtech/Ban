@@ -8,7 +8,7 @@
   <link rel="icon" href="https://moslimtech.github.io/Ban/icons/icon-192.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* --- CSS Section (No major changes) --- */
+    /* --- CSS Section (No changes) --- */
     body { font-family: 'Tajawal', system-ui, -apple-system, 'Segoe UI', Roboto, Arial; }
     .btn-anim { transition: transform .12s ease, box-shadow .12s ease, background-color .2s ease, border-color .2s ease; }
     .btn-anim:active { transform: translateY(1px) scale(.995); }
@@ -220,7 +220,7 @@
   </div>
 
   <script>
-    // --- JavaScript Logic (Updated) ---
+    // --- JavaScript Logic (Corrected) ---
 
     // --- Element Definitions ---
     const settingsBtn = document.getElementById('settingsBtn'), settingsBackdrop = document.getElementById('settingsBackdrop'), closeSettingsBtn = document.getElementById('closeSettingsBtn'), profitMarginInput = document.getElementById('profitMarginInput'), addWalletForm = document.getElementById('addWalletForm'), walletsList = document.getElementById('walletsList');
@@ -358,6 +358,28 @@
         alert(`تم تسجيل استلام مبلغ ${amount} جنيه في المحفظة.`);
     });
     
+    // --- <<<< CODE TO BE ADDED >>>>
+    // --- Contact Picker Logic ---
+    pickContactBtn.addEventListener('click', async () => {
+      // هذه الميزة قد لا تعمل على جميع المتصفحات أو الأجهزة
+      if ('contacts' in navigator && 'select' in navigator.contacts) {
+        try {
+          const contacts = await navigator.contacts.select(['tel'], { multiple: false });
+          if (contacts.length) {
+            // تنظيف الرقم من أي مسافات أو رموز إضافية
+            const phone = contacts[0].tel[0].replace(/[\s-()]/g, '');
+            phoneInput.value = phone;
+          }
+        } catch (ex) {
+          console.error('Error selecting contact.', ex);
+          alert('حدث خطأ أثناء محاولة اختيار جهة اتصال.');
+        }
+      } else {
+        alert('متصفحك لا يدعم ميزة اختيار جهات الاتصال. الرجاء كتابة الرقم يدوياً.');
+      }
+    });
+    // --- <<<< END OF ADDED CODE >>>>
+
     // --- History Modal Logic ---
     historyBtn.addEventListener('click', () => { renderHistory(); historyBackdrop.classList.remove('hidden'); });
     closeHistoryBtn.addEventListener('click', () => { historyBackdrop.classList.add('hidden'); });
