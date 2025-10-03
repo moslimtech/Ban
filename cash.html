@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>مدير المعاملات الذكي – بان للإعلانات</title>
+  <title>مدير المعاملات المالية – بان للإعلانات</title>
   <meta name="theme-color" content="#1e293b" />
   <link rel="icon" href="https://moslimtech.github.io/Ban/icons/icon-192.png" />
   <script src="https://cdn.tailwindcss.com"></script>
@@ -16,33 +16,39 @@
     .modal-card { width:95%; max-width:880px; max-height:85vh; overflow:auto; border-radius:12px; padding:16px; background:var(--card-bg); }
     :root {
       --bg: #f0f9ff; --card-bg: rgba(255, 255, 255, 0.95); --text: #0f172a; --muted: #475569; --border-color: #e5e7eb; --input-bg: #ffffff; --input-border: #d1d5db; --focus-border: #3b82f6; --tab-active-bg: #ffffff; --tab-inactive-text: #6b7280;
+      --limit-warn-bg: #fefce8; --limit-warn-text: #a16207; --limit-error-bg: #ffe4e6; --limit-error-text: #be123c;
     }
     .dark {
       --bg: #0f172a; --card-bg: rgba(30, 41, 59, 0.7); --text: #e2e8f0; --muted: #94a3b8; --border-color: rgba(255, 255, 255, 0.1); --input-bg: rgba(51, 65, 85, 0.5); --input-border: rgba(255, 255, 255, 0.15); --focus-border: #38bdf8; --tab-active-bg: rgba(51, 65, 85, 0.6); --tab-inactive-text: #94a3b8;
+      --limit-warn-bg: rgba(250, 204, 21, 0.1); --limit-warn-text: #facc15; --limit-error-bg: rgba(244, 63, 94, 0.1); --limit-error-text: #fda4af;
     }
     body { background: var(--bg); color: var(--text); } .muted { color: var(--muted); }
     .main-card { background: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); backdrop-filter: blur(12px); border-radius: 16px; }
     input, select { background-color: var(--input-bg); border-color: var(--input-border); color: var(--text); }
     input:focus, select:focus { border-color: var(--focus-border); box-shadow: 0 0 0 3px var(--focus-border-shadow, rgba(59, 130, 246, 0.2)); }
     .dark input:focus, .dark select:focus { --focus-border-shadow: rgba(56, 189, 248, 0.2); }
-    .dark .network-btn { background-color: rgba(51, 65, 85, 0.3); }
-    .network-btn.network-active { background: rgba(34, 197, 94, 0.12); border-color: #22c55e; }
-    .dark .network-btn.network-active { background: rgba(56, 189, 248, 0.1); border-color: var(--focus-border); box-shadow: 0 0 12px rgba(56, 189, 248, 0.3); }
     .badge { padding:6px 8px; border-radius:8px; font-size:13px; } .confirmed { background: #dcfce7; color:#166534; } .pending { background: #fff7ed; color:#92400e; } .received { background: #dbeafe; color:#1e40af; }
     .dark .confirmed { background: rgba(74, 222, 128, 0.15); color: #a7f3d0; } .dark .pending { background: rgba(251, 191, 36, 0.15); color: #fde68a; } .dark .received { background: rgba(96, 165, 250, 0.15); color: #bfdbfe; }
+    .dark .received-item { background-color: rgba(56, 189, 248, 0.05); } .cash-item { background-color: #f7fee7; } .dark .cash-item { background-color: rgba(132, 204, 22, 0.05); }
     th, td { border-bottom: 1px solid var(--border-color); padding:8px 10px; text-align:right; font-size:14px; } table { width:100%; border-collapse: collapse; }
     .color-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 8px; vertical-align: middle; }
     .instapay-icon { display: inline-flex; align-items: center; margin-left: 8px; vertical-align: middle; } .instapay-stripe { width: 8px; height: 10px; } .instapay-stripe:first-child { background-color: #facc15; } .instapay-stripe:last-child { background-color: #0f172a; } .dark .instapay-stripe:last-child { background-color: #e2e8f0; }
+    option.limit-warn { background-color: var(--limit-warn-bg) !important; color: var(--limit-warn-text) !important; font-weight: bold; }
+    option.limit-error { background-color: var(--limit-error-bg) !important; color: var(--limit-error-text) !important; font-weight: bold; }
     .network-btn { flex-direction: row-reverse; }
+    .network-active { background: rgba(34, 197, 94, 0.12); border-color: #22c55e; }
+    .dark .network-active { background: rgba(56, 189, 248, 0.1); border-color: var(--focus-border); box-shadow: 0 0 12px rgba(56, 189, 248, 0.3); }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 sm:p-6">
   <div class="max-w-4xl w-full">
     <header class="flex items-center justify-between mb-4">
-        <!-- Header as before -->
         <div class="flex items-center gap-4">
             <img src="https://moslimtech.github.io/Ban/icons/icon-192.png" alt="logo" class="w-12 h-12 rounded-lg shadow" />
-            <div><h1 class="text-lg font-bold">مدير المعاملات الذكي</h1><p class="text-sm muted">بان للإعلانات</p></div>
+            <div>
+              <h1 class="text-lg font-bold">مدير المعاملات المالية</h1>
+              <p class="text-sm muted">بان للإعلانات</p>
+            </div>
         </div>
         <div class="flex items-center gap-2">
             <a href="https://moslimtech.github.io/Ban/" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-orange-100 dark:bg-slate-700 shadow btn-anim hover:shadow-md text-xl">🏠</a>
@@ -51,64 +57,132 @@
         </div>
     </header>
 
+    <!-- لوحة التحكم المصغرة (Dashboard) -->
+    <div id="dashboard" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div class="p-3 rounded-lg bg-white/70 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-center">
+            <p class="text-xs muted">رصيد الكاش الشخصي</p>
+            <p id="dashboardPersonalCash" class="font-bold text-lg text-lime-600 dark:text-lime-400">0.00 ج</p>
+        </div>
+        <div class="p-3 rounded-lg bg-white/70 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-center">
+            <p class="text-xs muted">أرصدة المحافظ</p>
+            <p id="dashboardWalletsTotal" class="font-bold text-lg text-sky-600 dark:text-sky-400">0.00 ج</p>
+        </div>
+        <div class="p-3 rounded-lg bg-white/70 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-center">
+            <p class="text-xs muted">أرباح اليوم</p>
+            <p id="dashboardTodayProfit" class="font-bold text-lg text-amber-600 dark:text-amber-400">0.00 ج</p>
+        </div>
+        <div class="p-3 rounded-lg bg-white/70 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-center">
+            <p class="text-xs muted">إجمالي الأرباح</p>
+            <p id="dashboardTotalProfit" class="font-bold text-lg text-emerald-600 dark:text-emerald-400">0.00 ج</p>
+        </div>
+    </div>
+
     <main class="main-card">
       <div class="flex border-b" style="border-color: var(--border-color);">
         <button id="sendTabBtn" class="tab-btn flex-1 py-3 px-4 text-sm font-semibold transition-colors duration-200">تحويل أموال</button>
-        <button id="receiveTabBtn" class="tab-btn flex-1 py-3 px-4 text-sm font-semibold transition-colors duration-200">تسجيل استلام</button>
+        <button id="cashTabBtn" class="tab-btn flex-1 py-3 px-4 text-sm font-semibold transition-colors duration-200">معاملات الكاش</button>
       </div>
       <div class="p-5 sm:p-6">
         <!-- لوحة تحويل الأموال -->
-        <div id="sendPanel" class="tab-panel space-y-6">
-          <div>
-              <label for="sendWalletSelector" class="block text-sm font-medium muted mb-1">التحويل من:</label>
-              <select id="sendWalletSelector" class="w-full px-3 py-2 rounded-lg border focus:outline-none"></select>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            <div class="md:col-span-2">
-              <label class="block text-sm font-medium muted mb-1">إلى رقم (المستلم):</label>
-              <div class="flex gap-2 items-center">
-                <button type="button" id="pickContactBtn" class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500 text-white btn-anim hover:bg-emerald-600 text-lg">👤</button>
-                <input id="phoneInput" type="tel" inputmode="tel" placeholder="01xxxxxxxxx" class="flex-1 px-3 py-2 rounded-lg border focus:outline-none" />
+        <div id="sendPanel" class="tab-panel space-y-4">
+            <div>
+                <label for="sendWalletSelector" class="block text-sm font-medium muted mb-1">التحويل من:</label>
+                <select id="sendWalletSelector" class="w-full px-3 py-2 rounded-lg border focus:outline-none"></select>
+            </div>
+            <div id="quickNetworkWrapper" class="hidden">
+              <label class="block text-sm font-medium muted mb-2">عبر شبكة:</label>
+              <div id="networkButtonsWrapper" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <button type="button" data-net="vodafone" class="network-btn px-3 py-2 rounded-lg border bg-white dark:bg-transparent flex items-center justify-center btn-anim"><span class="color-dot" style="background-color: #ef4444;"></span>فودافون</button>
+                    <button type="button" data-net="etisalat" class="network-btn px-3 py-2 rounded-lg border bg-white dark:bg-transparent flex items-center justify-center btn-anim"><span class="color-dot" style="background-color: #22c55e;"></span>اتصالات</button>
+                    <button type="button" data-net="orange" class="network-btn px-3 py-2 rounded-lg border bg-white dark:bg-transparent flex items-center justify-center btn-anim"><span class="color-dot" style="background-color: #f97316;"></span>اورانج</button>
+                    <button type="button" data-net="we" class="network-btn px-3 py-2 rounded-lg border bg-white dark:bg-transparent flex items-center justify-center btn-anim"><span class="color-dot" style="background-color: #8b5cf6;"></span>وي</button>
+                    <button type="button" data-net="instapay" class="network-btn px-3 py-2 rounded-lg border bg-white dark:bg-transparent flex items-center justify-center btn-anim"><span class="instapay-icon"><span class="instapay-stripe"></span><span class="instapay-stripe"></span></span>إنستاباي</button>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+              <div>
+                <label class="block text-sm font-medium muted mb-1">إلى رقم (المستلم):</label>
+                <div class="flex gap-2 items-center">
+                  <button type="button" id="pickContactBtn" class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500 text-white btn-anim hover:bg-emerald-600 text-lg">👤</button>
+                  <input id="phoneInput" type="tel" inputmode="tel" placeholder="01xxxxxxxxx" class="flex-1 px-3 py-2 rounded-lg border focus:outline-none" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium muted mb-1">المبلغ (جنيه)</label>
+                <input id="amountInput" type="number" min="1" placeholder="25" class="w-full px-3 py-2 rounded-lg border focus:outline-none" />
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium muted mb-1">المبلغ (جنيه)</label>
-              <input id="amountInput" type="number" min="1" placeholder="25" class="w-full px-3 py-2 rounded-lg border focus:outline-none" />
+              <label for="profitInput" class="block text-sm font-medium muted mb-1">الربح (جنيه)</label>
+              <input id="profitInput" type="number" min="0" value="0" step="0.5" class="w-full px-3 py-2 rounded-lg border focus:outline-none" />
             </div>
-          </div>
-          <div id="networkSelectionContainer">
-            <label class="block text-sm font-medium muted mb-2">عبر شبكة:</label>
-            <div id="networkButtonsWrapper" class="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <button type="button" data-net="vodafone" class="network-btn ..."><span class="color-dot" style="background-color: #ef4444;"></span>فودافون</button>
-              <button type="button" data-net="etisalat" class="network-btn ..."><span class="color-dot" style="background-color: #22c55e;"></span>اتصالات</button>
-              <button type="button" data-net="orange" class="network-btn ..."><span class="color-dot" style="background-color: #f97316;"></span>اورانج</button>
-              <button type="button" data-net="we" class="network-btn ..."><span class="color-dot" style="background-color: #8b5cf6;"></span>وي</button>
-              <button type="button" data-net="instapay" class="network-btn ..."><span class="instapay-icon">...</span>إنستاباي</button>
+            <div class="flex flex-wrap items-center gap-3 justify-end pt-2">
+              <button id="generateBtn" type="button" class="px-4 py-2 rounded-xl bg-teal-500 text-white font-semibold shadow-lg btn-anim hover:bg-teal-600 flex items-center gap-2">🚀 تحويل الآن</button>
             </div>
-          </div>
-          <div class="flex justify-end pt-2">
-            <button id="generateBtn" type="button" class="px-4 py-2 rounded-xl bg-teal-500 text-white font-semibold shadow-lg btn-anim hover:bg-teal-600 flex items-center gap-2">🚀 تحويل الآن</button>
-          </div>
         </div>
 
-        <!-- لوحة تسجيل الاستلام -->
-        <div id="receivePanel" class="tab-panel hidden space-y-4">
-            <!-- ... Same as before ... -->
+        <!-- لوحة معاملات الكاش -->
+        <div id="cashPanel" class="tab-panel hidden space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium muted mb-1">المبلغ (جنيه)</label>
+                <input id="cashAmountInput" type="number" min="1" placeholder="مثال: 100" class="w-full px-3 py-2 text-lg rounded-lg border focus:outline-none" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium muted mb-1">الربح (جنيه) - للإيداع فقط</label>
+                <input id="cashProfitInput" type="number" min="0" value="0" step="0.5" placeholder="مثال: 5" class="w-full px-3 py-2 text-lg rounded-lg border focus:outline-none" />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <button id="depositCashBtn" type="button" class="w-full px-4 py-2 rounded-xl bg-green-500 text-white font-semibold shadow-lg btn-anim hover:bg-green-600 flex items-center justify-center gap-2">➕ إيداع كاش</button>
+                <button id="withdrawCashBtn" type="button" class="w-full px-4 py-2 rounded-xl bg-red-500 text-white font-semibold shadow-lg btn-anim hover:bg-red-600 flex items-center justify-center gap-2">➖ سحب كاش</button>
+            </div>
+            <p class="text-xs muted text-center">الإيداع يعني استلام نقدية من عميل. السحب للمصاريف الشخصية.</p>
         </div>
       </div>
+      
       <div class="text-center p-4 border-t" style="border-color: var(--border-color);">
         <button id="historyBtn" type="button" class="px-4 py-2 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-medium btn-anim hover:shadow flex items-center gap-2 mx-auto">
-          📜 عرض سجل المعاملات
+          <span class="text-lg">📜</span> عرض سجل المعاملات
         </button>
       </div>
     </main>
-    <footer class="mt-4 text-center text-xs muted">© 2025 بان للإعلانات</footer>
+
+    <footer class="mt-4 text-center text-xs muted">© 2025 بان للإعلانات • جميع الحقوق محفوظة</footer>
   </div>
 
   <!-- نافذة السجل -->
-  <div id="historyBackdrop" class="modal-backdrop hidden">...</div>
+  <div id="historyBackdrop" class="modal-backdrop hidden">
+    <div class="modal-card" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-lg">📜 سجل المعاملات</h3>
+            <button id="closeHistoryBtn" class="px-3 py-2 bg-gray-200 dark:bg-slate-600 rounded-lg text-sm">إغلاق</button>
+        </div>
+        <div id="historyStats" class="mb-3 text-sm muted"></div>
+        <div id="historyTableWrapper" class="overflow-auto">
+            <table id="historyTable">
+              <thead>
+                <tr>
+                  <th>📅 التاريخ</th>
+                  <th>المحفظة</th>
+                  <th>📱 إلى/من</th>
+                  <th>💰 المبلغ</th>
+                  <th>الربح</th>
+                  <th>📶 الشبكة</th>
+                  <th>الحالة</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="historyTbody"></tbody>
+            </table>
+        </div>
+        <div class="mt-4 text-right">
+            <strong>إجمالي الأرباح: <span id="modalTotalProfit">0</span> جنيه</strong>
+        </div>
+    </div>
+  </div>
 
-  <!-- نافذة الإعدادات (مُحدثة) -->
+  <!-- نافذة الإعدادات -->
   <div id="settingsBackdrop" class="modal-backdrop hidden">
     <div class="modal-card" role="dialog" aria-modal="true">
       <div class="flex items-center justify-between mb-4">
@@ -116,43 +190,42 @@
         <button id="closeSettingsBtn" class="px-3 py-2 bg-gray-200 dark:bg-slate-600 rounded-lg text-sm">إغلاق</button>
       </div>
       <div class="space-y-4">
-        <!-- Profit Margin as before -->
-        <hr class="dark:border-slate-700"/>
         <div>
-          <h4 class="font-semibold mb-2">إدارة المحافظ</h4>
+          <h4 class="font-semibold mb-2">إدارة المحافظ (أرقامك)</h4>
           <div id="walletsList" class="space-y-2 mb-4"></div>
           <div class="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border dark:border-slate-700">
             <h5 class="font-semibold mb-3">إضافة محفظة جديدة</h5>
             <form id="addWalletForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="sm:col-span-2">
-                <label for="walletAlias" class="block text-xs font-medium muted mb-1">اسم مميز</label>
-                <input id="walletAlias" type="text" required placeholder="فودافون شخصي" class="w-full ..."/>
-              </div>
               <div>
                 <label for="walletNumber" class="block text-xs font-medium muted mb-1">رقم المحفظة</label>
-                <input id="walletNumber" type="tel" required placeholder="01xxxxxxxxx" class="w-full ..."/>
+                <input id="walletNumber" type="tel" required placeholder="01xxxxxxxxx" class="w-full px-3 py-2 rounded-lg border focus:outline-none" />
               </div>
               <div>
-                <label for="walletNetwork" class="block text-xs font-medium muted mb-1">الشبكة</label>
-                <select id="walletNetwork" required class="w-full ...">
-                    <option value="" disabled selected>اختر الشبكة</option>
-                    <option value="vodafone">فودافون</option>
-                    <option value="etisalat">اتصالات</option>
-                    <option value="orange">اورانج</option>
-                    <option value="we">وي</option>
-                    <option value="instapay">إنستاباي</option>
-                </select>
+                <label for="walletAlias" class="block text-xs font-medium muted mb-1">اسم مميز (اختياري)</label>
+                <input id="walletAlias" type="text" placeholder="فودافون شخصي" class="w-full px-3 py-2 rounded-lg border focus:outline-none" />
               </div>
               <div>
-                <label for="walletBalance" class="block text-xs font-medium muted mb-1">رصيد افتتاحي</label>
-                <input id="walletBalance" type="number" required value="0" min="0" class="w-full ..."/>
+                <label for="walletBalance" class="block text-xs font-medium muted mb-1">الرصيد الافتتاحي (ج)</label>
+                <input id="walletBalance" type="number" required value="0" min="0" class="w-full px-3 py-2 rounded-lg border focus:outline-none" />
               </div>
               <div>
-                <label for="walletLimit" class="block text-xs font-medium muted mb-1">حد المعاملات</label>
-                <input id="walletLimit" type="number" required value="100" min="1" class="w-full ..."/>
+                <label for="walletLimit" class="block text-xs font-medium muted mb-1">حد المعاملات (شهري)</label>
+                <input id="walletLimit" type="number" required value="100" min="1" class="w-full px-3 py-2 rounded-lg border focus:outline-none" />
               </div>
               <div class="sm:col-span-2">
-                <button type="submit" class="w-full ...">+ إضافة المحفظة</button>
+                <label for="walletNetwork" class="block text-xs font-medium muted mb-1">الشبكة</label>
+                <select id="walletNetwork" required class="w-full px-3 py-2 rounded-lg border focus:outline-none">
+                  <option value="vodafone">فودافون</option>
+                  <option value="etisalat">اتصالات</option>
+                  <option value="orange">اورانج</option>
+                  <option value="we">وي</option>
+                  <option value="instapay">إنستاباي</option>
+                </select>
+              </div>
+              <div class="sm:col-span-2">
+                <button type="submit" class="w-full px-4 py-2 rounded-xl bg-blue-500 text-white font-semibold btn-anim hover:bg-blue-600">
+                  + إضافة المحفظة
+                </button>
               </div>
             </form>
           </div>
@@ -162,150 +235,262 @@
   </div>
 
   <script>
-    // --- JavaScript Logic (Final Version with Smart Network Selection) ---
-    // --- Element Definitions ---
-    const settingsBtn = document.getElementById('settingsBtn'), settingsBackdrop = document.getElementById('settingsBackdrop'), closeSettingsBtn = document.getElementById('closeSettingsBtn'), profitMarginInput = document.getElementById('profitMarginInput'), addWalletForm = document.getElementById('addWalletForm'), walletsList = document.getElementById('walletsList');
-    const sendTabBtn = document.getElementById('sendTabBtn'), receiveTabBtn = document.getElementById('receiveTabBtn'), sendPanel = document.getElementById('sendPanel'), receivePanel = document.getElementById('receivePanel');
+    // --- JavaScript Logic (Final Version) ---
+    const settingsBtn = document.getElementById('settingsBtn'), settingsBackdrop = document.getElementById('settingsBackdrop'), closeSettingsBtn = document.getElementById('closeSettingsBtn'), addWalletForm = document.getElementById('addWalletForm'), walletsList = document.getElementById('walletsList');
+    const sendTabBtn = document.getElementById('sendTabBtn'), cashTabBtn = document.getElementById('cashTabBtn'), sendPanel = document.getElementById('sendPanel'), cashPanel = document.getElementById('cashPanel');
     const historyBtn = document.getElementById('historyBtn'), themeToggle = document.getElementById('themeToggle');
-    const sendWalletSelector = document.getElementById('sendWalletSelector'), receiveWalletSelector = document.getElementById('receiveWalletSelector'), phoneInput = document.getElementById('phoneInput'), amountInput = document.getElementById('amountInput');
-    const networkSelectionContainer = document.getElementById('networkSelectionContainer'), networkButtonsWrapper = document.getElementById('networkButtonsWrapper'), networkButtons = networkButtonsWrapper.querySelectorAll('.network-btn');
+    const sendWalletSelector = document.getElementById('sendWalletSelector'), phoneInput = document.getElementById('phoneInput'), amountInput = document.getElementById('amountInput'), profitInput = document.getElementById('profitInput');
+    const quickNetworkWrapper = document.getElementById('quickNetworkWrapper'), networkButtonsWrapper = document.getElementById('networkButtonsWrapper'), networkButtons = networkButtonsWrapper.querySelectorAll('.network-btn');
     const generateBtn = document.getElementById('generateBtn'), pickContactBtn = document.getElementById('pickContactBtn');
+    const cashAmountInput = document.getElementById('cashAmountInput'), cashProfitInput = document.getElementById('cashProfitInput'), depositCashBtn = document.getElementById('depositCashBtn'), withdrawCashBtn = document.getElementById('withdrawCashBtn');
     const historyBackdrop = document.getElementById('historyBackdrop'), historyTbody = document.getElementById('historyTbody'), historyStats = document.getElementById('historyStats'), closeHistoryBtn = document.getElementById('closeHistoryBtn'), modalTotalProfit = document.getElementById('modalTotalProfit');
-    let manualSelectedNetwork = 'vodafone';
+    const dashboardPersonalCash = document.getElementById('dashboardPersonalCash'), dashboardWalletsTotal = document.getElementById('dashboardWalletsTotal'), dashboardTodayProfit = document.getElementById('dashboardTodayProfit'), dashboardTotalProfit = document.getElementById('dashboardTotalProfit');
+    let quickSelectedNetwork = 'vodafone';
 
-    // --- DB & Utilities ---
-    const DB_KEY = 'ban_smart_pos_v1';
-    const defaultDB = { settings: { profitMargin: 2.0 }, wallets: [], transactions: [] };
-    function loadDB() { return JSON.parse(localStorage.getItem(DB_KEY) || JSON.stringify(defaultDB)); }
-    function saveDB(db) { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
-    function getWalletCalculations(wallet, allTransactions) { /* ... same as before ... */ }
-    function onlyDigits(value = '') { return String(value || '').replace(/[^0-9]/g, ''); }
-    const templates = { vodafone: (p, a) => `*9*7*${p}*${a}#`, etisalat: (p, a) => `*777*${p}*${a}#`, orange: (p, a) => `*115*1*${p}*${a}#`, we: (p, a) => `*322*${p}*${a}#`, instapay: (p,a) => `instapay://pay?recipient=${p}&amount=${a}`};
-    const networkLabels = { vodafone: 'فودافون', etisalat: 'اتصالات', orange: 'أورانج', we: 'وي', instapay: 'إنستاباي', received_cash: 'استلام نقدي' };
-
-    // --- Settings Modal ---
-    settingsBtn.addEventListener('click', () => { settingsBackdrop.classList.remove('hidden'); loadSettingsIntoUI(); });
-    closeSettingsBtn.addEventListener('click', () => { settingsBackdrop.classList.add('hidden'); populateWalletSelectors(); });
-    // ... profitMarginInput listener ...
-    addWalletForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const alias = document.getElementById('walletAlias').value.trim();
-        const number = document.getElementById('walletNumber').value.trim();
-        const network = document.getElementById('walletNetwork').value;
-        const balance = parseFloat(document.getElementById('walletBalance').value);
-        const limit = parseInt(document.getElementById('walletLimit').value);
-
-        if (!alias || !number || !network || isNaN(balance) || isNaN(limit)) { alert('الرجاء ملء جميع الحقول بشكل صحيح.'); return; }
-        const db = loadDB();
-        if (db.wallets.some(w => w.id === number)) { alert('هذا الرقم موجود بالفعل.'); return; }
-        // Use number as ID for uniqueness
-        db.wallets.push({ id: number, alias, network, openingBalance: balance, limit });
-        saveDB(db);
-        addWalletForm.reset();
-        renderWalletsList();
-    });
-    function loadSettingsIntoUI() { /* ... same as before ... */ }
-    function renderWalletsList() {
-        // ... modified to show network in wallet list ...
-        // walletEl.innerHTML = `... <p>الشبكة: ${networkLabels[wallet.network]}</p> ...`
+    const DB_KEY = 'ban_pos_database_v4'; // Increment version for new data structure
+    const defaultDB = { settings: { personalCash: 0 }, wallets: [], transactions: [] };
+    function loadDB() { 
+        const data = localStorage.getItem(DB_KEY); 
+        if(data) { 
+            const parsed = JSON.parse(data); 
+            if(!parsed.settings) { parsed.settings = { personalCash: 0 }; } // Handle old data
+            if(!parsed.settings.hasOwnProperty('personalCash')) { parsed.settings.personalCash = 0; }
+            if(!parsed.hasOwnProperty('wallets')) { parsed.wallets = []; }
+            return parsed; 
+        } 
+        return JSON.parse(JSON.stringify(defaultDB)); 
     }
-    function handleDeleteWallet(e) { /* ... same as before ... */ }
-
-    // --- Main UI Logic (Smart Network Selection) ---
-    function populateWalletSelectors() {
+    function saveDB(db) { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+    
+    function getWalletCalculations(wallet, allTransactions) {
+        const walletTransactions = allTransactions.filter(t => t.sourceWalletId === wallet.id);
+        const sent = walletTransactions.filter(t => t.type === 'sent').reduce((sum, t) => sum + t.amount, 0);
+        const received = walletTransactions.filter(t => t.type === 'received').reduce((sum, t) => sum + t.amount, 0);
+        const currentBalance = wallet.openingBalance - sent + received;
+        return { txCount: walletTransactions.length, currentBalance };
+    }
+    function onlyDigits(value = '') { return String(value || '').replace(/[^0-9]/g, ''); }
+    const templates = { vodafone: (p, a) => `*9*7*${p}*${a}#`, etisalat: (p, a) => `*777*${p}*${a}#`, orange: (p, a) => `*115*1*${p}*${a}#`, we: (p, a) => `*322*${p}*${a}#` };
+    const networkLabels = { vodafone: 'فودافون', etisalat: 'اتصالات', orange: 'أورانج', we: 'وي', instapay: 'إنستاباي', personal_cash_deposit: 'إيداع كاش', personal_cash_withdrawal: 'سحب كاش' };
+    
+    function updateDashboard() {
         const db = loadDB();
-        sendWalletSelector.innerHTML = '<option value="manual">تحويل سريع (يدوي)</option>';
-        receiveWalletSelector.innerHTML = '';
-        if (db.wallets.length === 0) { return; }
+        const today = new Date().toLocaleDateString('ar-EG');
+        const todayProfit = db.transactions.filter(tx => new Date(tx.id).toLocaleDateString('ar-EG') === today).reduce((sum, tx) => sum + (tx.profit || 0), 0);
+        const totalProfit = db.transactions.reduce((sum, tx) => sum + (tx.profit || 0), 0);
+        let walletsTotal = 0;
+        db.wallets.forEach(w => { walletsTotal += getWalletCalculations(w, db.transactions).currentBalance; });
         
+        dashboardPersonalCash.textContent = `${(db.settings.personalCash || 0).toFixed(2)} ج`;
+        dashboardWalletsTotal.textContent = `${walletsTotal.toFixed(2)} ج`;
+        dashboardTodayProfit.textContent = `${todayProfit.toFixed(2)} ج`;
+        dashboardTotalProfit.textContent = `${totalProfit.toFixed(2)} ج`;
+    }
+    
+    settingsBtn.addEventListener('click', () => { settingsBackdrop.classList.remove('hidden'); loadSettingsIntoUI(); });
+    closeSettingsBtn.addEventListener('click', () => { settingsBackdrop.classList.add('hidden'); populateWalletSelectors(); updateDashboard(); });
+    
+    addWalletForm.addEventListener('submit', (e) => { 
+        e.preventDefault(); 
+        const number = document.getElementById('walletNumber').value.trim(), 
+              alias = document.getElementById('walletAlias').value.trim(), 
+              balance = parseFloat(document.getElementById('walletBalance').value), 
+              limit = parseInt(document.getElementById('walletLimit').value),
+              network = document.getElementById('walletNetwork').value;
+
+        if (!number || isNaN(balance) || isNaN(limit) || !network) { alert('الرجاء ملء جميع الحقول المطلوبة بشكل صحيح.'); return; } 
+        const db = loadDB(); 
+        if (db.wallets.some(w => w.id === number)) { alert('هذه المحفظة (الرقم) موجودة بالفعل.'); return; } 
+        db.wallets.push({ id: number, alias: alias, openingBalance: balance, limit: limit, network: network }); 
+        saveDB(db); 
+        addWalletForm.reset(); 
+        renderWalletsList(); 
+        populateWalletSelectors();
+    });
+
+    function loadSettingsIntoUI() { renderWalletsList(); }
+    
+    function renderWalletsList() {
+        const db = loadDB(); walletsList.innerHTML = ''; if (db.wallets.length === 0) { walletsList.innerHTML = `<p class="text-sm muted text-center">لم تقم بإضافة أي محافظ بعد.</p>`; return; }
         db.wallets.forEach(wallet => {
             const { currentBalance, txCount } = getWalletCalculations(wallet, db.transactions);
-            const optionText = `${wallet.alias} (${wallet.id}) - رصيد: ${currentBalance.toFixed(2)} ج`;
-            const sendOptionHTML = `<option value="${wallet.id}">${optionText}</option>`;
-            sendWalletSelector.innerHTML += sendOptionHTML;
-            // Also populate receive selector
-            receiveWalletSelector.innerHTML += `<option value="${wallet.id}">${wallet.alias} (${wallet.id})</option>`;
+            const networkName = networkLabels[wallet.network] || wallet.network;
+            const walletEl = document.createElement('div'); walletEl.className = 'flex items-center justify-between p-2 rounded-lg bg-slate-100 dark:bg-slate-800';
+            walletEl.innerHTML = `<div><p class="font-semibold">${wallet.alias || wallet.id} <span class="text-xs muted">(${networkName})</span></p><p class="text-xs muted">الرصيد الحالي: ${currentBalance.toFixed(2)} ج | المعاملات: ${txCount}/${wallet.limit}</p></div><button data-id="${wallet.id}" class="delete-wallet-btn px-2 py-1 text-xs text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 rounded">حذف</button>`;
+            walletsList.appendChild(walletEl);
         });
+        walletsList.querySelectorAll('.delete-wallet-btn').forEach(btn => btn.addEventListener('click', handleDeleteWallet));
+    }
+    
+    function handleDeleteWallet(e) { const walletId = e.target.dataset.id; if (confirm(`هل أنت متأكد من حذف المحفظة ${walletId}؟`)) { const db = loadDB(); db.wallets = db.wallets.filter(w => w.id !== walletId); saveDB(db); renderWalletsList(); populateWalletSelectors(); updateDashboard(); } }
+    
+    function populateWalletSelectors() {
+        const db = loadDB();
+        sendWalletSelector.innerHTML = '<option value="quick_transfer">⚡ تحويل سريع (بدون محفظة)</option>';
+        if (db.wallets.length === 0) {
+            sendWalletSelector.innerHTML += `<option value="" disabled>--- أضف محفظة من الإعدادات ---</option>`;
+        } else {
+            sendWalletSelector.innerHTML += `<option value="" disabled>--- محافظك المسجلة ---</option>`;
+        }
+        db.wallets.forEach(wallet => {
+            const { currentBalance, txCount } = getWalletCalculations(wallet, db.transactions);
+            const usagePercentage = (txCount / wallet.limit) * 100; let limitClass = '';
+            if (usagePercentage >= 90 && usagePercentage < 100) limitClass = 'limit-warn'; else if (usagePercentage >= 100) limitClass = 'limit-error';
+            const networkName = networkLabels[wallet.network] || wallet.network;
+            const optionText = `${wallet.alias || wallet.id} [${networkName}] (رصيد: ${currentBalance.toFixed(2)} ج | ${txCount}/${wallet.limit})`;
+            const optionHTML = `<option value="${wallet.id}" class="${limitClass}">${optionText}</option>`;
+            sendWalletSelector.innerHTML += optionHTML;
+        });
+        toggleQuickNetworkView();
     }
 
-    sendWalletSelector.addEventListener('change', (e) => {
-        const selectedValue = e.target.value;
-        if (selectedValue === 'manual') {
-            // Show all network buttons for manual mode
-            networkButtons.forEach(btn => btn.style.display = 'flex');
-            networkSelectionContainer.style.display = 'block';
-        } else {
-            // It's a wallet ID (which is the number)
-            const db = loadDB();
-            const selectedWallet = db.wallets.find(w => w.id === selectedValue);
-            if (selectedWallet) {
-                // Hide container, or just show the one button
-                networkSelectionContainer.style.display = 'block';
-                networkButtons.forEach(btn => {
-                    btn.style.display = btn.dataset.net === selectedWallet.network ? 'flex' : 'none';
-                });
-                // Automatically activate the correct network button
-                const activeBtn = networkButtonsWrapper.querySelector(`[data-net="${selectedWallet.network}"]`);
-                if(activeBtn) activeBtn.classList.add('network-active');
-            }
-        }
-    });
-    
+    function toggleQuickNetworkView() {
+        const isQuickTransfer = sendWalletSelector.value === 'quick_transfer';
+        quickNetworkWrapper.classList.toggle('hidden', !isQuickTransfer);
+    }
+    sendWalletSelector.addEventListener('change', toggleQuickNetworkView);
+
+
     generateBtn.addEventListener('click', () => {
         const db = loadDB();
-        const sourceWalletId = sendWalletSelector.value;
-        const recipientPhone = phoneInput.value.trim();
-        const amount = parseFloat(amountInput.value);
-
-        if (!recipientPhone || isNaN(amount) || amount <= 0) { /* alert */ return; }
+        const sourceWalletId = sendWalletSelector.value, recipientPhone = phoneInput.value.trim(), amount = parseFloat(amountInput.value), profit = parseFloat(profitInput.value) || 0;
         
-        let networkToUse = '';
-        let transactionToSave = {};
-
-        if (sourceWalletId === 'manual') {
-            networkToUse = manualSelectedNetwork;
-            // Create a temporary transaction not linked to a wallet
-            transactionToSave = { /* ... id, type, recipient, amount, no profit, network, date, confirmed */ };
-             if (confirm('تسجيل كمعاملة يدوية. هل تريد المتابعة؟')) {
-                // Just open the link, don't save anything
-                const link = `tel:${encodeURIComponent(templates[networkToUse](onlyDigits(recipientPhone), amount))}`;
-                window.location.href = link;
-             }
+        if (!sourceWalletId) { alert('الرجاء اختيار محفظة أو "تحويل سريع".'); return; }
+        if (!recipientPhone || isNaN(amount) || amount <= 0) { alert('الرجاء إدخال رقم مستلم ومبلغ صحيحين.'); return; }
+        
+        const isQuickTransfer = sourceWalletId === 'quick_transfer';
+        let sourceWallet, network;
+        
+        if (isQuickTransfer) {
+            network = quickSelectedNetwork;
         } else {
-            const sourceWallet = db.wallets.find(w => w.id === sourceWalletId);
-            // ... All the checks for balance and limit as before ...
-            networkToUse = sourceWallet.network; // Get network automatically from wallet
-            const profit = amount * (db.settings.profitMargin / 100);
-            transactionToSave = { id: Date.now(), type: 'sent', sourceWalletId: sourceWallet.id, recipient: onlyDigits(recipientPhone), amount: amount, profit: profit, network: networkToUse, date: new Date().toLocaleString('ar-EG'), confirmed: false };
-            
-            db.transactions.unshift(transactionToSave);
-            saveDB(db);
-            populateWalletSelectors();
-            
-            const link = `tel:${encodeURIComponent(templates[networkToUse](onlyDigits(recipientPhone), amount))}`;
-            if (confirm('تم تسجيل المعاملة. فتح تطبيق الاتصال؟')) {
-                window.location.href = link;
-            }
+            sourceWallet = db.wallets.find(w => w.id === sourceWalletId);
+            if(!sourceWallet) { alert('المحفظة المختارة غير موجودة.'); return; }
+
+            const { currentBalance, txCount } = getWalletCalculations(sourceWallet, db.transactions);
+            if (txCount >= sourceWallet.limit) { alert(`لقد وصلت للحد الأقصى للمعاملات لهذه المحفظة (${sourceWallet.limit}).`); return; }
+            if (currentBalance < amount) { alert(`الرصيد في هذه المحفظة (${currentBalance.toFixed(2)} ج) غير كافٍ لإتمام هذه العملية.`); return; }
+            network = sourceWallet.network;
         }
+
+        db.settings.personalCash = (db.settings.personalCash || 0) + amount; // Add received cash to personal wallet
+        const newTransaction = { id: Date.now(), type: 'sent', sourceWalletId: isQuickTransfer ? 'quick_transfer' : sourceWallet.id, recipient: onlyDigits(recipientPhone), amount: amount, profit: profit, network: network, date: new Date().toLocaleString('ar-EG'), confirmed: isQuickTransfer ? true : false };
+        db.transactions.unshift(newTransaction);
+        saveDB(db);
+        populateWalletSelectors(); updateDashboard();
+        
+        if (templates[network]) { 
+            const link = `tel:${encodeURIComponent(templates[network](onlyDigits(recipientPhone), amount))}`;
+            if (confirm('تم تسجيل المعاملة بنجاح. هل تريد فتح تطبيق الاتصال الآن لإتمام التحويل؟')) { 
+                try { window.location.href = link; } catch (e) { console.error(e); alert('فشل فتح تطبيق الاتصال تلقائياً.'); } 
+            }
+        } else {
+            alert(`تم تسجيل المعاملة بنجاح. (شبكة ${networkLabels[network] || network} لا تتطلب كود اتصال).`);
+        }
+
+        phoneInput.value = ''; amountInput.value = ''; profitInput.value = '0';
     });
     
-    networkButtons.forEach(btn => btn.addEventListener('click', () => {
-        if(sendWalletSelector.value === 'manual') {
-            manualSelectedNetwork = btn.dataset.net;
-            networkButtons.forEach(b => b.classList.remove('network-active'));
-            btn.classList.add('network-active');
+    function handleCashTransaction(type) {
+        const db = loadDB();
+        const amount = parseFloat(cashAmountInput.value);
+        if (isNaN(amount) || amount <= 0) { alert('الرجاء إدخال مبلغ صحيح.'); return; }
+        
+        const profit = (type === 'deposit') ? (parseFloat(cashProfitInput.value) || 0) : 0;
+
+        if(type === 'deposit') { 
+            db.settings.personalCash = (db.settings.personalCash || 0) + amount;
+        } else { 
+            if((db.settings.personalCash || 0) < amount) { alert('رصيد الكاش الشخصي غير كافٍ لإتمام عملية السحب.'); return; }
+            db.settings.personalCash -= amount; 
         }
+
+        const newTransaction = { id: Date.now(), type: 'cash', sourceWalletId: 'personal_cash', recipient: '', amount: amount, profit: profit, network: `personal_cash_${type}`, date: new Date().toLocaleString('ar-EG'), confirmed: true };
+        db.transactions.unshift(newTransaction);
+        saveDB(db);
+        updateDashboard();
+        cashAmountInput.value = '';
+        cashProfitInput.value = '0';
+        alert(`تمت عملية ${type === 'deposit' ? 'الإيداع' : 'السحب'} بنجاح.`);
+    }
+    depositCashBtn.addEventListener('click', () => handleCashTransaction('deposit'));
+    withdrawCashBtn.addEventListener('click', () => handleCashTransaction('withdrawal'));
+    
+    pickContactBtn.addEventListener('click', async () => { if ('contacts' in navigator && 'select' in navigator.contacts) { try { const contacts = await navigator.contacts.select(['tel'], { multiple: false }); if (contacts.length) { phoneInput.value = contacts[0].tel[0].replace(/[\s-()]/g, ''); } } catch (ex) { console.error('Error selecting contact.', ex); alert('حدث خطأ أثناء محاولة اختيار جهة اتصال.'); } } else { alert('متصفحك لا يدعم ميزة اختيار جهات الاتصال.'); } });
+    historyBtn.addEventListener('click', () => { renderHistory(); historyBackdrop.classList.remove('hidden'); });
+    closeHistoryBtn.addEventListener('click', () => { historyBackdrop.classList.add('hidden'); });
+    function renderHistory() {
+        const db = loadDB(); historyTbody.innerHTML = ''; const totalProfit = db.transactions.reduce((sum, tx) => sum + (tx.profit || 0), 0); modalTotalProfit.textContent = totalProfit.toFixed(2);
+        historyStats.innerHTML = `📊 إجمالي المعاملات: <strong>${db.transactions.length}</strong>`;
+        if (db.transactions.length === 0) { historyTbody.innerHTML = `<tr><td colspan="8" class="text-center muted">لا توجد معاملات بعد.</td></tr>`; return; }
+        db.transactions.forEach(tx => {
+            const tr = document.createElement('tr');
+            let sourceName;
+            if (tx.sourceWalletId === 'personal_cash') {
+                tr.classList.add('cash-item');
+                sourceName = 'كاش شخصي';
+            } else if (tx.sourceWalletId === 'quick_transfer') {
+                sourceName = 'تحويل سريع';
+            } else {
+                const sourceWallet = db.wallets.find(w => w.id === tx.sourceWalletId);
+                sourceName = sourceWallet ? (sourceWallet.alias || sourceWallet.id) : 'محذوفة';
+            }
+
+            const statusBadge = tx.confirmed ? '<span class="badge confirmed">مؤكد</span>' : '<span class="badge pending">قيد التنفيذ</span>';
+            const actions = `${(tx.type === 'sent' && !tx.confirmed) ? `<button data-id="${tx.id}" class="confirm-tx-btn px-2 py-1 text-xs rounded bg-emerald-500 text-white btn-anim">تأكيد</button>` : ''} <button data-id="${tx.id}" class="delete-tx-btn px-2 py-1 text-xs rounded bg-red-100 dark:bg-red-900/50 dark:text-red-300 ml-2 btn-anim">حذف</button>`;
+            tr.innerHTML = `<td>${new Date(tx.id).toLocaleString('ar-EG')}</td><td>${sourceName}</td><td>${tx.recipient || '-'}</td><td>${tx.amount.toFixed(2)}</td><td>${(tx.profit || 0).toFixed(2)}</td><td>${networkLabels[tx.network] || tx.network}</td><td>${statusBadge}</td><td class="whitespace-nowrap">${actions}</td>`;
+            historyTbody.appendChild(tr);
+        });
+        historyTbody.querySelectorAll('.confirm-tx-btn').forEach(btn => btn.addEventListener('click', (e) => handleTxAction(e.target.dataset.id, 'confirm')));
+        historyTbody.querySelectorAll('.delete-tx-btn').forEach(btn => btn.addEventListener('click', (e) => handleTxAction(e.target.dataset.id, 'delete')));
+    }
+    function handleTxAction(txId, action) {
+        const db = loadDB(); const txIndex = db.transactions.findIndex(t => t.id == txId); if (txIndex === -1) return;
+        const tx = db.transactions[txIndex];
+        if (action === 'confirm') { db.transactions[txIndex].confirmed = true; } 
+        else if (action === 'delete') {
+            if (confirm('هل أنت متأكد من حذف هذه المعاملة؟ سيتم عكس تأثيرها المالي.')) {
+                if (tx.type === 'sent') { db.settings.personalCash = (db.settings.personalCash || 0) - tx.amount; }
+                else if (tx.network === 'personal_cash_deposit') { db.settings.personalCash = (db.settings.personalCash || 0) - tx.amount; }
+                else if (tx.network === 'personal_cash_withdrawal') { db.settings.personalCash = (db.settings.personalCash || 0) + tx.amount; }
+                db.transactions.splice(txIndex, 1);
+            }
+        }
+        saveDB(db); renderHistory(); populateWalletSelectors(); updateDashboard();
+    }
+
+    function switchTab(activeTab) {
+        const isSend = activeTab === 'send';
+        sendPanel.classList.toggle('hidden', !isSend); cashPanel.classList.toggle('hidden', isSend);
+        sendTabBtn.style.backgroundColor = isSend ? 'var(--tab-active-bg)' : 'transparent'; sendTabBtn.style.color = isSend ? 'var(--text)' : 'var(--tab-inactive-text)';
+        cashTabBtn.style.backgroundColor = !isSend ? 'var(--tab-active-bg)' : 'transparent'; cashTabBtn.style.color = !isSend ? 'var(--text)' : 'var(--tab-inactive-text)';
+    }
+    sendTabBtn.addEventListener('click', () => switchTab('send')); cashTabBtn.addEventListener('click', () => switchTab('cash'));
+    function applyTheme(mode) { document.documentElement.classList.toggle('dark', mode === 'dark'); localStorage.setItem('theme', mode); switchTab(cashPanel.classList.contains('hidden') ? 'send' : 'cash'); }
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = localStorage.getItem('theme') || (prefersDark ? 'dark' : 'light');
+    applyTheme(savedTheme); themeToggle.addEventListener('click', () => { const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark'; applyTheme(newTheme); themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙'; });
+    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    
+    networkButtons.forEach(btn => btn.addEventListener('click', (e) => {
+        quickSelectedNetwork = e.currentTarget.dataset.net;
+        networkButtons.forEach(b => b.classList.remove('network-active'));
+        e.currentTarget.classList.add('network-active');
     }));
 
-    // --- Other functions (history, theme, etc.) ---
-    // ... no major changes needed here yet ...
+    function markDefaultNetwork() {
+        const vodafoneBtn = networkButtonsWrapper.querySelector('[data-net="vodafone"]');
+        if (vodafoneBtn) {
+            vodafoneBtn.classList.add('network-active');
+            quickSelectedNetwork = 'vodafone';
+        }
+    }
 
-    // Initial App Load
-    document.addEventListener('DOMContentLoaded', () => {
-      populateWalletSelectors();
-      // Trigger change event to set initial state for network buttons
-      sendWalletSelector.dispatchEvent(new Event('change'));
-      // ... other initializers ...
+    document.addEventListener('DOMContentLoaded', () => { 
+        switchTab('send'); 
+        populateWalletSelectors(); 
+        updateDashboard(); 
+        markDefaultNetwork();
     });
   </script>
 </body>
