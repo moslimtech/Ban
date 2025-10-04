@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>أسعار العملات ومحول عملات</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f7f6; color:#222; padding:20px; display:flex; justify-content:center; }
+    .card{ width:100%; max-width:700px; background:#fff; padding:18px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.08); }
+    h1, h2 { text-align:center; color:#0b5ed7; margin:0 0 10px; }
+    #controls{ display:flex; flex-wrap: wrap; gap:8px; justify-content:center; margin-bottom:12px; align-items:center; }
+    #rates-table{ width:100%; border-collapse:collapse; margin-top:10px; }
+    #rates-table th, #rates-table td{ padding:10px; border-bottom:1px solid #eee; text-align:left; }
+    #rates-table th{ background:#0b5ed7; color:#fff; }
+    #rates-table .currency-code { font-size: 0.8em; color: #888; } /* تنسيق لرمز العملة الصغير */
+    .btn{ padding:8px 12px; border-radius:6px; border:0; cursor:pointer; color:#fff; }
+    .btn-refresh{ background:#28a745; }
+    .btn-stop{ background:#dc3545; }
+    #last-updated{ text-align:center; color:#666; margin-top:10px; font-size:0.9em; }
+    .error{ color:#c9302c; text-align:center; margin-top:8px; }
+    #converter-card { border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-top: 20px; background-color: #f9f9f9; }
+    .converter-controls { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
+    .converter-controls input, .converter-controls select { padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 1em; }
+    #converter-result { margin-top: 15px; font-size: 1.2em; font-weight: bold; color: #28a745; text-align: center; min-height: 25px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>أسعار العملات</h1>
+    <div id="controls">
+      <button class="btn btn-refresh" id="refresh-btn">تحديث الآن</button>
+      <button class="btn btn-stop" id="toggle-auto-btn">إيقاف التحديث التلقائي</button>
+      <label> فترة التحديث: <select id="interval-select">
+          <option value="1">كل 1 دقيقة</option>
+          <option value="5" selected>كل 5 دقائق</option>
+          <option value="10">كل 10 دقائق</option>
+          <option value="30">كل 30 دقيقة</option>
+      </select></label>
+    </div>
+    <div id="rates-container"><div class="loader" style="text-align:center;">جاري تحميل البيانات...</div></div>
+    <div id="last-updated"></div>
+    <div id="error" class="error"></div>
+    <div id="converter-card">
+        <h2>محول العملات</h2>
+        <div class="converter-controls">
+            <input type="number" id="amount-input" value="100" placeholder="المبلغ">
+            <select id="from-currency-select"></select>
+            <span> إلى </span>
+            <select id="to-currency-select"></select>
+        </div>
+        <div id="converter-result"></div>
+    </div>
+  </div>
+
+  <script>
+    // ===== قاموس لترجمة رموز العملات إلى العربية (جديد) =====
+    // يمكنك إضافة المزيد من العملات هنا بنفس الطريقة
+    const currencyNamesAR = {
+        'USD': 'دولار أمريكي',
+        'EGP': 'جنيه مصري',
+        'SAR': 'ريال سعودي',
+        'AED': 'درهم إماراتي',
+        'EUR': 'يورو',
+        'GBP': 'جنيه إسترليني',
+        'JPY': 'ين ياباني',
+        'KWD': 'دينار كويتي',
+        'QAR': 'ريال قطري',
+        'BHD': 'دينار بحريني',
+        'OMR': 'ريال عماني',
+        'TRY': 'ليرة تركية'
+    };
+    // ========================================================
+
+    const apiKey = '074fa3acdae390c51111c657'; // تذكير: استبدل هذا بمفتاحك الجديد والخاص
+    const baseCurrency = 'USD';
+    const symbols = Object.keys(currencyNamesAR); // استخدام كل العملات الموجودة في القاموس
+
+    const buildUrl = () => `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${baseCurrency}`;
+
+    let intervalId = null;
+    let autoEnabled = true;
+    let isFetching = false;
+    let globalRates = {};
+
+    const ratesContainer = document.getElementById('rates-container');
+    const lastUpdatedDiv = document.getElementById('last-updated');
+    const errorDiv = document.getElementById('error');
+    const refreshBtn = document.getElementById('refresh-btn');
+    const toggleAutoBtn = document.getElementById('toggle-auto-btn');
+    const intervalSelect = document.getElementById('interval-select');
+    const amountInput = document.getElementById('amount-input');
+    const fromSelect = document.getElementById('from-currency-select');
+    const toSelect = document.getElementById('to-currency-select');
+    const resultDiv = document.getElementById('converter-result');
+
+    async function fetchAndDisplay() {
+      if (isFetching) return;
+      isFetching = true;
+      errorDiv.textContent = '';
+      ratesContainer.innerHTML = '<div style="text-align:center;">جاري تحديث البيانات...</div>';
+      try {
+        const res = await fetch(buildUrl());
+        if (!res.ok) throw new Error('خطأ في استجابة الخادم: ' + res.status);
+        const data = await res.json();
+        if (data.result && data.result === 'error') throw new Error(data['error-type'] || 'خطأ من مزوّد الخدمة');
+        const rates = data.conversion_rates || data.rates || {};
+        globalRates = rates;
+        renderTable(rates);
+        populateConverterOptions(rates);
+        calculateConversion();
+        const timeStr = data.time_last_update_utc || null;
+        lastUpdatedDiv.textContent = timeStr ? 'آخر تحديث: ' + new Date(timeStr).toLocaleString('ar-EG') : 'آخر تحديث: ' + new Date().toLocaleString('ar-EG');
+        localStorage.setItem('lastRates', JSON.stringify({ data, savedAt: Date.now() }));
+      } catch (err) {
+        console.error('Fetch error:', err);
+        const cached = localStorage.getItem('lastRates');
+        if (cached) {
+          try {
+            const parsed = JSON.parse(cached);
+            const rates = (parsed.data && (parsed.data.conversion_rates || parsed.data.rates)) || {};
+            globalRates = rates;
+            renderTable(rates);
+            populateConverterOptions(rates);
+            calculateConversion();
+            lastUpdatedDiv.textContent = 'يعرض آخر بيانات مخزنة (قديمة).';
+            errorDiv.textContent = 'فشل تحديث البيانات الحيّة، يتم عرض بيانات مخزنة محلياً.';
+          } catch (e) {
+            ratesContainer.innerHTML = '<div style="text-align:center;color:#c9302c;">لا تتوفر بيانات.</div>';
+            errorDiv.textContent = 'فشل تحميل البيانات.';
+          }
+        } else {
+          ratesContainer.innerHTML = '<div style="text-align:center;color:#c9302c;">لا تتوفر بيانات.</div>';
+          errorDiv.textContent = 'فشل تحميل البيانات. حاول إعادة المحاولة.';
+        }
+      } finally {
+        isFetching = false;
+      }
+    }
+
+    function renderTable(rates) {
+      // تعديل رأس الجدول ليشمل اسم العملة الأساسية بالعربي
+      const baseCurrencyName = currencyNamesAR[baseCurrency] || baseCurrency;
+      let html = `<table id="rates-table"><thead><tr><th>العملة</th><th>سعر الصرف (مقابل 1 ${baseCurrencyName})</th></tr></thead><tbody>`;
+      symbols.filter(s => s !== baseCurrency).forEach(sym => {
+        const v = rates[sym];
+        // تعديل: استخدام الاسم العربي من القاموس
+        const arabicName = currencyNamesAR[sym] || sym; // إذا لم يجد الاسم، يستخدم الرمز
+        html += `<tr><td>${arabicName} <span class="currency-code">(${sym})</span></td><td>${v !== undefined ? v.toFixed(4) : '—'}</td></tr>`;
+      });
+      html += '</tbody></table>';
+      ratesContainer.innerHTML = html;
+    }
+    
+    function populateConverterOptions(rates) {
+        const currencies = Object.keys(rates).filter(c => currencyNamesAR[c]); // عرض العملات الموجودة في القاموس فقط
+        fromSelect.innerHTML = '';
+        toSelect.innerHTML = '';
+        currencies.forEach(currency => {
+            // تعديل: استخدام الاسم العربي في النص المعروض
+            const arabicName = currencyNamesAR[currency] || currency;
+            fromSelect.innerHTML += `<option value="${currency}">${arabicName}</option>`;
+            toSelect.innerHTML += `<option value="${currency}">${arabicName}</option>`;
+        });
+        fromSelect.value = 'USD';
+        toSelect.value = 'EGP';
+    }
+
+    function calculateConversion() {
+        const amount = parseFloat(amountInput.value);
+        const fromCurrency = fromSelect.value;
+        const toCurrency = toSelect.value;
+        if (isNaN(amount) || !fromCurrency || !toCurrency || !globalRates[fromCurrency] || !globalRates[toCurrency]) {
+            resultDiv.textContent = '';
+            return;
+        }
+        const fromRate = globalRates[fromCurrency];
+        const toRate = globalRates[toCurrency];
+        const result = (amount / fromRate) * toRate;
+        
+        // تعديل: استخدام الأسماء العربية في نص النتيجة
+        const fromCurrencyName = currencyNamesAR[fromCurrency] || fromCurrency;
+        const toCurrencyName = currencyNamesAR[toCurrency] || toCurrency;
+        
+        resultDiv.textContent = `${amount.toLocaleString()} ${fromCurrencyName} = ${result.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${toCurrencyName}`;
+    }
+
+    function startAuto(minutes) {
+      stopAuto();
+      const ms = Math.max(1, minutes) * 60 * 1000;
+      intervalId = setInterval(fetchAndDisplay, ms);
+      autoEnabled = true;
+      toggleAutoBtn.textContent = 'إيقاف التحديث التلقائي';
+    }
+    function stopAuto() {
+      if (intervalId) { clearInterval(intervalId); }
+      autoEnabled = false;
+      toggleAutoBtn.textContent = 'تشغيل التحديث التلقائي';
+    }
+
+    refreshBtn.addEventListener('click', fetchAndDisplay);
+    toggleAutoBtn.addEventListener('click', () => { autoEnabled ? stopAuto() : startAuto(parseInt(intervalSelect.value, 10)); });
+    intervalSelect.addEventListener('change', () => { if (autoEnabled) startAuto(parseInt(intervalSelect.value, 10)); });
+    amountInput.addEventListener('keyup', calculateConversion);
+    fromSelect.addEventListener('change', calculateConversion);
+    toSelect.addEventListener('change', calculateConversion);
+
+    fetchAndDisplay();
+    startAuto(parseInt(intervalSelect.value, 10));
+  </script>
+</body>
+</html>
