@@ -288,31 +288,7 @@
     }
     @keyframes shimmer { 100% { transform: translateX(100%); } }
   </style>
-  <style>
-    /* Floating button badges and spacing tweaks */
-    #currencyExchangeFloatingBtn, #cashFloatingBtn, #metoolsFloatingBtn {
-      left: 1.5rem; /* keep from the left edge */
-      /* ensure on top of other fixed elements */
-      z-index: 60;
-    }
 
-    /* Reduce size slightly on very small screens and lift above bottom nav */
-    @media (max-width: 640px) {
-      /* Lift both buttons up a bit on mobile so they look nicer above nav */
-      #currencyExchangeFloatingBtn { bottom: 120px; }
-      #cashFloatingBtn { bottom: 120px; }
-      #metoolsFloatingBtn { bottom: 56px; }
-      #currencyExchangeFloatingBtn ,#cashFloatingBtn, #metoolsFloatingBtn { width:48px; height:48px }
-      #currencyExchangeFloatingBtn span ,#cashFloatingBtn span, #metoolsFloatingBtn span { font-size:11px; padding:3px 6px }
-    }
-    /* Badge style: white background with red text */
-    #currencyExchangeFloatingBtn span, #cashFloatingBtn span, #metoolsFloatingBtn span {
-      background: #ffffff !important;
-      color: #dc2626 !important; /* red-600 */
-      font-weight: 700;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-    }
-  </style>
 
   <!-- Structured Data -->
   <script type="application/ld+json">
