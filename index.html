@@ -446,7 +446,18 @@
   </section>
 
   <!-- Floating cash button (opens كاشك in a new tab) -->
-  <button id="cashFloatingBtn" type="button" aria-label="كاشك" title="كاشك" class="fixed bottom-28 left-6 z-50 inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-600/95 text-white shadow-lg hover:scale-105 transition-transform" style="backdrop-filter: blur(6px); box-shadow: 0 6px 18px rgba(6,8,24,0.18);">
+  <button id="currencyExchangeFloatingBtn" type="button" aria-label="عملتك" title="عملتك" class="fixed bottom-40 left-6 z-50 inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-600/95 text-white shadow-lg hover:scale-105 transition-transform" style="backdrop-filter: blur(6px); box-shadow: 0 6px 18px rgba(6,8,24,0.18);">
+    <!-- centered badge above the button -->
+    <span class="absolute" style="left:50%; top:-10px; transform:translateX(-50%); background:#111827; color:#ffffff; font-weight:700; padding:4px 8px; border-radius:999px; font-size:12px; box-shadow:0 6px 18px rgba(0,0,0,0.18);">عملتك</span>
+    <!-- Money bundle icon (stack of bills) -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7" aria-hidden="true">
+      <path d="M3 7a1 1 0 011-1h16a1 1 0 011 1v8a1 1 0 01-1 1H4a1 1 0 01-1-1V7zm2 1v6h14V8H5zm1 2a1 1 0 100 2h8a1 1 0 100-2H6z" />
+      <path d="M2 13v2a2 2 0 002 2h16a2 2 0 002-2v-2" opacity="0.2" />
+    </svg>
+  </button>
+
+  <!-- Floating cash button (opens كاشك in a new tab) -->
+  <button id="cashFloatingBtn" type="button" aria-label="كاشك" title="كاشك" class="fixed bottom-30 left-6 z-50 inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-600/95 text-white shadow-lg hover:scale-105 transition-transform" style="backdrop-filter: blur(6px); box-shadow: 0 6px 18px rgba(6,8,24,0.18);">
     <!-- centered badge above the button -->
     <span class="absolute" style="left:50%; top:-10px; transform:translateX(-50%); background:#111827; color:#ffffff; font-weight:700; padding:4px 8px; border-radius:999px; font-size:12px; box-shadow:0 6px 18px rgba(0,0,0,0.18);">كاشك</span>
     <!-- Money bundle icon (stack of bills) -->
@@ -465,6 +476,8 @@
       <path d="M7 2a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V4a2 2 0 00-2-2H7zm8 2v3H9V4h6zM9 9h6v2H9V9zm0 4h2v2H9v-2zm4 0h2v2h-2v-2zM9 17h2v2H9v-2zm4 0h2v2h-2v-2z"/>
     </svg>
   </button>
+
+  
 
   <!-- Filters Bar -->
   <section class="border-b border-slate-200 bg-white">
@@ -2158,27 +2171,49 @@
     // فتح صفحة metools من الزر كـ button وليس رابط
     (function(){
       const btn = document.getElementById('metoolsFloatingBtn');
-      const url = 'https://moslimtech.github.io/Ban/metools';
-      if (!btn) return;
-      btn.addEventListener('click', function(){
-        // افتح الرابط في نفس الصفحة
-        window.location.href = url;
-      });
-      // دعم لوحة المفاتيح (Enter/Space)
-      btn.addEventListener('keydown', function(e){
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          btn.click();
-        }
-      });
+        const url = 'https://moslimtech.github.io/Ban/metools';
+        if (!btn) return;
+        // The cash button is a regular button — navigate in the same tab on click/keyboard.
+        btn.addEventListener('click', function(){
+          window.location.href = url;
+        });
+        btn.addEventListener('keydown', function(e){
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            btn.click();
+          }
+        });
     })();
   </script>
 
+
+ 
+
   <script>
-    // فتح صفحة metools من الزر كـ button وليس رابط
+    // فتح صفحة cash من الزر كـ button وليس رابط
     (function(){
       const btn = document.getElementById('cashFloatingBtn');
         const url = 'https://moslimtech.github.io/Ban/cash';
+        if (!btn) return;
+        // The cash button is a regular button — navigate in the same tab on click/keyboard.
+        btn.addEventListener('click', function(){
+          window.location.href = url;
+        });
+        btn.addEventListener('keydown', function(e){
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            btn.click();
+          }
+        });
+    })();
+  </script>
+
+
+  <script>
+    // فتح صفحة currencyExchange من الزر كـ button وليس رابط
+    (function(){
+      const btn = document.getElementById('currencyExchangeFloatingBtn');
+        const url = 'https://moslimtech.github.io/Ban/currencyExchange';
         if (!btn) return;
         // The cash button is a regular button — navigate in the same tab on click/keyboard.
         btn.addEventListener('click', function(){
