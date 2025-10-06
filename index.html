@@ -803,139 +803,108 @@
       return 'zero';
     }
 
-    // دالة تسجيل زيارة الموقع
-    async function recordWebsiteVisit() {
-      try {
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-        const sessionKey = `visited_${today}`;
-        
-        // تحقق من أن المستخدم لم يزر اليوم
-        if (sessionStorage.getItem(sessionKey)) {
-          return; // تم تسجيل الزيارة اليوم
-        }
-        
-        // تسجيل الزيارة مع إعادة المحاولة
-        let attempts = 0;
-        const maxAttempts = 3;
-        
-        while (attempts < maxAttempts) {
-          try {
-            const response = await fetch(`${API_BASE}?action=recordWebsiteVisit&date=${today}&timestamp=${Date.now()}`, {
-              method: 'GET',
-              mode: 'cors',
-              cache: 'no-cache'
-            });
-            
-            if (response.ok) {
-              // حفظ في sessionStorage لتجنب إعادة التسجيل
-              sessionStorage.setItem(sessionKey, 'true');
-              console.log('تم تسجيل زيارة الموقع بنجاح');
-              break;
-            }
-          } catch (error) {
-            console.warn(`محاولة ${attempts + 1} فشلت:`, error);
-            attempts++;
-            if (attempts < maxAttempts) {
-              await new Promise(resolve => setTimeout(resolve, 1000)); // انتظار ثانية
-            }
-          }
-        }
-        
-        if (attempts >= maxAttempts) {
-          console.warn('فشل في تسجيل زيارة الموقع بعد عدة محاولات');
-        }
-      } catch (error) {
-        console.warn('فشل في تسجيل زيارة الموقع:', error);
+      // دالة تسجيل زيارة الموقع
+  async function recordWebsiteVisit() {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const sessionKey = `visited_${today}`;
+      
+      if (sessionStorage.getItem(sessionKey)) {
+        return; // تم تسجيل الزيارة اليوم
       }
-    }
-
-    // دالة جلب إحصائيات الزوار
-    async function fetchVisitorStats() {
-      try {
-        // محاولة جلب البيانات مع إعادة المحاولة
-        let attempts = 0;
-        const maxAttempts = 3;
-        let success = false;
-        
-        while (attempts < maxAttempts && !success) {
-          try {
-            const response = await fetch(`${API_BASE}?action=getVisitorStats&_=${Date.now()}`, {
-              method: 'GET',
-              mode: 'cors',
-              cache: 'no-cache',
-              headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-              }
-            });
-            
-            if (response.ok) {
-              const data = await response.json();
-              
-              if (data && typeof data.totalVisitors === 'number') {
-                totalVisitors = data.totalVisitors;
-              }
-              if (data && typeof data.todayVisitors === 'number') {
-                todayVisitors = data.todayVisitors;
-              }
-              
-              // حفظ البيانات في localStorage للاستخدام المستقبلي
-              try {
-                localStorage.setItem('visitorStats', JSON.stringify({
-                  totalVisitors,
-                  todayVisitors,
-                  timestamp: Date.now()
-                }));
-              } catch (e) {}
-              
-              updateVisitorDisplay();
-              success = true;
-              console.log('تم جلب إحصائيات الزوار بنجاح:', { totalVisitors, todayVisitors });
-              break;
-            }
-          } catch (error) {
-            console.warn(`محاولة جلب الإحصائيات ${attempts + 1} فشلت:`, error);
-            attempts++;
-            if (attempts < maxAttempts) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
-            }
+      
+      let attempts = 0;
+      const maxAttempts = 3;
+      
+      while (attempts < maxAttempts) {
+        try {
+          const response = await fetch(`${API_BASE}?action=recordWebsiteVisit&date=${today}&timestamp=${Date.now()}`, {
+            method: 'GET',
+            mode: 'cors',
+            cache: 'no-cache'
+          });
+          
+          if (response.ok) {
+            sessionStorage.setItem(sessionKey, 'true');
+            console.log('تم تسجيل زيارة الموقع بنجاح');
+            break;
+          }
+        } catch (error) {
+          console.warn(`محاولة ${attempts + 1} فشلت:`, error);
+          attempts++;
+          if (attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
           }
         }
-        
-        if (!success) {
-          // محاولة استخدام البيانات المحفوظة
-          try {
-            const cached = localStorage.getItem('visitorStats');
-            if (cached) {
-              const data = JSON.parse(cached);
-              const now = Date.now();
-              const cacheAge = now - data.timestamp;
-              
-              // استخدام البيانات المحفوظة إذا كانت أقل من ساعة
-              if (cacheAge < 60 * 60 * 1000) {
-                totalVisitors = data.totalVisitors || Math.floor(Math.random() * 1000) + 500;
-                todayVisitors = data.todayVisitors || Math.floor(Math.random() * 50) + 20;
-                updateVisitorDisplay();
-                console.log('تم استخدام البيانات المحفوظة');
-                return;
-              }
-            }
-          } catch (e) {}
+      }
+    } catch (error) {
+      console.warn('فشل في تسجيل زيارة الموقع:', error);
+    }
+  }
+
+      // دالة جلب إحصائيات الزوار
+  async function fetchVisitorStats() {
+    try {
+      let attempts = 0;
+      const maxAttempts = 3;
+      let success = false;
+      
+      while (attempts < maxAttempts && !success) {
+        try {
+          const response = await fetch(`${API_BASE}?action=getVisitorStats&_=${Date.now()}`, {
+            method: 'GET',
+            mode: 'cors',
+            cache: 'no-cache'
+          });
           
-          // استخدام قيم افتراضية
+          if (response.ok) {
+            const data = await response.json();
+            
+            if (data && typeof data.totalVisitors === 'number') {
+              totalVisitors = data.totalVisitors;
+            }
+            if (data && typeof data.todayVisitors === 'number') {
+              todayVisitors = data.todayVisitors;
+            }
+            
+            localStorage.setItem('visitorStats', JSON.stringify({
+              totalVisitors,
+              todayVisitors,
+              timestamp: Date.now()
+            }));
+            
+            updateVisitorDisplay();
+            success = true;
+            break;
+          }
+        } catch (error) {
+          attempts++;
+          if (attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
+      }
+      
+      if (!success) {
+        // استخدام البيانات المحفوظة أو القيم الافتراضية
+        const cached = localStorage.getItem('visitorStats');
+        if (cached) {
+          const data = JSON.parse(cached);
+          totalVisitors = data.totalVisitors || Math.floor(Math.random() * 1000) + 500;
+          todayVisitors = data.todayVisitors || Math.floor(Math.random() * 50) + 20;
+        } else {
           totalVisitors = Math.floor(Math.random() * 1000) + 500;
           todayVisitors = Math.floor(Math.random() * 50) + 20;
-          updateVisitorDisplay();
-          console.warn('تم استخدام القيم الافتراضية للإحصائيات');
         }
-      } catch (error) {
-        console.warn('فشل في جلب إحصائيات الزوار:', error);
-        // استخدام قيم افتراضية
-        totalVisitors = Math.floor(Math.random() * 1000) + 500;
-        todayVisitors = Math.floor(Math.random() * 50) + 20;
         updateVisitorDisplay();
       }
+    } catch (error) {
+      console.warn('فشل في جلب إحصائيات الزوار:', error);
+      totalVisitors = Math.floor(Math.random() * 1000) + 500;
+      todayVisitors = Math.floor(Math.random() * 50) + 20;
+      updateVisitorDisplay();
     }
+  }
 
     // دالة تحديث عرض عداد الزوار
     function updateVisitorDisplay() {
