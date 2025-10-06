@@ -2335,7 +2335,6 @@ document.head.appendChild(styleSheet);
         });
     })();
   </script>
-
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
   import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-messaging.js";
@@ -2353,26 +2352,44 @@ document.head.appendChild(styleSheet);
   const app = initializeApp(firebaseConfig);
   const messaging = getMessaging(app);
 
-  // طلب إذن الإشعارات وجلب الـ token
   async function requestPermission() {
-    const permission = await Notification.requestPermission();
-    if (permission === "granted") {
-      const token = await getToken(messaging, {
-        vapidKey: "BIW9FLD1UxD9mQsQcE90o3AdxTkA7iyqT5XwjW8zXs_y4Sm6wLqTOXJTit7WINcEX8F6rdmynCSFQ704z6ej8bY"
-      });
-      console.log("📬 FCM Token:", token);
-      // احفظه في قاعدة بياناتك أو أرسله إلى السيرفر
-    } else {
-      console.log("❌ تم رفض الإذن بالإشعارات");
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        console.log("❌ تم رفض الإذن بالإشعارات");
+        return;
+      }
+
+      const registration = await navigator.serviceWorker.register("/Ban/firebase-messaging-sw.js");
+
+      try {
+        const token = await getToken(messaging, {
+          vapidKey: "BIW9FLD1UxD9mQsQcE90o3AdxTkA7iyqT5XwjW8zXs_y4Sm6wLqTOXJTit7WINcEX8F6rdmynCSFQ704z6ej8bY",
+          serviceWorkerRegistration: registration
+        });
+
+        if (!token) {
+          console.warn("⚠️ لم يتم إنشاء توكن (قد يكون المتصفح غير مدعوم أو الإعداد ناقص).");
+          return;
+        }
+
+        console.log("📬 FCM Token:", token);
+        // TODO: أرسل التوكن إلى السيرفر أو خزّنه حسب سيناريوك
+      } catch (tokenError) {
+        console.error("❌ فشل في الحصول على التوكن:", tokenError);
+      }
+    } catch (swError) {
+      console.error("❌ فشل تسجيل Service Worker:", swError);
     }
   }
 
   requestPermission();
 
-  // استقبال إشعارات أثناء فتح الصفحة
   onMessage(messaging, (payload) => {
     console.log("📩 إشعار وارد:", payload);
-    alert("📢 " + payload.notification.title + "\n" + payload.notification.body);
+    const { title = "📢 إشعار جديد", body = "لديك إشعار من بان" } = payload.notification || {};
+    alert(`${title}
+${body}`);
   });
 </script>
 
