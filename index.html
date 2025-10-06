@@ -1759,27 +1759,25 @@
     // });
 
     // init
-    (async function init() {
-      // تهيئة عداد الزوار
-      visitorCountElement = document.getElementById('visitorCount');
-      todayVisitorsElement = document.getElementById('todayVisitors');
-      
-      // تحميل البيانات المحفوظة فوراً
-      const hasCachedData = loadCachedStats();
-      
-      // تسجيل زيارة الموقع
-      recordWebsiteVisit();
-      
-      // جلب إحصائيات الزوار (في الخلفية إذا كانت هناك بيانات محفوظة)
-      if (hasCachedData) {
-        // تحديث البيانات في الخلفية
-        setTimeout(() => {
-          fetchVisitorStats();
-        }, 1000);
-      } else {
-        // جلب البيانات فوراً إذا لم تكن هناك بيانات محفوظة
-        fetchVisitorStats();
-      }
+   (async function init() {
+  // تهيئة عداد الزوار
+  visitorCountElement = document.getElementById('visitorCount');
+  todayVisitorsElement = document.getElementById('todayVisitors');
+  
+  // تحميل البيانات المحفوظة فوراً
+  const hasCachedData = loadCachedStats();
+  
+  // تسجيل زيارة الموقع
+  recordWebsiteVisit();
+  
+  // جلب إحصائيات الزوار
+  if (hasCachedData) {
+    setTimeout(() => {
+      fetchVisitorStats();
+    }, 1000);
+  } else {
+    fetchVisitorStats();
+  }
       
       // اعرض سكيليتون فورًا عند فتح الصفحة لضمان ظهور الشبكة مباشرة
       showSkeletons(2);
