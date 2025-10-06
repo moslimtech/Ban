@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -848,155 +849,93 @@
       }
     }
 
-    // دالة جلب إحصائيات الزوار - نسخة محسّنة 🚀
- // دالة جلب إحصائيات الزوار
-async function fetchVisitorStats() {
-  try {
-    let attempts = 0;
-    const maxAttempts = 3;
-    let success = false;
-
-    while (attempts < maxAttempts && !success) {
+    // دالة جلب إحصائيات الزوار
+    async function fetchVisitorStats() {
       try {
-        const response = await fetch(`${API_BASE}?action=getVisitorStats&_=${Date.now()}`, {
-            method: 'GET',
-            mode: 'cors',
-            cache: 'no-cache'
-          });
-
-        if (response.ok) {
-          const raw = await response.json();
-          const data = raw && raw.success ? raw.data : null;
-
-          if (data && typeof data.totalVisitors === 'number') {
-            totalVisitors = data.totalVisitors;
-          }
-          if (data && typeof data.todayVisitors === 'number') {
-            todayVisitors = data.todayVisitors;
-          }
-
-          // حفظ البيانات في localStorage للاستخدام المستقبلي
+        // محاولة جلب البيانات مع إعادة المحاولة
+        let attempts = 0;
+        const maxAttempts = 3;
+        let success = false;
+        
+        while (attempts < maxAttempts && !success) {
           try {
-            localStorage.setItem('visitorStats', JSON.stringify({
-              totalVisitors,
-              todayVisitors,
-              timestamp: Date.now()
-            }));
+            const response = await fetch(`${API_BASE}?action=getVisitorStats&_=${Date.now()}`, {
+              method: 'GET',
+              mode: 'cors',
+              cache: 'no-cache',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              }
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              
+              if (data && typeof data.totalVisitors === 'number') {
+                totalVisitors = data.totalVisitors;
+              }
+              if (data && typeof data.todayVisitors === 'number') {
+                todayVisitors = data.todayVisitors;
+              }
+              
+              // حفظ البيانات في localStorage للاستخدام المستقبلي
+              try {
+                localStorage.setItem('visitorStats', JSON.stringify({
+                  totalVisitors,
+                  todayVisitors,
+                  timestamp: Date.now()
+                }));
+              } catch (e) {}
+              
+              updateVisitorDisplay();
+              success = true;
+              console.log('تم جلب إحصائيات الزوار بنجاح:', { totalVisitors, todayVisitors });
+              break;
+            }
+          } catch (error) {
+            console.warn(`محاولة جلب الإحصائيات ${attempts + 1} فشلت:`, error);
+            attempts++;
+            if (attempts < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+          }
+        }
+        
+        if (!success) {
+          // محاولة استخدام البيانات المحفوظة
+          try {
+            const cached = localStorage.getItem('visitorStats');
+            if (cached) {
+              const data = JSON.parse(cached);
+              const now = Date.now();
+              const cacheAge = now - data.timestamp;
+              
+              // استخدام البيانات المحفوظة إذا كانت أقل من ساعة
+              if (cacheAge < 60 * 60 * 1000) {
+                totalVisitors = data.totalVisitors || Math.floor(Math.random() * 1000) + 500;
+                todayVisitors = data.todayVisitors || Math.floor(Math.random() * 50) + 20;
+                updateVisitorDisplay();
+                console.log('تم استخدام البيانات المحفوظة');
+                return;
+              }
+            }
           } catch (e) {}
-
+          
+          // استخدام قيم افتراضية
+          totalVisitors = Math.floor(Math.random() * 1000) + 500;
+          todayVisitors = Math.floor(Math.random() * 50) + 20;
           updateVisitorDisplay();
-          success = true;
-          console.log('تم جلب إحصائيات الزوار بنجاح:', { totalVisitors, todayVisitors });
-          break;
+          console.warn('تم استخدام القيم الافتراضية للإحصائيات');
         }
       } catch (error) {
-        console.warn(`محاولة جلب الإحصائيات ${attempts + 1} فشلت:`, error);
-        attempts++;
-        if (attempts < maxAttempts) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
-    }
-
-    if (!success) {
-      // محاولة استخدام البيانات المحفوظة
-      try {
-        const cached = localStorage.getItem('visitorStats');
-        if (cached) {
-          const data = JSON.parse(cached);
-          const now = Date.now();
-          const cacheAge = now - data.timestamp;
-
-          // استخدام البيانات المحفوظة إذا كانت أقل من ساعة
-          if (cacheAge < 60 * 60 * 1000) {
-            totalVisitors = data.totalVisitors ?? totalVisitors;
-            todayVisitors = data.todayVisitors ?? todayVisitors;
-            updateVisitorDisplay();
-            console.log('تم استخدام البيانات المحفوظة');
-            return;
-          }
-        }
-      } catch (e) {}
-
-      // استخدام قيم افتراضية (آخر ملاذ)
-      if (!success) {
+        console.warn('فشل في جلب إحصائيات الزوار:', error);
+        // استخدام قيم افتراضية
         totalVisitors = Math.floor(Math.random() * 1000) + 500;
         todayVisitors = Math.floor(Math.random() * 50) + 20;
         updateVisitorDisplay();
-        console.warn('تم استخدام القيم الافتراضية للإحصائيات');
       }
     }
-  } catch (error) {
-    console.warn('فشل في جلب إحصائيات الزوار:', error);
-    totalVisitors = Math.floor(Math.random() * 1000) + 500;
-    todayVisitors = Math.floor(Math.random() * 50) + 20;
-    updateVisitorDisplay();
-  }
-}
-
-// دوال مساعدة لتوليد قيم افتراضية منطقية
-function generateFallbackTotal() {
-  // توليد رقم يبدو منطقياً بناءً على التاريخ
-  const daysSinceLaunch = Math.floor((Date.now() - new Date('2024-01-01').getTime()) / (24 * 60 * 60 * 1000));
-  const baseVisits = Math.floor(daysSinceLaunch * (Math.random() * 10 + 15)); // 15-25 زيارة/يوم
-  return Math.max(500, baseVisits + Math.floor(Math.random() * 200));
-}
-
-function generateFallbackToday() {
-  const hour = new Date().getHours();
-  // زيارات أقل في الفجر، أكثر في المساء
-  const hourMultiplier = hour < 6 ? 0.3 : hour < 12 ? 0.7 : hour < 18 ? 1.0 : 0.8;
-  return Math.floor((Math.random() * 30 + 10) * hourMultiplier);
-}
-
-// إضافة تأثيرات بصرية للحالات المختلفة
-function addVisualFeedback(type) {
-  const visitorCountElement = document.getElementById('visitorCount');
-  const todayVisitorsElement = document.getElementById('todayVisitors');
-  
-  if (!visitorCountElement || !todayVisitorsElement) return;
-  
-  const effects = {
-    success: { color: '#10b981', animation: 'fadeInScale 0.5s ease-out' },
-    cached: { color: '#f59e0b', animation: 'fadeInScale 0.3s ease-out' },
-    fallback: { color: '#6b7280', animation: 'fadeInScale 0.3s ease-out' },
-    error: { color: '#ef4444', animation: 'shake 0.5s ease-out' }
-  };
-  
-  const effect = effects[type] || effects.fallback;
-  
-  [visitorCountElement, todayVisitorsElement].forEach(el => {
-    el.style.color = effect.color;
-    el.style.animation = effect.animation;
-    
-    // إزالة التأثير بعد انتهائه
-    setTimeout(() => {
-      el.style.color = '';
-      el.style.animation = '';
-    }, 1000);
-  });
-}
-
-// إضافة الأنيميشنز في CSS
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  @keyframes fadeInScale {
-    0% { opacity: 0; transform: scale(0.8); }
-    100% { opacity: 1; transform: scale(1); }
-  }
-  
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-2px); }
-    75% { transform: translateX(2px); }
-  }
-  
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
-`;
-document.head.appendChild(styleSheet);
 
     // دالة تحديث عرض عداد الزوار
     function updateVisitorDisplay() {
@@ -2335,6 +2274,7 @@ document.head.appendChild(styleSheet);
         });
     })();
   </script>
+
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
   import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-messaging.js";
@@ -2352,50 +2292,18 @@ document.head.appendChild(styleSheet);
   const app = initializeApp(firebaseConfig);
   const messaging = getMessaging(app);
 
+  // طلب إذن الإشعارات وجلب الـ token
   async function requestPermission() {
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission !== "granted") {
-        console.log("❌ تم رفض الإذن بالإشعارات");
-        return;
-      }
-
-      const registration = await navigator.serviceWorker.register("/Ban/firebase-messaging-sw.js");
-
-      try {
-        const token = await getToken(messaging, {
-          vapidKey: "BIW9FLD1UxD9mQsQcE90o3AdxTkA7iyqT5XwjW8zXs_y4Sm6wLqTOXJTit7WINcEX8F6rdmynCSFQ704z6ej8bY",
-          serviceWorkerRegistration: registration
-        });
-
-        if (!token) {
-          console.warn("⚠️ لم يتم إنشاء توكن (قد يكون المتصفح غير مدعوم أو الإعداد ناقص).");
-          return;
-        }
-
-        console.log("📬 FCM Token:", token);
-        // TODO: أرسل التوكن إلى السيرفر أو خزّنه حسب سيناريوك
-      } catch (tokenError) {
-        console.error("❌ فشل في الحصول على التوكن:", tokenError);
-      }
-    } catch (swError) {
-      console.error("❌ فشل تسجيل Service Worker:", swError);
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      const token = await getToken(messaging, {
+        vapidKey: "BIW9FLD1UxD9mQsQcE90o3AdxTkA7iyqT5XwjW8zXs_y4Sm6wLqTOXJTit7WINcEX8F6rdmynCSFQ704z6ej8bY"
+      });
+      console.log("📬 FCM Token:", token);
+      // احفظه في قاعدة بياناتك أو أرسله إلى السيرفر
+    } else {
+      console.log("❌ تم رفض الإذن بالإشعارات");
     }
   }
 
   requestPermission();
-
-  onMessage(messaging, (payload) => {
-    console.log("📩 إشعار وارد:", payload);
-    const { title = "📢 إشعار جديد", body = "لديك إشعار من بان" } = payload.notification || {};
-    alert(`${title}
-${body}`);
-  });
-</script>
-
-
-  
-
-
-</body>
-</html>
