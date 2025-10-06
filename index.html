@@ -859,14 +859,10 @@ async function fetchVisitorStats() {
     while (attempts < maxAttempts && !success) {
       try {
         const response = await fetch(`${API_BASE}?action=getVisitorStats&_=${Date.now()}`, {
-          method: 'GET',
-          mode: 'cors',
-          cache: 'no-cache',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
-        });
+            method: 'GET',
+            mode: 'cors',
+            cache: 'no-cache'
+          });
 
         if (response.ok) {
           const raw = await response.json();
