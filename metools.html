@@ -47,6 +47,24 @@
     
     /* إخفاء العناصر الفارغة عند التصدير */
     .export-hide-if-empty { display: none !important; }
+    
+    /* تحسينات للتصدير - ضمان ظهور النص بشكل صحيح */
+    #docPreview table input[type="text"],
+    #docPreview table input[type="number"] {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background: transparent !important;
+      color: #000 !important;
+      font-weight: 500 !important;
+    }
+    
+    /* ضمان ظهور النص في PDF */
+    #docPreview #itemsTable td,
+    #docPreview #itemsTable th {
+      text-align: center !important;
+      vertical-align: middle !important;
+    }
 
     /* تحسين ظهور contenteditable عندما يكون فارغاً */
     [contenteditable]:empty:before {
@@ -60,7 +78,37 @@
       border: none;
       background: transparent;
       width: 100%;
-      padding: 0.25rem;
+      padding: 0.4rem 0.25rem;
+      text-align: center;
+      color: #000;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    
+    table input[type="text"]::placeholder, table input[type="number"]::placeholder {
+      color: #9CA3AF;
+      opacity: 0.7;
+    }
+    
+    /* ضمان محاذاة النص في وسط الخلايا */
+    #itemsTable td, #itemsTable th {
+      text-align: center !important;
+      vertical-align: middle;
+      padding: 0.75rem 0.5rem !important;
+      min-height: 2.25rem;
+    }
+    
+    #itemsTable td {
+      color: #000;
+    }
+    
+    #itemsTable tr {
+      height: auto;
+    }
+    
+    #itemsTable .total {
+      font-weight: 600;
+      color: #000;
     }
     table input[type="number"]::-webkit-outer-spin-button,
     table input[type="number"]::-webkit-inner-spin-button {
@@ -95,13 +143,15 @@
       }
       
       #itemsTable th, #itemsTable td {
-        padding: 0.25rem !important;
+        padding: 0.5rem 0.35rem !important;
+        min-height: 2rem;
       }
       
       /* تحسين حجم المدخلات */
       table input[type="text"], table input[type="number"] {
         font-size: 0.75rem;
-        min-height: 1.5rem;
+        padding: 0.35rem 0.25rem;
+        line-height: 1.4;
       }
       
       /* تحسين حجم النصوص */
@@ -346,19 +396,19 @@
       head.innerHTML = "";
       if (docType === "فاتورة") {
         head.innerHTML = `
-          <th class="p-1 md:p-2 border text-xs md:text-sm">الصنف</th>
-          <th class="p-1 md:p-2 border w-16 md:w-28 text-xs md:text-sm">الكمية</th>
-          <th class="p-1 md:p-2 border w-16 md:w-28 text-xs md:text-sm">السعر</th>
-          <th class="p-1 md:p-2 border text-xs md:text-sm">الإجمالي</th>
-          <th class="remove-row-btn w-8">X</th>
+          <th class="p-2 md:p-2.5 border text-center text-xs md:text-sm">الصنف</th>
+          <th class="p-2 md:p-2.5 border w-16 md:w-28 text-center text-xs md:text-sm">الكمية</th>
+          <th class="p-2 md:p-2.5 border w-16 md:w-28 text-center text-xs md:text-sm">السعر</th>
+          <th class="p-2 md:p-2.5 border text-center text-xs md:text-sm">الإجمالي</th>
+          <th class="remove-row-btn w-8 text-center">X</th>
         `;
       } else {
         head.innerHTML = `
-          <th class="p-1 md:p-2 border text-xs md:text-sm">الصنف</th>
-          <th class="p-1 md:p-2 border text-xs md:text-sm">الوحدة</th>
-          <th class="p-1 md:p-2 border w-16 md:w-28 text-xs md:text-sm">السعر</th>
-          <th class="p-1 md:p-2 border text-xs md:text-sm">ملاحظات</th>
-          <th class="remove-row-btn w-8">X</th>
+          <th class="p-2 md:p-2.5 border text-center text-xs md:text-sm">الصنف</th>
+          <th class="p-2 md:p-2.5 border text-center text-xs md:text-sm">الوحدة</th>
+          <th class="p-2 md:p-2.5 border w-16 md:w-28 text-center text-xs md:text-sm">السعر</th>
+          <th class="p-2 md:p-2.5 border text-center text-xs md:text-sm">ملاحظات</th>
+          <th class="remove-row-btn w-8 text-center">X</th>
         `;
       }
       document.getElementById("items").innerHTML = "";
@@ -407,21 +457,21 @@
       if (docType === 'فاتورة') {
         row = `
           <tr class="align-middle">
-            <td class="border p-1 md:p-2"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="اسم الصنف" oninput="updatePreview()"></td>
-            <td class="border p-1 md:p-2"><input type="number" value="1" min="1" class="w-full text-center text-xs md:text-sm" oninput="updateTotal()"></td>
-            <td class="border p-1 md:p-2"><input type="number" value="0" min="0" class="w-full text-center text-xs md:text-sm" oninput="updateTotal()"></td>
-            <td class="border p-1 md:p-2 total text-xs md:text-sm">0</td>
-            <td class="remove-row-btn p-1"><button type="button" onclick="this.closest('tr').remove(); updateTotal()" class="text-red-500 text-xs">X</button></td>
+            <td class="border p-2 md:p-2.5 text-center"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="اسم الصنف" oninput="updatePreview()"></td>
+            <td class="border p-2 md:p-2.5 text-center"><input type="number" value="1" min="1" class="w-full text-center text-xs md:text-sm" oninput="updateTotal()"></td>
+            <td class="border p-2 md:p-2.5 text-center"><input type="number" value="0" min="0" class="w-full text-center text-xs md:text-sm" oninput="updateTotal()"></td>
+            <td class="border p-2 md:p-2.5 total text-center text-xs md:text-sm">0</td>
+            <td class="remove-row-btn p-2 text-center"><button type="button" onclick="this.closest('tr').remove(); updateTotal()" class="text-red-500 text-xs">X</button></td>
           </tr>
         `;
       } else {
         row = `
           <tr class="align-middle">
-            <td class="border p-1 md:p-2"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="اسم الصنف" oninput="updatePreview()"></td>
-            <td class="border p-1 md:p-2"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="الوحدة" oninput="updatePreview()"></td>
-            <td class="border p-1 md:p-2"><input type="number" value="0" class="w-full text-center text-xs md:text-sm" oninput="updatePreview()"></td>
-            <td class="border p-1 md:p-2"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="ملاحظات" oninput="updatePreview()"></td>
-            <td class="remove-row-btn p-1"><button type="button" onclick="this.closest('tr').remove(); updatePreview()" class="text-red-500 text-xs">X</button></td>
+            <td class="border p-2 md:p-2.5 text-center"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="اسم الصنف" oninput="updatePreview()"></td>
+            <td class="border p-2 md:p-2.5 text-center"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="الوحدة" oninput="updatePreview()"></td>
+            <td class="border p-2 md:p-2.5 text-center"><input type="number" value="0" class="w-full text-center text-xs md:text-sm" oninput="updatePreview()"></td>
+            <td class="border p-2 md:p-2.5 text-center"><input type="text" class="w-full text-center text-xs md:text-sm" placeholder="ملاحظات" oninput="updatePreview()"></td>
+            <td class="remove-row-btn p-2 text-center"><button type="button" onclick="this.closest('tr').remove(); updatePreview()" class="text-red-500 text-xs">X</button></td>
           </tr>
         `;
       }
@@ -521,7 +571,36 @@
       docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.add('export-hide'));
       hideEmptyElements();
 
-      html2canvas(docElement, { scale: 2 }).then(canvas => {
+      // استبدال الـ inputs بنصوص قبل التصدير
+      const inputs = docElement.querySelectorAll('table input');
+      const inputValues = [];
+      inputs.forEach((input, index) => {
+        inputValues[index] = input.value;
+        if (input.value) {
+          const span = document.createElement('span');
+          span.textContent = input.value;
+          span.className = 'export-text-display';
+          span.style.cssText = 'display: block; width: 100%; text-align: center; color: #000; font-weight: 500; padding: 0.4rem 0.25rem; line-height: 1.5;';
+          input.parentNode.insertBefore(span, input);
+          input.style.display = 'none';
+        }
+      });
+
+      html2canvas(docElement, { 
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      }).then(canvas => {
+        // استعادة الـ inputs بعد التصدير
+        inputs.forEach((input, index) => {
+          const span = input.parentNode.querySelector('.export-text-display');
+          if (span) {
+            span.remove();
+          }
+          input.style.display = '';
+          input.value = inputValues[index];
+        });
         docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.remove('export-hide'));
         showAllElements();
 
@@ -551,8 +630,38 @@
       docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.add('export-hide'));
       hideEmptyElements();
       
+      // استبدال الـ inputs بنصوص قبل التصدير
+      const inputs = docElement.querySelectorAll('table input');
+      const inputValues = [];
+      inputs.forEach((input, index) => {
+        inputValues[index] = input.value;
+        if (input.value) {
+          const span = document.createElement('span');
+          span.textContent = input.value;
+          span.className = 'export-text-display';
+          span.style.cssText = 'display: block; width: 100%; text-align: center; color: #000; font-weight: 500; padding: 0.4rem 0.25rem; line-height: 1.5;';
+          input.parentNode.insertBefore(span, input);
+          input.style.display = 'none';
+        }
+      });
+
       try {
-        const canvas = await html2canvas(docElement, { scale: 2 });
+        const canvas = await html2canvas(docElement, { 
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff'
+        });
+        
+        // استعادة الـ inputs بعد التصدير
+        inputs.forEach((input, index) => {
+          const span = input.parentNode.querySelector('.export-text-display');
+          if (span) {
+            span.remove();
+          }
+          input.style.display = '';
+          input.value = inputValues[index];
+        });
         docElement.querySelectorAll('.remove-row-btn').forEach(btn => btn.classList.remove('export-hide'));
         showAllElements();
         
